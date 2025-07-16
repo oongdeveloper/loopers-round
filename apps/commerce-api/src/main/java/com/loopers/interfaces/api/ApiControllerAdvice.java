@@ -8,6 +8,9 @@ import com.loopers.support.error.ErrorType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,6 +19,8 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,6 +32,21 @@ public class ApiControllerAdvice {
     public ResponseEntity<ApiResponse<?>> handle(CoreException e) {
         log.warn("CoreException : {}", e.getCustomMessage() != null ? e.getCustomMessage() : e.getMessage(), e);
         return failureResponse(e.getErrorType(), e.getCustomMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<?>> handleNotValidException(MethodArgumentNotValidException e) {
+        Map<String, String> errors = new HashMap<>();
+
+        e.getBindingResult().getAllErrors().forEach((ObjectError error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMsg = error.getDefaultMessage();
+            errors.put(fieldName, errorMsg);
+        });
+
+        String message  = errors.isEmpty() ? "입력값 검증에 실패했습니다."
+                : String.format("입력값 검증에 실패했습니다. 오류 필드 : %s ", String.join(",", errors.keySet()));
+        return failureResponse(ErrorType.BAD_REQUEST, message);
     }
 
     @ExceptionHandler
