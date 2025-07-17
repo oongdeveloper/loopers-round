@@ -1,16 +1,14 @@
 package com.loopers.infrastructure.user;
 
-import com.loopers.domain.user.UserCommand;
 import com.loopers.domain.user.UserEntity;
-import com.loopers.domain.user.UserRespository;
+import com.loopers.domain.user.UserRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public class UserRepositoryImpl implements UserRespository {
+public class UserRepositoryImpl implements UserRepository {
     private final UserJpaRepository userJpaRepository;
-
     public UserRepositoryImpl(UserJpaRepository userJpaRepository) {
         this.userJpaRepository = userJpaRepository;
     }
