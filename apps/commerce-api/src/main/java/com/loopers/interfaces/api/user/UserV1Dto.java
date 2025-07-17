@@ -64,5 +64,10 @@ public class UserV1Dto {
             );
         }
     }
+
+    public record UserPointResponse(
+            String userId,
+            long point
+    ){}
 }
 

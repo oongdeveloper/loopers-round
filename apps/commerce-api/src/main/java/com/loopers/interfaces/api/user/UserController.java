@@ -46,5 +46,4 @@ public class UserController implements UserV1ApiSpec{
         UserV1Dto.UserResponse response =  UserV1Dto.UserResponse.from(userInfo);
         return ApiResponse.success(response);
     }
-
 }
