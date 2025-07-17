@@ -5,6 +5,8 @@ import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserRespository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public class UserRepositoryImpl implements UserRespository {
     private final UserJpaRepository userJpaRepository;
@@ -14,7 +16,7 @@ public class UserRepositoryImpl implements UserRespository {
     }
 
     @Override
-    public UserEntity find(String findId) {
+    public Optional<UserEntity> find(String findId) {
         return userJpaRepository.findByUserId(findId);
     }
 

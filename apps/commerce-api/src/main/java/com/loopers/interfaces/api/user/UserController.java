@@ -1,5 +1,8 @@
 package com.loopers.interfaces.api.user;
 
+import com.loopers.application.user.UserFacade;
+import com.loopers.application.user.UserInfo;
+import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -9,11 +12,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/v1")
 @Slf4j
 public class UserController implements UserV1ApiSpec{
-//    private final UserService userService;
-//
-//    public UserController(UserService userService) {
-//        this.userService = userService;
-//    }
+    private final UserService userService;
+    private final UserFacade userFacade;
+
+    public UserController(UserService userService, UserFacade userFacade) {
+        this.userService = userService;
+        this.userFacade = userFacade;
+    }
 
     @PostMapping("/users")
     public ApiResponse<UserV1Dto.UserResponse> signUp(@Valid @RequestBody UserV1Dto.SignUpRequest request) {
@@ -31,6 +36,14 @@ public class UserController implements UserV1ApiSpec{
                 "aa@bb.cc"
         );
 
+        return ApiResponse.success(response);
+    }
+
+    @GetMapping("/users/me")
+    public ApiResponse<UserV1Dto.UserResponse> signUp(@RequestHeader("X-USER-ID") String userId) {
+        UserInfo userInfo = userFacade.find(userId);
+        System.out.printf("userInfo == " + userInfo);
+        UserV1Dto.UserResponse response =  UserV1Dto.UserResponse.from(userInfo);
         return ApiResponse.success(response);
     }
 
