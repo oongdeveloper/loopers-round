@@ -47,6 +47,12 @@ public class UserV1Dto {
 //        }
     }
 
+    // TODO. 이거 만들꺼?
+    public record ChargePointRequest(
+        long point
+    ) {
+    }
+
     public record UserResponse (
         String userId,
         String name,

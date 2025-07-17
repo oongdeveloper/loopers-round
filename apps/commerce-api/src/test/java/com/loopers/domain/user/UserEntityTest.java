@@ -16,6 +16,7 @@ public class UserEntityTest {
 
     @DisplayName("회원 가입 단위 테스트 ")
     @Nested
+    // TODO. 대문자 변경 필요
     class signUp {
         @DisplayName("ID 가 영문 및 숫자 10자 이내 형식에 맞지 않으면 User 객체 생성에 실패한다.")
         @ParameterizedTest
