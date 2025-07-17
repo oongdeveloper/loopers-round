@@ -1,5 +1,6 @@
 package com.loopers.interfaces.api.user;
 
+import com.loopers.application.user.UserInfo;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +11,17 @@ public class UserV1Dto {
 
     enum Gender{
         M,
-        F
+        F;
+
+        // TODO. 이거 변환 어떻게 함?
+        private static Gender fromString(String genderStr) {
+            for (Gender g : Gender.values()) {
+                if (g.name().equalsIgnoreCase(genderStr)) { // 대소문자 무시 비교
+                    return g;
+                }
+            }
+            throw new IllegalArgumentException("Invalid Gender string for UserV1Dto: " + genderStr);
+        }
     }
 
     public record SignUpRequest(
@@ -43,5 +54,15 @@ public class UserV1Dto {
         String birth,
         String email
     ){
+        public static UserResponse from(UserInfo userInfo) {
+            return new UserResponse(
+                    userInfo.userId(),
+                    userInfo.userName(),
+                    Gender.fromString(userInfo.gender().name()),
+                    userInfo.birth(),
+                    userInfo.email()
+            );
+        }
     }
 }
+
