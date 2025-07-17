@@ -30,6 +30,8 @@ public class UserEntity extends BaseEntity {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
+    private long point;
+
     private final String USER_ID_PATTERN = "^[0-9a-zA-Z]{1,10}$";
     private final String BIRTH_PATTERN = "^\\d{4}-\\d{2}-\\d{2}$";
     private final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
@@ -50,6 +52,7 @@ public class UserEntity extends BaseEntity {
         this.gender = gender;
         this.birth = birth;
         this.email = email;
+        this.point = 0L;
     }
 
     // TODO. public 이 맞나?
