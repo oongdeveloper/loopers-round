@@ -5,16 +5,14 @@ import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.utils.DatabaseCleanUp;
-import org.junit.experimental.runners.Enclosed;
 import org.junit.jupiter.api.*;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 
-import java.time.LocalDate;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,6 +23,7 @@ class UserV1ApiE2ETest {
     private final UserService userService;
     private final DatabaseCleanUp databaseCleanUp;
 
+    @Autowired
     public UserV1ApiE2ETest(TestRestTemplate testRestTemplate, UserService userService, DatabaseCleanUp databaseCleanUp) {
         this.testRestTemplate = testRestTemplate;
         this.userService = userService;
@@ -44,7 +43,6 @@ class UserV1ApiE2ETest {
         @DisplayName("회원 가입이 성공할 경우, 생성된 유저 정보를 응답으로 반환한다.")
         @Test
         void returnUserInfo_whenSuccessedSignUp(){
-            // arrange
             UserV1Dto.SignUpRequest userRequest = new UserV1Dto.SignUpRequest(
                                                         "oong",
                                                         "옹재성",
@@ -53,16 +51,14 @@ class UserV1ApiE2ETest {
                                                         "aa@bb.cc"
                                                 );
 
-            // act
             ParameterizedTypeReference<ApiResponse<UserV1Dto.UserResponse>> responseType = new ParameterizedTypeReference<>() {};
             ResponseEntity<ApiResponse<UserV1Dto.UserResponse>> response =
                     testRestTemplate.exchange(END_POINT, HttpMethod.POST, new HttpEntity<>(userRequest), responseType);
 
-            // assert
             assertAll(
                     () -> assertTrue(response.getStatusCode().is2xxSuccessful()),
                     () -> assertThat(response.getBody().data().userId()).isEqualTo(userRequest.userId()),
-                    () -> assertThat(response.getBody().data().name()).isEqualTo(userRequest.name()),
+                    () -> assertThat(response.getBody().data().name()).isEqualTo(userRequest.userName()),
                     () -> assertThat(response.getBody().data().gender()).isEqualTo(userRequest.gender()),
                     () -> assertThat(response.getBody().data().birth()).isEqualTo(userRequest.birth()),
                     () -> assertThat(response.getBody().data().email()).isEqualTo(userRequest.email())
@@ -73,7 +69,7 @@ class UserV1ApiE2ETest {
         @Test
         void throwBadRequest_whenDoNotHaveGender(){
             final String END_POINT = "/api/v1/users";
-            // arrange
+
             UserV1Dto.SignUpRequest signUpRequest = new UserV1Dto.SignUpRequest(
                     "oong",
                     "옹재성",
@@ -82,16 +78,15 @@ class UserV1ApiE2ETest {
                     "aa@bb.cc"
             );
 
-            // act
             ParameterizedTypeReference<ApiResponse<?>> responseType = new ParameterizedTypeReference<>() {};
             ResponseEntity<ApiResponse<?>> response =
                     testRestTemplate.exchange(END_POINT, HttpMethod.POST, new HttpEntity<>(signUpRequest), responseType);
 
-            // assert
             assertAll(
                     () -> assertTrue(response.getStatusCode().is4xxClientError()),
                     () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST),
                     () -> assertThat(response.getBody().data()).isNull(),
+                    () -> assertThat(response.getBody().errors()).isNotNull(),
                     () -> assertThat(response.getBody().meta().result()).isEqualTo(ApiResponse.Metadata.Result.FAIL)
             );
         }
@@ -101,10 +96,12 @@ class UserV1ApiE2ETest {
     @Nested
     class Get{
         private final String END_POINT = "/api/v1/users/me";
+        private final String ENROLLED_USER = "oong";
+
         @BeforeEach
         void setUp(){
             userService.save(UserCommand.of(
-                    "oong",
+                    ENROLLED_USER,
                     "오옹",
                     UserEntity.Gender.M,
                     "2025-06-01",
@@ -115,16 +112,13 @@ class UserV1ApiE2ETest {
         @DisplayName("내 정보 조회에 성공할 경우, 해당하는 유저 정보를 응답으로 반환한다.")
         @Test
         void returnUserInfo_whenSuccessedGetProfile(){
-            // arrange
             HttpHeaders headers = new HttpHeaders();
-            headers.add("X-USER-ID", "oong");
+            headers.add("X-USER-ID", ENROLLED_USER);
 
-            // act
             ParameterizedTypeReference<ApiResponse<UserV1Dto.UserResponse>> responseType = new ParameterizedTypeReference<>() {};
             ResponseEntity<ApiResponse<UserV1Dto.UserResponse>> response =
                     testRestTemplate.exchange(END_POINT, HttpMethod.GET, new HttpEntity<>(null, headers), responseType);
 
-            // assert
             assertAll(
                     () -> assertTrue(response.getStatusCode().is2xxSuccessful()),
                     () -> assertThat(response.getBody().data().name()).isEqualTo("오옹"),
@@ -138,7 +132,7 @@ class UserV1ApiE2ETest {
         void returnNOT_FOUND_whenFailedToGetProfile(){
             // arrange
             HttpHeaders headers = new HttpHeaders();
-            headers.add("X-USER-ID", "oong_oong");
+            headers.add("X-USER-ID", "TEST_USER");
             // act
             ParameterizedTypeReference<ApiResponse<?>> responseType = new ParameterizedTypeReference<>() {};
             ResponseEntity<ApiResponse<?>> response =

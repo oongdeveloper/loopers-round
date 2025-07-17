@@ -9,10 +9,10 @@ public record UserInfo (
     String birth,
     String email
 ){
-    public static UserInfo of(UserEntity entity) {
+    public static UserInfo from(UserEntity entity) {
         return new UserInfo(
                 entity.getUserId(),
-                entity.getName(),
+                entity.getUserName(),
                 entity.getGender(),
                 entity.getBirth(),
                 entity.getEmail()

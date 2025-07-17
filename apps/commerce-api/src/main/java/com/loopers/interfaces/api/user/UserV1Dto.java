@@ -4,50 +4,42 @@ import com.loopers.application.user.UserInfo;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDate;
-
+@Slf4j
 public class UserV1Dto {
 
-    enum Gender{
+    public enum Gender{
         M,
         F;
-
-        // TODO. 이거 변환 어떻게 함?
-        private static Gender fromString(String genderStr) {
-            for (Gender g : Gender.values()) {
-                if (g.name().equalsIgnoreCase(genderStr)) { // 대소문자 무시 비교
-                    return g;
-                }
+        private static Gender stringToEnum(String genderStr) {
+            try{
+                return Gender.valueOf(genderStr);
+            } catch (IllegalArgumentException e){
+                log.error("존재하지 않는 성별입니다. Gender = {}.", genderStr);
+                throw new CoreException(ErrorType.INTERNAL_ERROR, "정상적이지 않은 User 입니다.");
             }
-            throw new IllegalArgumentException("Invalid Gender string for UserV1Dto: " + genderStr);
         }
     }
 
     public record SignUpRequest(
-            @NotNull
+            @NotNull(message = "빈 값일 수 없습니다.")
+            @Pattern(regexp = "^[0-9a-zA-Z]{1,10}$", message = "ID 는 1자 이상 10자 이내의 영문과 숫자로 이루어져야 합니다.")
             String userId,
-            @NotNull
-            String name,
-            @NotNull
+            @NotNull(message = "빈 값일 수 없습니다.")
+            String userName,
+            @NotNull(message = "빈 값일 수 없습니다.")
             Gender gender,
-            @NotNull
+            @NotNull(message = "빈 값일 수 없습니다.")
+            @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "생년월일 형식이 맞지 않습니다. f) yyyy-MM-dd")
             String birth,
-            @NotNull
+            @NotNull(message = "빈 값일 수 없습니다.")
+            @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "이메일 형식이 올바르지 않습니다. ex) aa@bb.cc")
             String email
     ) {
-//        // TODO. 여기다 검증을 두는 게 맞을까?
-//        public SignUpRequest{
-//            if (gender == null) {
-//                throw new CoreException(ErrorType.BAD_REQUEST,"성별은 빈 값일 수 없습니다.");
-//            }
-//        }
-//        enum GenderRespone{
-//            M,F
-//        }
     }
 
-    // TODO. 이거 만들꺼?
     public record ChargePointRequest(
         long point
     ) {
@@ -64,7 +56,7 @@ public class UserV1Dto {
             return new UserResponse(
                     userInfo.userId(),
                     userInfo.userName(),
-                    Gender.fromString(userInfo.gender().name()),
+                    Gender.stringToEnum(userInfo.gender().name()),
                     userInfo.birth(),
                     userInfo.email()
             );

@@ -1,6 +1,12 @@
 package com.loopers.interfaces.api;
 
-public record ApiResponse<T>(Metadata meta, T data) {
+import java.util.Map;
+
+public record ApiResponse<T>(Metadata meta, T data, Map<String, String> errors) {
+    public ApiResponse{
+        errors = errors == null ? null : errors;
+    }
+
     public record Metadata(Result result, String errorCode, String message) {
         public enum Result {
             SUCCESS, FAIL
@@ -16,17 +22,26 @@ public record ApiResponse<T>(Metadata meta, T data) {
     }
 
     public static ApiResponse<Object> success() {
-        return new ApiResponse<>(Metadata.success(), null);
+        return new ApiResponse<>(Metadata.success(), null, null);
     }
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(Metadata.success(), data);
+        return new ApiResponse<>(Metadata.success(), data, null);
     }
 
     public static ApiResponse<Object> fail(String errorCode, String errorMessage) {
         return new ApiResponse<>(
             Metadata.fail(errorCode, errorMessage),
-            null
+            null, null
         );
     }
+
+    public static ApiResponse<Object> fail(String errorCode, String errorMessage, Map errors) {
+        return new ApiResponse<>(
+                Metadata.fail(errorCode, errorMessage),
+                null,
+                errors
+        );
+    }
+
 }
