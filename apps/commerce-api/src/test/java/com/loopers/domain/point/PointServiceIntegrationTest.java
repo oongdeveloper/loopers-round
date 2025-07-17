@@ -1,10 +1,15 @@
 package com.loopers.domain.point;
 
 
+import com.loopers.application.point.PointFacade;
 import com.loopers.domain.user.UserCommand;
 import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
+import com.loopers.interfaces.api.user.UserV1Dto;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,16 +19,19 @@ import org.springframework.http.HttpHeaders;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class PointServiceIntegrationTest {
+    private final PointFacade pointFacade;
     private final PointService pointService;
     private final DatabaseCleanUp databaseCleanUp;
     private final UserService userService;
 
     @Autowired
-    public PointServiceIntegrationTest(PointService pointService, DatabaseCleanUp databaseCleanUp, UserService userService) {
+    public PointServiceIntegrationTest(PointFacade pointFacade, PointService pointService, DatabaseCleanUp databaseCleanUp, UserService userService) {
+        this.pointFacade = pointFacade;
         this.pointService = pointService;
         this.databaseCleanUp = databaseCleanUp;
         this.userService = userService;
@@ -71,6 +79,37 @@ public class PointServiceIntegrationTest {
             Optional<UserEntity> user = pointService.find("TEST_USER");
             // assert
             assertTrue(user.isEmpty());
+        }
+    }
+
+    @DisplayName("포인트 충전")
+    @Nested
+    class Charge{
+        final String END_POINT = "/api/v1/points/charge";
+        final String ENROLLED_USER = "oong";
+
+        // TODO. Stub 으로 별도 처리 가능?
+        @BeforeEach
+        void setUp(){
+            userService.save(UserCommand.of(
+                    ENROLLED_USER,
+                    "오옹",
+                    UserEntity.Gender.M,
+                    "2025-06-01",
+                    "oong@oo.ng"
+            ));
+        }
+
+        @DisplayName("존재하지 않는 유저 ID 로 충전을 시도한 경우, 실패한다.")
+        @Test
+        void failed_whenChargeWithUnknownUserId(){
+            // arrange
+            // act
+            CoreException exception = assertThrows(CoreException.class, () -> {
+                pointFacade.chargePoint("TEST_USER", new UserV1Dto.ChargePointRequest(1000L));
+            });
+            // assert
+            Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
         }
     }
 

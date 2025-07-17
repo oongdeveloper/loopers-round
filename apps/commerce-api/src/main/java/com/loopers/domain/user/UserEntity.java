@@ -30,10 +30,14 @@ public class UserEntity extends BaseEntity {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
+    @Column(name = "point", nullable = false)
     private long point;
 
+    @Transient
     private final String USER_ID_PATTERN = "^[0-9a-zA-Z]{1,10}$";
+    @Transient
     private final String BIRTH_PATTERN = "^\\d{4}-\\d{2}-\\d{2}$";
+    @Transient
     private final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     public UserEntity(String userId, String name, Gender gender, String birth, String email) {
@@ -59,5 +63,10 @@ public class UserEntity extends BaseEntity {
     public enum Gender{
         M,
         F
+    }
+
+    public long charge(long chargePoint){
+        if (chargePoint <= 0) throw new CoreException(ErrorType.BAD_REQUEST, "충전 금액은 0원 이상이어야 합니다.");
+        return this.point += chargePoint;
     }
 }

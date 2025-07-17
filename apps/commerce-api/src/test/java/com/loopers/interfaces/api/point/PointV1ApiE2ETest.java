@@ -89,5 +89,61 @@ public class PointV1ApiE2ETest {
 
     }
 
+    @DisplayName("POST /api/v1/points/charge")
+    @Nested
+    class Post{
+        final String END_POINT = "/api/v1/points/charge";
+        final String ENROLLED_USER = "oong";
+
+        // TODO. Stub 으로 별도 처리 가능?
+        @BeforeEach
+        void setUp(){
+            userService.save(UserCommand.of(
+                    ENROLLED_USER,
+                    "오옹",
+                    UserEntity.Gender.M,
+                    "2025-06-01",
+                    "oong@oo.ng"
+            ));
+        }
+
+        @DisplayName("존재하는 유저가 1000원을 충전할 경우, 충전된 보유 총량을 응답으로 반환한다.")
+        @Test
+        void returnTotalPoint_whenUserCharge1000(){
+            // arrange
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-USER-ID", ENROLLED_USER);
+
+            UserV1Dto.ChargePointRequest beforeCharge = new UserV1Dto.ChargePointRequest(1000L);
+            // act
+            ParameterizedTypeReference<ApiResponse<UserV1Dto.UserPointResponse>> responseType = new ParameterizedTypeReference<>(){};
+            ResponseEntity<ApiResponse<UserV1Dto.UserPointResponse>> response =
+                    testRestTemplate.exchange(END_POINT, HttpMethod.POST, new HttpEntity<>(beforeCharge, headers), responseType);
+
+            // assert
+            assertAll(
+                    () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
+                    () -> assertThat(response.getBody().data().point()).isEqualTo(1000L)
+            );
+        }
+
+        @DisplayName("존재하지 않는 유저로 요청할 경우, 404 Not Found 응답을 반환한다.")
+        @Test
+        void returnNotFound_whenUnknownUserCharge(){
+            // arrange
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-USER-ID", "TEST_USER");
+
+            UserV1Dto.ChargePointRequest beforeCharge = new UserV1Dto.ChargePointRequest(1000L);
+            // act
+            ParameterizedTypeReference<ApiResponse<UserV1Dto.UserPointResponse>> responseType = new ParameterizedTypeReference<>(){};
+            ResponseEntity<ApiResponse<UserV1Dto.UserPointResponse>> response =
+                    testRestTemplate.exchange(END_POINT, HttpMethod.POST, new HttpEntity<>(beforeCharge, headers), responseType);
+
+            // assert
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 }
