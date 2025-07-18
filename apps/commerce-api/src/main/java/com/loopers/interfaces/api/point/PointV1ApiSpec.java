@@ -12,7 +12,7 @@ public interface PointV1ApiSpec {
             summary = "Point 조회",
             description = "ID로 보유 Point를 조회합니다."
     )
-    ApiResponse<UserV1Dto.UserPointResponse> get(
+    ApiResponse<PointV1Dto.UserPointResponse> get(
             @Schema(name = "USER ID", description = "조회할 User의 ID")
             String userId
     );
@@ -21,10 +21,10 @@ public interface PointV1ApiSpec {
             summary = "Point 충전",
             description = "User 의 포인트를 충전합니다."
     )
-    ApiResponse<UserV1Dto.UserPointResponse> charge(
+    ApiResponse<PointV1Dto.UserPointResponse> charge(
             @Schema(name = "USER ID", description = "충전할 User의 ID")
             String userId,
             @Schema(name = "Charge Point", description = "충전할 포인트")
-            UserV1Dto.ChargePointRequest chargePoint
+            PointV1Dto.ChargePointRequest chargePoint
     );
 }

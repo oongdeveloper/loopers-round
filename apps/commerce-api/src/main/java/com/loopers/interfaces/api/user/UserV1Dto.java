@@ -40,11 +40,6 @@ public class UserV1Dto {
     ) {
     }
 
-    public record ChargePointRequest(
-        long point
-    ) {
-    }
-
     public record UserResponse (
         String userId,
         String name,
@@ -62,10 +57,5 @@ public class UserV1Dto {
             );
         }
     }
-
-    public record UserPointResponse(
-            String userId,
-            long point
-    ){}
 }
 
