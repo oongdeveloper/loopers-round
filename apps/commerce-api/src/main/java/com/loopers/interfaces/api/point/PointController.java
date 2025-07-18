@@ -22,7 +22,6 @@ public class PointController implements PointV1ApiSpec{
     @Override
     public ApiResponse<PointV1Dto.UserPointResponse> get(@RequestHeader("X-USER-ID") String userId) {
         PointInfo pointInfo = pointFacade.find(userId);
-        // TODO. PointInfo 의 값이 인자로 받은 userId 와 같은지 검증을 추가해야 하나?
         return ApiResponse.success(new PointV1Dto.UserPointResponse(
                 pointInfo.userId(),
                 pointInfo.point()
