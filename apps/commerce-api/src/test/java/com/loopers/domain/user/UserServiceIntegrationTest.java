@@ -1,13 +1,9 @@
 package com.loopers.domain.user;
 
-import com.loopers.application.user.UserFacade;
-import com.loopers.application.user.UserInfo;
-import com.loopers.infrastructure.user.UserRepositoryImpl;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -28,7 +24,8 @@ public class UserServiceIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    public UserServiceIntegrationTest(UserService userService, DatabaseCleanUp databaseCleanUp) {
+    public UserServiceIntegrationTest(UserService userService,
+                                      DatabaseCleanUp databaseCleanUp) {
         this.userService = userService;
         this.databaseCleanUp = databaseCleanUp;
     }
@@ -64,7 +61,7 @@ public class UserServiceIntegrationTest {
 
         @DisplayName("이미 가입된 ID 로 회원가입 시도 시, 실패한다.")
         @Test
-        void throwAlreadyEnroledException_whenAlreadySignedUp(){
+        void throwAlreadyEnrolledException_whenAlreadySignedUp(){
             UserCommand command = UserCommand.of(
                     "oong",
                     "오옹",

@@ -2,7 +2,6 @@ package com.loopers.interfaces.api.user;
 
 import com.loopers.application.user.UserFacade;
 import com.loopers.application.user.UserInfo;
-import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController implements UserV1ApiSpec{
     private final UserFacade userFacade;
 
-    public UserController(UserService userService, UserFacade userFacade) {
+    public UserController(UserFacade userFacade) {
         this.userFacade = userFacade;
     }
 
@@ -25,9 +24,8 @@ public class UserController implements UserV1ApiSpec{
     }
 
     @GetMapping("/users/me")
-    public ApiResponse<UserV1Dto.UserResponse> find(@RequestHeader("X-USER-ID") String userId) {
-        UserInfo userInfo = userFacade.find(userId);
-        UserV1Dto.UserResponse response =  UserV1Dto.UserResponse.from(userInfo);
-        return ApiResponse.success(response);
+    public ApiResponse<UserV1Dto.UserResponse> get(@RequestHeader("X-USER-ID") String userId) {
+        UserInfo userInfo = userFacade.get(userId);
+        return ApiResponse.success(UserV1Dto.UserResponse.from(userInfo));
     }
 }

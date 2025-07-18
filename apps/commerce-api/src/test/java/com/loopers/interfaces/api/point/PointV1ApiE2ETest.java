@@ -41,7 +41,6 @@ public class PointV1ApiE2ETest {
         final String END_POINT = "/api/v1/points";
         final String ENROLLED_USER = "oong";
 
-        // TODO. Stub 으로 별도 처리 가능?
         @BeforeEach
         void setUp(){
             userService.save(UserCommand.of(
@@ -88,7 +87,7 @@ public class PointV1ApiE2ETest {
         final String END_POINT = "/api/v1/points/charge";
         final String ENROLLED_USER = "oong";
 
-        // TODO. Stub 으로 별도 처리 가능?
+        // TODO. 별도 Stub 으로 통일 가능한가?
         @BeforeEach
         void setUp(){
             userService.save(UserCommand.of(

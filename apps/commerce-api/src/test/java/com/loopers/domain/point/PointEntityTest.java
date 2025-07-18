@@ -15,7 +15,6 @@ public class PointEntityTest {
     @DisplayName("포인트 충전 단위 테스트 ")
     @Nested
     class Charge {
-
         @DisplayName("0 이하의 정수로 포인트를 충전 시 실패한다.")
         @Test
         void failed_whenChargePointIsLessThanZero(){

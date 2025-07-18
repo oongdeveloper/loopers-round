@@ -1,11 +1,9 @@
 package com.loopers.domain.point;
 
 
-import com.loopers.application.point.PointFacade;
 import com.loopers.domain.user.UserCommand;
 import com.loopers.domain.user.UserEntity;
 import com.loopers.domain.user.UserService;
-import com.loopers.interfaces.api.point.PointV1Dto;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
@@ -13,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -21,14 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class PointServiceIntegrationTest {
-//    private final PointFacade pointFacade;
     private final PointService pointService;
     private final DatabaseCleanUp databaseCleanUp;
     private final UserService userService;
 
     @Autowired
-    public PointServiceIntegrationTest(PointFacade pointFacade, PointService pointService, DatabaseCleanUp databaseCleanUp, UserService userService) {
-//        this.pointFacade = pointFacade;
+    public PointServiceIntegrationTest(PointService pointService, DatabaseCleanUp databaseCleanUp, UserService userService) {
         this.pointService = pointService;
         this.databaseCleanUp = databaseCleanUp;
         this.userService = userService;
@@ -82,7 +79,6 @@ public class PointServiceIntegrationTest {
         final String ENROLLED_USER = "oong";
         final String UNKNOWN_USER = "UNKNOWN_USER";
 
-        // TODO. Stub 으로 별도 처리 가능?
         @BeforeEach
         void setUp(){
             userService.save(UserCommand.of(

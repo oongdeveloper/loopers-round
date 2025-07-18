@@ -2,15 +2,10 @@ package com.loopers.domain.user;
 
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import jakarta.persistence.Transient;
 
 public class UserValidator {
-
-    @Transient
     private static final String USER_ID_PATTERN = "^[0-9a-zA-Z]{1,10}$";
-    @Transient
     private static final String BIRTH_PATTERN = "^\\d{4}-\\d{2}-\\d{2}$";
-    @Transient
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     public static void validate(UserCommand userCommand){

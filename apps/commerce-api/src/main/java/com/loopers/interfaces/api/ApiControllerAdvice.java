@@ -44,8 +44,6 @@ public class ApiControllerAdvice {
             errors.put(fieldName, errorMsg);
         });
 
-//        String message  = errors.isEmpty() ? "입력값 검증에 실패했습니다."
-//                : String.format("입력값 검증에 실패했습니다. 오류 필드 : %s ", String.join(",", errors.keySet()));
         String message = "입력값 검증에 실패했습니다.";
         return failureResponse(ErrorType.BAD_REQUEST, message, errors);
     }

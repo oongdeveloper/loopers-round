@@ -4,7 +4,7 @@ import java.util.Map;
 
 public record ApiResponse<T>(Metadata meta, T data, Map<String, String> errors) {
     public ApiResponse{
-        errors = errors == null ? null : errors;
+        errors = errors;
     }
 
     public record Metadata(Result result, String errorCode, String message) {

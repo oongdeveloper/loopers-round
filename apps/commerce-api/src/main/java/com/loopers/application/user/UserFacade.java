@@ -6,7 +6,6 @@ import com.loopers.interfaces.api.user.UserV1Dto;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class UserFacade {
     private final UserService userService;
 
-    public UserInfo find(String userId){
+    public UserInfo get(String userId){
         return userService.find(userId)
                 .map(UserInfo::from)
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "이미 존재하는 User 입니다."));

@@ -1,22 +1,18 @@
 package com.loopers.domain.user;
 
-
-import com.loopers.interfaces.api.user.UserV1Dto;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
 public class UserCommand {
-    private String userId;
-    private String userName;
-    private UserEntity.Gender gender;
-    private String birth;
-    private String email;
+    private final String userId;
+    private final String userName;
+    private final UserEntity.Gender gender;
+    private final String birth;
+    private final String email;
 
     public static UserCommand of(String userId, String userName, Enum<?> gender, String birth, String email){
         return new UserCommand(

@@ -2,26 +2,21 @@ package com.loopers.interfaces.api.point;
 
 import com.loopers.application.point.PointFacade;
 import com.loopers.application.point.PointInfo;
-import com.loopers.domain.point.PointService;
 import com.loopers.interfaces.api.ApiResponse;
-import com.loopers.interfaces.api.user.UserV1Dto;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class PointController implements PointV1ApiSpec{
-
-    private final PointService pointService;
     private final PointFacade pointFacade;
 
-    public PointController(PointService pointService, PointFacade pointFacade) {
-        this.pointService = pointService;
+    public PointController(PointFacade pointFacade) {
         this.pointFacade = pointFacade;
     }
 
     @GetMapping("/api/v1/points")
     @Override
     public ApiResponse<PointV1Dto.UserPointResponse> get(@RequestHeader("X-USER-ID") String userId) {
-        PointInfo pointInfo = pointFacade.find(userId);
+        PointInfo pointInfo = pointFacade.get(userId);
         return ApiResponse.success(new PointV1Dto.UserPointResponse(
                 pointInfo.userId(),
                 pointInfo.point()
@@ -31,7 +26,7 @@ public class PointController implements PointV1ApiSpec{
     @PostMapping("/api/v1/points/charge")
     @Override
     public ApiResponse<PointV1Dto.UserPointResponse> charge(@RequestHeader("X-USER-ID") String userId, @RequestBody PointV1Dto.ChargePointRequest request) {
-        long chargedPoint = pointFacade.chargePoint(userId, request);
+        long chargedPoint = pointFacade.charge(userId, request);
         return ApiResponse.success(new PointV1Dto.UserPointResponse(
                 userId,
                 chargedPoint

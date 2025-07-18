@@ -1,7 +1,5 @@
 package com.loopers.domain.user;
 
-import com.loopers.application.user.UserInfo;
-import com.loopers.interfaces.api.user.UserV1Dto;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.springframework.dao.DataIntegrityViolationException;
