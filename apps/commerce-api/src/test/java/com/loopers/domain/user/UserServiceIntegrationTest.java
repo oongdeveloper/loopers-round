@@ -22,16 +22,14 @@ import static org.mockito.Mockito.*;
 public class UserServiceIntegrationTest {
 
     private final UserService userService;
-    private final UserFacade userFacade;
     private final DatabaseCleanUp databaseCleanUp;
 
     @MockitoSpyBean
     private UserRepository userRepository;
 
     @Autowired
-    public UserServiceIntegrationTest(UserService userService, UserFacade userFacade, DatabaseCleanUp databaseCleanUp) {
+    public UserServiceIntegrationTest(UserService userService, DatabaseCleanUp databaseCleanUp) {
         this.userService = userService;
-        this.userFacade = userFacade;
         this.databaseCleanUp = databaseCleanUp;
     }
 
@@ -57,6 +55,7 @@ public class UserServiceIntegrationTest {
 
             UserEntity user = userService.save(commnand);
 
+            verify(userRepository, times(1)).find(any(String.class));
             verify(userRepository, times(1)).save(any(UserEntity.class));
             assertNotNull(user);
             assertEquals("oong", user.getUserId());
@@ -108,14 +107,14 @@ public class UserServiceIntegrationTest {
         @DisplayName("해당 ID 의 회원이 존재할 경우, 회원 정보가 반환된다.")
         @Test
         void success_whenFindExistUserId(){
-            UserInfo userInfo = userFacade.find(ENROLLED_USER);
+            Optional<UserEntity> userInfo = userService.find(ENROLLED_USER);
 
-            // assert
-            assertAll(
-                    () -> assertThat(userInfo.userId()).isEqualTo(ENROLLED_USER),
-                    () -> assertThat(userInfo.userName()).isEqualTo("오옹"),
-                    () -> assertThat(userInfo.gender()).isEqualTo(UserEntity.Gender.M)
-            );
+            assertThat(userInfo)
+                    .isPresent()
+                    .hasValueSatisfying(user -> {
+                        assertThat(user.getUserId()).isEqualTo(ENROLLED_USER);
+                        assertThat(user.getUserName()).isEqualTo("오옹");
+                    });
         }
 
         @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
