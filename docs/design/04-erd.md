@@ -44,7 +44,13 @@ erDiagram
 		bigint id PK
 		String name
 		String description
-	}     
+	}
+
+	PRODUCT_SKU_STOCK{
+		bigint id PK
+		bigint ref_product_sku_id UK
+		int stock_quantity
+	}
 	
 	USERS {
 		bigint id PK
@@ -116,4 +122,5 @@ erDiagram
 	USERS ||--o{ ORDER : places
 	ORDER ||--o{ ORDER_ITEM : contains
 	ORDER ||--o{ PAYMENT : has
+	PRODUCT_SKU ||--|| PRODUCT_SKU_STOCK : owns
 ```
