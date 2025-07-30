@@ -120,6 +120,7 @@ public class UserServiceIntegrationTest {
             Optional<UserEntity> userEntity = userService.find(UNKNOWN_USER);
             assertThat(userEntity).isEmpty();
         }
+
     }
 }
 

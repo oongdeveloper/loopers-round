@@ -9,13 +9,28 @@ public class UserValidator {
     private static final String EMAIL_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
     public static void validate(UserCommand userCommand){
-        if (userCommand.getUserId() == null || !userCommand.getUserId().matches(USER_ID_PATTERN))
+        validateUserId(userCommand.userId());
+        validateBirth(userCommand.birth());
+        validateEmail(userCommand.email());
+    }
+
+    private static void validateUserId(String userId){
+        if (userId == null || !userId.matches(USER_ID_PATTERN))
             throw new CoreException(ErrorType.BAD_REQUEST, "ID 는 1자 이상 10자 이내의 영문과 숫자로 이루어져야 합니다.");
+    }
 
-        if (userCommand.getBirth() == null || !userCommand.getBirth().matches(BIRTH_PATTERN))
+    private static void validateBirth(String birth){
+        if (birth == null || !birth.matches(BIRTH_PATTERN))
             throw new CoreException(ErrorType.BAD_REQUEST, "생년월일 형식이 맞지 않습니다. f) yyyy-MM-dd");
+        // TODO. 오늘 이전 날짜는 에러 발생.
+//        if (LocalDate.now().isBefore(LocalDate.parse(birthDate))) {
+//            throw new CoreException(ErrorType.BAD_REQUEST, "생년월일은 오늘 이전이어야 합니다: " + birthDate);
+//        }
+    }
 
-        if (userCommand.getEmail() == null || !userCommand.getEmail().matches(EMAIL_PATTERN))
+    private static void validateEmail(String email){
+        if (email == null || !email.matches(EMAIL_PATTERN))
             throw new CoreException(ErrorType.BAD_REQUEST, "이메일 형식이 올바르지 않습니다. ex) aa@bb.cc");
     }
 }
+

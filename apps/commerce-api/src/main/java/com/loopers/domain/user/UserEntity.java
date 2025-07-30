@@ -45,11 +45,11 @@ public class UserEntity extends BaseEntity {
     public static UserEntity from(UserCommand command) {
         UserValidator.validate(command);
         return new UserEntity(
-                command.getUserId(),
-                command.getUserName(),
-                command.getGender(),
-                command.getBirth(),
-                command.getEmail()
+                command.userId(),
+                command.userName(),
+                command.gender(),
+                command.birth(),
+                command.email()
                 );
     }
 

@@ -16,7 +16,7 @@ public class UserEntityTest {
     @DisplayName("회원 가입 단위 테스트 ")
     @Nested
     class SignUp {
-        @DisplayName("ID 가 영문 및 숫자 10자 이내 형식에 맞지 않으면 User 객체 생성에 실패한다.")
+        @DisplayName("ID 가 영문 및 숫자 10자 이내 형식에 맞지 않으면 BAD_REQUEST 가 발생한다.")
         @ParameterizedTest
         @ValueSource(strings = {
                 "옹",
@@ -38,7 +38,7 @@ public class UserEntityTest {
             assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
         }
 
-        @DisplayName("이메일이 xx@yy.zz 형식에 맞지 않으면 User 객체 생성에 실패한다.")
+        @DisplayName("이메일이 xx@yy.zz 형식에 맞지 않으면 BAD_REQUEST 가 발생한다.")
         @Test
         void throwBadRequestException_whenEmailDoesNotMatch() {
             assertThatThrownBy(() -> {
@@ -52,7 +52,7 @@ public class UserEntityTest {
             }).isInstanceOf(CoreException.class).hasMessage("이메일 형식이 올바르지 않습니다. ex) aa@bb.cc");
         }
 
-        @DisplayName("생년월일이 yyyy-MM-dd 형식에 맞지 않으면 User 객체 생성에 실패한다.")
+        @DisplayName("생년월일이 yyyy-MM-dd 형식에 맞지 않으면 BAD_REQUEST 가 발생한다. ")
         @Test
         void throwBadRequestException_whenBirthDoesNotMatch() {
             assertThatThrownBy(() -> {

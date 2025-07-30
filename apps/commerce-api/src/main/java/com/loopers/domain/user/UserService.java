@@ -17,7 +17,7 @@ public class UserService {
 
     public UserEntity save(UserCommand command){
         try{
-            userRepository.find(command.getUserId())
+            userRepository.find(command.userId())
                     .ifPresent(e -> {
                         throw new CoreException(ErrorType.CONFLICT, "이미 존재하는 User 입니다.");
                     });
