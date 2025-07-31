@@ -3,21 +3,27 @@ package com.loopers.domain.catalog;
 import com.loopers.domain.BaseEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "product_definition")
+@Table(name = "product_catalog")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProductDefinition extends BaseEntity {
+@Getter
+@ToString
+public class ProductCatalog extends BaseEntity {
 
     @Column(name = "ref_brand_id", nullable = false)
     private Long brandId;
@@ -35,7 +41,11 @@ public class ProductDefinition extends BaseEntity {
     @Column(name = "description")
     private String description;
 
-    private ProductDefinition(Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description) {
+    @Column(name = "published_at", updatable = false,
+            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    private ZonedDateTime publishedAt;
+
+    private ProductCatalog(Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description) {
         validate(brandId, productName, basePrice, imageUrl);
 
         this.brandId = brandId;
@@ -45,8 +55,8 @@ public class ProductDefinition extends BaseEntity {
         this.description = description;
     }
 
-    public static ProductDefinition from (Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description){
-        return new ProductDefinition(
+    public static ProductCatalog from (Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description){
+        return new ProductCatalog(
                 brandId, productName, basePrice, imageUrl, description
         );
     }
@@ -55,7 +65,7 @@ public class ProductDefinition extends BaseEntity {
         if (brandId == null)
             throw new CoreException(ErrorType.BAD_REQUEST, "Brand 정보가 존재하지 않습니다.");
 
-        if (productName == null || productName.length() > 100)
+        if (StringUtils.isBlank(productName) || productName.length() > 250)
             throw new CoreException(ErrorType.BAD_REQUEST, "상품 이름은 250자 이내여야 합니다.");
 
         if (basePrice == null || basePrice.compareTo(BigDecimal.ZERO) <= 0)
