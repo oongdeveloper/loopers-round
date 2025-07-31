@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @UnitTest
-class ProductDefinitionTest {
+class ProductCatalogTest {
 
     @Test
-    @DisplayName("Brand ID 가 없으면 BAD_REQUEST 를 반환한다.")
+    @DisplayName("Brand ID 가 없으면 BAD_REQUEST 오류를 반환한다.")
     void returnBadRequest_whenBrandIdNull(){
         Long brandId = null;
         String productName = "loopers_product_1";
@@ -25,13 +25,13 @@ class ProductDefinitionTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductDefinition.from(brandId, productName, price, imageUrl, description);
+            ProductCatalog.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("상품의 이름이 250자를 넘으면 BAD_REQUEST 를 반환한다.")
+    @DisplayName("상품의 이름이 250자를 넘으면 BAD_REQUEST 오류를 반환한다.")
     void returnBadRequest_whenProductNameOver250(){
         Long brandId = 0L;
         String productName = "상품 이름이 이렇게 길면 안돼요.".repeat(30);
@@ -40,13 +40,13 @@ class ProductDefinitionTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductDefinition.from(brandId, productName, price, imageUrl, description);
+            ProductCatalog.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("상품의 가격이 10억을 넘으면 BAD_REQUEST 를 반환한다.")
+    @DisplayName("상품의 가격이 10억을 넘으면 BAD_REQUEST 오류를 반환한다.")
     void returnBadRequest_whenPriceOverThanBillion(){
         Long brandId = 0L;
         String productName = "loopers_product_1";
@@ -55,13 +55,13 @@ class ProductDefinitionTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductDefinition.from(brandId, productName, price, imageUrl, description);
+            ProductCatalog.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("상품의 가격이 0 이하면 BAD_REQUEST 를 반환한다.")
+    @DisplayName("상품의 가격이 0 이하면 BAD_REQUEST 오류를 반환한다.")
     void returnBadRequest_whenPriceLessThanZero(){
         Long brandId = null;
         String productName = "loopers_product_1";
@@ -70,13 +70,13 @@ class ProductDefinitionTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductDefinition.from(brandId, productName, price, imageUrl, description);
+            ProductCatalog.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("Image URL 이 올바른 형식이 아니면 BAD_REQUEST 를 반환한다.")
+    @DisplayName("Image URL 이 올바른 형식이 아니면 BAD_REQUEST 오류를 반환한다.")
     void returnBadRequest_whenMalformedURL(){
         Long brandId = null;
         String productName = "loopers_product_1";
@@ -85,7 +85,7 @@ class ProductDefinitionTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductDefinition.from(brandId, productName, price, imageUrl, description);
+            ProductCatalog.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
