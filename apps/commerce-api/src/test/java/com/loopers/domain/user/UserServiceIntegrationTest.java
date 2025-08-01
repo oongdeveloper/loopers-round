@@ -45,15 +45,15 @@ public class UserServiceIntegrationTest {
             UserCommand commnand = UserCommand.of(
                     "oong",
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
             );
 
-            UserEntity user = userService.save(commnand);
+            User user = userService.save(commnand);
 
             verify(userRepository, times(1)).find(any(String.class));
-            verify(userRepository, times(1)).save(any(UserEntity.class));
+            verify(userRepository, times(1)).save(any(User.class));
             assertNotNull(user);
             assertEquals("oong", user.getUserId());
             assertEquals("오옹", user.getUserName());
@@ -65,7 +65,7 @@ public class UserServiceIntegrationTest {
             UserCommand command = UserCommand.of(
                     "oong",
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
             );
@@ -90,7 +90,7 @@ public class UserServiceIntegrationTest {
             userService.save(UserCommand.of(
                     "oong",
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
             ));
@@ -104,7 +104,7 @@ public class UserServiceIntegrationTest {
         @DisplayName("해당 ID 의 회원이 존재할 경우, 회원 정보가 반환된다.")
         @Test
         void success_whenFindExistUserId(){
-            Optional<UserEntity> userInfo = userService.find(ENROLLED_USER);
+            Optional<User> userInfo = userService.find(ENROLLED_USER);
 
             assertThat(userInfo)
                     .isPresent()
@@ -117,7 +117,7 @@ public class UserServiceIntegrationTest {
         @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
         @Test
         void throwNullPointException_whenCannotFindUserId(){
-            Optional<UserEntity> userEntity = userService.find(UNKNOWN_USER);
+            Optional<User> userEntity = userService.find(UNKNOWN_USER);
             assertThat(userEntity).isEmpty();
         }
     }

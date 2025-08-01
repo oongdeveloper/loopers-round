@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public record ProductDetailInfo(
+public record ProductCatalogDetailInfo(
         Long productId,
         String brandName,
         String productName,
@@ -12,7 +12,7 @@ public record ProductDetailInfo(
         String imageUrl,
         String description,
         ZonedDateTime publishedAt,
-        List<ProductDetailInfo.SkuInfo> skuInfos
+        List<ProductCatalogDetailInfo.SkuInfo> skuInfos
 ){
 
 
@@ -21,7 +21,7 @@ public record ProductDetailInfo(
         BigDecimal unitPrice,
         String imageUrl,
         String status,
-        List<ProductDetailInfo.OptionDetail> optionDetails
+        List<ProductCatalogDetailInfo.OptionDetail> optionDetails
     ){
     }
     public record OptionDetail(

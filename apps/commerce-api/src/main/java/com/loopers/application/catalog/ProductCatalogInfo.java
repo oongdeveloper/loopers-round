@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record ProductCatalogInfo (
+        Long productCatalogId,
         String brandName,
         String productName,
         BigDecimal basePrice,
@@ -16,6 +17,7 @@ public record ProductCatalogInfo (
 ){
     public static ProductCatalogInfo from(ProductCatalog product, String brandName){
         return new ProductCatalogInfo(
+                product.getId(),
                 brandName,
                 product.getProductName(),
                 product.getBasePrice(),
@@ -30,9 +32,8 @@ public record ProductCatalogInfo (
         }
         return productCatalogs.stream()
                 .map(product -> {
-                    // ProductCatalog의 brandId를 이용하여 brandName을 Map에서 찾음
-                    String brandName = brandIdToNameMap.getOrDefault(product.getBrandId(), "Unknown Brand"); // getBrandId() 가정
-                    return ProductCatalogInfo.from(product, brandName); // 단일 브랜드 이름을 리스트로
+                    String brandName = brandIdToNameMap.getOrDefault(product.getBrandId(), "Unknown Brand");
+                    return ProductCatalogInfo.from(product, brandName);
                 })
                 .collect(Collectors.toList());
     }

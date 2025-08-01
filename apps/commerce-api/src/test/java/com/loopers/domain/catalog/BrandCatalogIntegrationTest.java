@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @IntegrationTest
 @SpringBootTest
-public class BrandIntegrationTest {
+public class BrandCatalogIntegrationTest {
 
     private final BrandCatalogFacade brandCatalogFacade;
     private final BrandRepository brandRepository;
     private final DatabaseCleanUp databaseCleanUp;
 
     @Autowired
-    public BrandIntegrationTest(BrandCatalogFacade brandCatalogFacade, BrandRepository brandRepository, DatabaseCleanUp databaseCleanUp) {
+    public BrandCatalogIntegrationTest(BrandCatalogFacade brandCatalogFacade, BrandRepository brandRepository, DatabaseCleanUp databaseCleanUp) {
         this.brandCatalogFacade = brandCatalogFacade;
         this.brandRepository = brandRepository;
         this.databaseCleanUp = databaseCleanUp;
@@ -38,18 +38,18 @@ public class BrandIntegrationTest {
 
     @DisplayName("브랜드조회")
     @Nested
-    class RetrieveBrand{
+    class RetrieveBrandCatalog {
         @Test
         @DisplayName("브랜드 정보가 존재하지 않으면 Not Found 오류가 발생합니다.")
         void returnNotFount_whenBrandNotFound(){
             // arrange
-            Brand appleBrand = Brand.from("Apple", "https://example.com/logos/apple.png");
-            Brand samsungBrand = Brand.from("Samsung", "https://example.com/logos/samsung.png");
-            Brand lgBrand = Brand.from("LG", "https://example.com/logos/lg.png");
+            BrandCatalog appleBrandCatalog = BrandCatalog.from("Apple", "https://example.com/logos/apple.png");
+            BrandCatalog samsungBrandCatalog = BrandCatalog.from("Samsung", "https://example.com/logos/samsung.png");
+            BrandCatalog lgBrandCatalog = BrandCatalog.from("LG", "https://example.com/logos/lg.png");
 
-            brandRepository.save(appleBrand);
-            brandRepository.save(samsungBrand);
-            brandRepository.save(lgBrand);
+            brandRepository.save(appleBrandCatalog);
+            brandRepository.save(samsungBrandCatalog);
+            brandRepository.save(lgBrandCatalog);
 
             // act
             CoreException exception = assertThrows(CoreException.class, () -> {

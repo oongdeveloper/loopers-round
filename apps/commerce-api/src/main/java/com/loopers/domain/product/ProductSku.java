@@ -20,8 +20,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ProductSku extends BaseEntity {
-    @Column(name = "ref_product_definition_id", nullable = false)
-    private Long productDefinitionId;
+    @Column(name = "ref_product_catalog_id", nullable = false)
+    private Long productCatalogId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -55,23 +55,23 @@ public class ProductSku extends BaseEntity {
     }
 
 
-    public static ProductSku from(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Long productDefinitionId){
+    public static ProductSku from(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Long productCatalogId){
         return new ProductSku(
                 skuOptions,
                 imageUrl,
                 unitPrice,
                 status,
-                productDefinitionId
+                productCatalogId
         );
     }
 
-    private ProductSku(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Long productDefinitionId) {
+    private ProductSku(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Long productCatalogId) {
         validate(imageUrl, unitPrice);
         this.skuOptions = skuOptions;
         this.imageUrl = imageUrl;
         this.unitPrice = unitPrice;
         this.status = status;
-        this.productDefinitionId = productDefinitionId;
+        this.productCatalogId = productCatalogId;
     }
 
     private void validate(String imageUrl, BigDecimal unitPrice){

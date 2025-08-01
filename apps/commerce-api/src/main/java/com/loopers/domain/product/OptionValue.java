@@ -17,7 +17,7 @@ public class OptionValue extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ref_option_name_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private OptionName optionName; // OptionName 엔티티 참조
+    private OptionName optionName;
 
     @Column(name = "value", nullable = false, length = 100) // 옵션 값 (레드, M, 256GB)
     private String value;

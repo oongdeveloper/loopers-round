@@ -1,6 +1,6 @@
 package com.loopers.infrastructure.user;
 
-import com.loopers.domain.user.UserEntity;
+import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,12 +14,12 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public Optional<UserEntity> find(String findId) {
+    public Optional<User> find(String findId) {
         return userJpaRepository.findByUserId(findId);
     }
 
     @Override
-    public UserEntity save(UserEntity user) {
+    public User save(User user) {
         return userJpaRepository.save(user);
     }
 }

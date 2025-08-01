@@ -1,6 +1,6 @@
 package com.loopers.infrastructure.catalog;
 
-import com.loopers.domain.catalog.Brand;
+import com.loopers.domain.catalog.BrandCatalog;
 import com.loopers.domain.catalog.BrandRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,17 +16,17 @@ public class BrandRepositoryImpl implements BrandRepository {
     }
 
     @Override
-    public Optional<Brand> find(Long id) {
+    public Optional<BrandCatalog> find(Long id) {
         return jpaRepository.findById(id);
     }
 
     @Override
-    public Brand save(Brand brand) {
-        return jpaRepository.save(brand);
+    public BrandCatalog save(BrandCatalog brandCatalog) {
+        return jpaRepository.save(brandCatalog);
     }
 
     @Override
-    public List<Brand> findAllById(Iterable<Long> ids) {
+    public List<BrandCatalog> findAllById(Iterable<Long> ids) {
         return jpaRepository.findAllById(ids);
     }
 

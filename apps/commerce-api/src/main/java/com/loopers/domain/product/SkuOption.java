@@ -20,13 +20,13 @@ public class SkuOption extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ref_product_sku_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private ProductSku productSku; // ProductSku 엔티티 참조
+    private ProductSku productSku;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ref_option_name_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private OptionName optionName; // OptionName 엔티티 참조
+    private OptionName optionName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ref_option_value_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private OptionValue optionValue; // OptionValue 엔티티 참조
+    private OptionValue optionValue;
 }

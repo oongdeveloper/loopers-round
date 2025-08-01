@@ -14,11 +14,11 @@ public class BrandCatalogService {
         this.brandRepository = brandRepository;
     }
 
-    public Optional<Brand> find(Long id) {
+    public Optional<BrandCatalog> find(Long id) {
         return brandRepository.find(id);
     }
 
-    public List<Brand>  findAllById(Iterable<Long> ids){
+    public List<BrandCatalog>  findAllByIds(Iterable<Long> ids){
         return brandRepository.findAllById(ids);
     }
 }

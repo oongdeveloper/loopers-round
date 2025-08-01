@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class UserEntityTest {
+public class UserTest {
     @DisplayName("회원 가입 단위 테스트 ")
     @Nested
     class SignUp {
@@ -26,10 +26,10 @@ public class UserEntityTest {
         })
         void throwBadRequestException_whenIdDoesNotMatch(String userId) {
             final CoreException exception = assertThrows(CoreException.class, () -> {
-                UserEntity.from(UserCommand.of(
+                User.from(UserCommand.of(
                         userId,
                         "오옹",
-                        UserEntity.Gender.M,
+                        User.Gender.M,
                         "2025-07-01",
                         "oo@nn.gg"
                 ));
@@ -42,10 +42,10 @@ public class UserEntityTest {
         @Test
         void throwBadRequestException_whenEmailDoesNotMatch() {
             assertThatThrownBy(() -> {
-                UserEntity.from(UserCommand.of(
+                User.from(UserCommand.of(
                         "oong",
                         "오옹",
-                        UserEntity.Gender.M,
+                        User.Gender.M,
                         "2025-07-01",
                         "oo@nn@gg"
                 ));
@@ -56,10 +56,10 @@ public class UserEntityTest {
         @Test
         void throwBadRequestException_whenBirthDoesNotMatch() {
             assertThatThrownBy(() -> {
-                UserEntity.from(UserCommand.of(
+                User.from(UserCommand.of(
                         "oong",
                         "오옹",
-                        UserEntity.Gender.M,
+                        User.Gender.M,
                         "2025.07.01",
                         "oo@nn.gg"
                 ));

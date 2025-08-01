@@ -1,7 +1,7 @@
 package com.loopers.domain.point;
 
 import com.loopers.domain.user.UserCommand;
-import com.loopers.domain.user.UserEntity;
+import com.loopers.domain.user.User;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.junit.jupiter.api.DisplayName;
@@ -18,10 +18,10 @@ public class PointEntityTest {
         @DisplayName("0 이하의 정수로 포인트를 충전 시 실패한다.")
         @Test
         void failed_whenChargePointIsLessThanZero(){
-            UserEntity user = UserEntity.from(UserCommand.of(
+            User user = User.from(UserCommand.of(
                     "oong",
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-07-01",
                     "oo@nn.gg"
             ));

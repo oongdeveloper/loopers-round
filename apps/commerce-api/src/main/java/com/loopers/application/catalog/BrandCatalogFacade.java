@@ -1,6 +1,6 @@
 package com.loopers.application.catalog;
 
-import com.loopers.domain.catalog.Brand;
+import com.loopers.domain.catalog.BrandCatalog;
 import com.loopers.domain.catalog.BrandCatalogService;
 import com.loopers.domain.catalog.ProductCatalog;
 import com.loopers.domain.catalog.ProductCatalogService;
@@ -23,16 +23,16 @@ public class BrandCatalogFacade {
     }
 
     public BrandDetailInfo getBrandDetailWithProducts(Long brandId){
-        Brand brand = brandCatalogService.find(brandId)
+        BrandCatalog brandCatalog = brandCatalogService.find(brandId)
                 .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "해당 ID의 브랜드를 찾을 수 없습니다."));
 
         List<ProductCatalog> productCatalogs = productCatalogService.findTop5ByBrandIdOrderByPublishedAtDesc(brandId);
 
         List<ProductCatalogInfo> productCatalogInfos = productCatalogs.stream()
-                .map(productCatalog -> ProductCatalogInfo.from(productCatalog, brand.getBrandName()))
+                .map(productCatalog -> ProductCatalogInfo.from(productCatalog, brandCatalog.getBrandName()))
                 .collect(Collectors.toList());
 
-        return BrandDetailInfo.from(brand, productCatalogInfos);
+        return BrandDetailInfo.from(brandCatalog, productCatalogInfos);
     }
 
 }
