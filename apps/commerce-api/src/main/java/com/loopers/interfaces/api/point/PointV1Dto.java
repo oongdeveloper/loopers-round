@@ -1,14 +1,16 @@
 package com.loopers.interfaces.api.point;
 
+import java.math.BigDecimal;
+
 public class PointV1Dto {
 
     public record ChargePointRequest(
-            long point
+            BigDecimal point
     ) {
     }
 
     public record UserPointResponse(
             String userId,
-            long point
+            BigDecimal point
     ){}
 }

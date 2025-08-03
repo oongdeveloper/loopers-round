@@ -1,7 +1,7 @@
 package com.loopers.interfaces.api.user;
 
 import com.loopers.domain.user.UserCommand;
-import com.loopers.domain.user.UserEntity;
+import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.utils.DatabaseCleanUp;
@@ -101,7 +101,7 @@ class UserV1ApiE2ETest {
             userService.save(UserCommand.of(
                     ENROLLED_USER,
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
             ));

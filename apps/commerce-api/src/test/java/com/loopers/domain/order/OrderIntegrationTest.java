@@ -1,0 +1,195 @@
+package com.loopers.domain.order;
+
+import com.loopers.application.order.OrderFacade;
+import com.loopers.domain.BaseEntity;
+import com.loopers.domain.catalog.ProductCatalog;
+import com.loopers.domain.catalog.ProductRepository;
+import com.loopers.domain.point.Point;
+import com.loopers.domain.point.PointRepository;
+import com.loopers.domain.product.ProductSku;
+import com.loopers.domain.product.ProductSkuRepository;
+import com.loopers.domain.stock.Stock;
+import com.loopers.domain.stock.StockRepository;
+import com.loopers.interfaces.api.order.OrderV1Dto;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
+import com.loopers.utils.DatabaseCleanUp;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SpringBootTest
+public class OrderIntegrationTest {
+
+    @Autowired
+    private OrderFacade orderFacade;
+
+    @Autowired
+    private DatabaseCleanUp databaseCleanUp; // DB 초기화 헬퍼
+
+    @Autowired private ProductRepository productCatalogRepository;
+    @Autowired private ProductSkuRepository productSkuRepository;
+    @Autowired private StockRepository stockRepository;
+    @Autowired private PointRepository pointRepository;
+
+    private TestOrderHelper helper;
+    private final String TEST_USER_ID = "user1";
+
+    @BeforeEach
+    void setUp() {
+        helper = new TestOrderHelper(productCatalogRepository, productSkuRepository, stockRepository, pointRepository);
+    }
+
+    @AfterEach
+    void tearDown() {
+        databaseCleanUp.truncateAllTables();
+    }
+
+    @Nested
+    @DisplayName("주문 을 할 때,")
+    class OrderCreate {
+
+        @Test
+        @DisplayName("재고가 부족하면 Bad Request 오류를 반환한다.")
+        @Transactional
+        void returnBadRequst_whenOutOfStock() {
+            // Given
+            // 1. 주문에 필요한 엔티티 생성 및 저장 (재고 부족 상황)
+            //    - 재고: 1개
+            //    - 요청 수량: 2개
+            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.AVAILABLE, BigDecimal.valueOf(10000));
+            Stock stock = helper.createStock(sku.getId(), 1L); // 재고 1개
+            Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(100000)); // 충분한 포인트
+
+            OrderV1Dto.OrderCreateRequest request = new OrderV1Dto.OrderCreateRequest(
+                    Collections.singletonList(new OrderV1Dto.OrderItemCreateRequest(sku.getId(), 2L)) // 요청 수량 2개
+            );
+
+            // When & Then
+            assertThrows(CoreException.class, () -> orderFacade.createOrder(TEST_USER_ID, request));
+//             재고 부족 예외 메시지를 더 구체적으로 검증할 수 있습니다.
+//             (예: exception.getMessage().contains("재고가 부족합니다."))
+        }
+
+        @Test
+        @DisplayName("상품이 판매중 상태가 아니면 Conflict 오류를 반환한다.")
+        void returnConflict_whenProductNotAvaliable() {
+            // Given
+            // 1. 주문에 필요한 엔티티 생성 및 저장 (판매 중지 상태)
+            //    - 상품 상태: DISCONTINUED (판매 중지)
+            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.DISCONTINUED, BigDecimal.valueOf(10000)); // 판매 중지 상태
+            Stock stock = helper.createStock(sku.getId(), 10L); // 충분한 재고
+            Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(100000)); // 충분한 포인트
+
+            OrderV1Dto.OrderCreateRequest request = new OrderV1Dto.OrderCreateRequest(
+                    Collections.singletonList(new OrderV1Dto.OrderItemCreateRequest(sku.getId(), 2L)) // 요청 수량 2개
+            );
+
+            // When & Then
+            assertThrows(CoreException.class, () -> orderFacade.createOrder(TEST_USER_ID, request));
+            // 상태 관련 예외 메시지를 더 구체적으로 검증할 수 있습니다.
+        }
+
+        @Test
+        @DisplayName("사용자의 포인트가 부족하면 Conflict 오류를 반환한다.")
+        void returnConflict_whenInsufficientPoint() {
+            // Given
+            // 1. 주문에 필요한 엔티티 생성 및 저장 (포인트 부족 상황)
+            //    - 상품 가격: 10000원
+            //    - 요청 수량: 2개 (총 20000원)
+            //    - 사용자 포인트: 10000원
+            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.AVAILABLE, BigDecimal.valueOf(10000));
+            Stock stock = helper.createStock(sku.getId(), 10L); // 충분한 재고
+            Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(10000)); // 10000원 포인트
+
+            OrderV1Dto.OrderCreateRequest request = new OrderV1Dto.OrderCreateRequest(
+                    Collections.singletonList(new OrderV1Dto.OrderItemCreateRequest(sku.getId(), 2L)) // 요청 수량 2개
+            );
+
+            // When & Then
+            assertThrows(CoreException.class, () -> orderFacade.createOrder(TEST_USER_ID, request));
+            // 포인트 부족 예외 메시지를 더 구체적으로 검증할 수 있습니다.
+        }
+    }
+
+    @Nested
+    @DisplayName("상품을 조회할 때")
+    class OrderRead{
+
+        @Test
+        @DisplayName("상품 상세 조회 시, 없는 주문정보면 Bad Request 오류를 반환한다.")
+        void returnBadRequest_whenOrderNotFound(){
+            Long nonExistingOrderId = 9999L;
+
+            CoreException exception = assertThrows(CoreException.class,
+                    () -> orderFacade.getOrderDetail(nonExistingOrderId)
+            );
+
+            assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
+        }
+
+    }
+
+    /**
+     * 테스트 엔티티 생성을 돕는 헬퍼 클래스 (통합 테스트의 가독성 향상 목적)
+     * 이 클래스는 실제 Repository를 주입받아 사용합니다.
+     */
+    private static class TestOrderHelper {
+        private final ProductRepository productCatalogRepository;
+        private final ProductSkuRepository productSkuRepository;
+        private final StockRepository stockRepository;
+        private final PointRepository pointRepository;
+
+        public TestOrderHelper(ProductRepository productCatalogRepository, ProductSkuRepository productSkuRepository, StockRepository stockRepository, PointRepository pointRepository) {
+            this.productCatalogRepository = productCatalogRepository;
+            this.productSkuRepository = productSkuRepository;
+            this.stockRepository = stockRepository;
+            this.pointRepository = pointRepository;
+        }
+
+        private void setEntityId(BaseEntity entity, Long id) {
+            try {
+                java.lang.reflect.Field idField = BaseEntity.class.getDeclaredField("id");
+                idField.setAccessible(true);
+                idField.set(entity, id);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new RuntimeException("BaseEntity의 id 필드를 설정할 수 없습니다.", e);
+            }
+        }
+
+        public ProductCatalog createProductCatalog(String productName, BigDecimal basePrice) {
+            ProductCatalog catalog = ProductCatalog.from(
+                    1L, productName, basePrice, "http://image.url", "description"
+            );
+            return productCatalogRepository.save(catalog);
+        }
+
+        public ProductSku createProductSku(Long catalogId, ProductSku.SkuStatus status, BigDecimal unitPrice) {
+            ProductSku sku = ProductSku.from(
+                    Collections.emptyList(), "http://sku.image.url", unitPrice, status, catalogId
+            );
+            return productSkuRepository.save(sku);
+        }
+
+        public Stock createStock(Long skuId, Long quantity) {
+            Stock stock = Stock.from(skuId, quantity);
+            return stockRepository.save(stock);
+        }
+
+        public Point createPoint(String userId, BigDecimal pointAmount) {
+            Point point = Point.from(userId, pointAmount);
+            return pointRepository.save(point);
+        }
+    }
+
+}
