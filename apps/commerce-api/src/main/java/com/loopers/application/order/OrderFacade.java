@@ -3,11 +3,14 @@ package com.loopers.application.order;
 import com.loopers.domain.catalog.ProductCatalog;
 import com.loopers.domain.catalog.ProductCatalogService;
 import com.loopers.domain.order.Order;
+import com.loopers.domain.order.OrderFactory;
 import com.loopers.domain.order.OrderService;
 import com.loopers.domain.point.DeductPointCommand;
+import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointService;
 import com.loopers.domain.product.ProductSku;
 import com.loopers.domain.product.ProductSkuService;
+import com.loopers.domain.stock.Stock;
 import com.loopers.domain.stock.StockService;
 import com.loopers.interfaces.api.order.OrderV1Dto;
 import com.loopers.support.error.CoreException;
@@ -113,5 +116,28 @@ public class OrderFacade {
 
     public OrderInfo.OrderDetailInfo getOrderDetail(Long orderId) {
         return orderService.getOrderDetail(orderId);
+    }
+
+
+    public void createOrder(String userId, OrderV1Dto.CreateRequest request){
+        Map<Long, Long> requestMap = request.toMap();
+        List<ProductSku> foundSkus =  productSkuService.findByIds(requestMap.keySet());
+
+        Set<Long> catalogIds = foundSkus.stream()
+                .map(ProductSku::getProductCatalogId)
+                .collect(Collectors.toSet());
+        List<ProductCatalog> foundCatalogs = productCatalogService.findByIds(catalogIds);
+
+        Order order = OrderFactory.createOrder(userId, requestMap, foundSkus, foundCatalogs);
+        // TODO. INSERT 가 여러 번 요청됨.
+        orderService.save(order);
+
+        // 재고 정보 조회
+        List<Stock> stocks = stockService.findBySkuIds(requestMap.keySet());
+        stockService.decreaseStock(stocks, requestMap);
+
+        // Point 정보 조회
+        Point point = pointService.find(userId).get();
+        point.deduct(order.getTotalOrderPrice());
     }
 }

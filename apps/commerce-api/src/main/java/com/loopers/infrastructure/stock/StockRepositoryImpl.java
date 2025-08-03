@@ -4,6 +4,8 @@ import com.loopers.domain.stock.Stock;
 import com.loopers.domain.stock.StockRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,5 +25,10 @@ public class StockRepositoryImpl implements StockRepository {
     @Override
     public Stock save(Stock stock) {
         return jpaRepository.save(stock);
+    }
+
+    @Override
+    public List<Stock> findBySkuIdIn(Collection<Long> skuIds) {
+        return jpaRepository.findByProductSkuIdIn(skuIds);
     }
 }

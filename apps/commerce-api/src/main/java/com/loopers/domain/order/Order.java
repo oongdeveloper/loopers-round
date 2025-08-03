@@ -30,6 +30,9 @@ public class Order extends BaseEntity {
     @Column(name = "status", nullable = false)
     String status;
 
+    @Embedded
+    OrderLines lines;
+
     private Order(String userId, String status){
         this.userId = userId;
         this.status = status;
@@ -37,6 +40,16 @@ public class Order extends BaseEntity {
 
     public static Order of(String userId, String status){
         return new Order(userId, status);
+    }
+
+    public static Order create(OrderFactory.OrderCommand.Create createCommand) {
+        Order createdOrder = new Order(createCommand.userId(), "NEW");
+        createdOrder.lines = OrderLines.empty();
+
+        createCommand.items().forEach(itemCommand -> {
+            createdOrder.lines.add(OrderLine.from(itemCommand));
+        });
+        return createdOrder;
     }
 
     public void addOrderItem(OrderItem item) {

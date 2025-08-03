@@ -50,4 +50,8 @@ public class OrderService {
 
         return OrderInfo.OrderDetailInfo.from(order);
     }
+
+    public void save(Order order){
+        orderRepository.save(order);
+    }
 }

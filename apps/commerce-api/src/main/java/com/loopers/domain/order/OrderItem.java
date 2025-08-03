@@ -55,6 +55,12 @@ public class OrderItem extends BaseEntity {
                             orderItemUnitPrice, orderItemProductName);
     }
 
+    public static OrderItem createItem(Long productSkuId, Long productCatalogId, Long quantity,
+                               BigDecimal orderItemUnitPrice, String orderItemProductName) {
+        return new OrderItem(productSkuId, productCatalogId, quantity,
+                orderItemUnitPrice, orderItemProductName);
+    }
+
     public void validate(Long quantity, BigDecimal orderItemUnitPrice){
         if(quantity == null || quantity < 0){
             throw new CoreException(ErrorType.BAD_REQUEST, "수량은 0보다 작을 수 없습니다.");
