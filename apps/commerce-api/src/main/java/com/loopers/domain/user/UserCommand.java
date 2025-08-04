@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 public record UserCommand (
         String userId,
         String userName,
-        UserEntity.Gender gender,
+        User.Gender gender,
         String birth,
         String email
 ) {
@@ -18,9 +18,9 @@ public record UserCommand (
         );
     }
 
-    private static UserEntity.Gender stringToEnum(String genderStr){
+    private static User.Gender stringToEnum(String genderStr){
         try{
-            return UserEntity.Gender.valueOf(genderStr);
+            return User.Gender.valueOf(genderStr);
         } catch (IllegalArgumentException e){
             log.error("존재하지 않는 성별입니다. Gender = {}.", genderStr);
             throw new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 성별입니다.");

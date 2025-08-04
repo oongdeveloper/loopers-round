@@ -4,15 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+
 @ToString
 @Getter
 @AllArgsConstructor
 public class ChargePointCommand {
 
     private String userId;
-    private long chargePoint;
+    private BigDecimal chargePoint;
 
-    public static ChargePointCommand of(String userId, long chargePoint) {
+    public static ChargePointCommand of(String userId, BigDecimal chargePoint) {
         return new ChargePointCommand(userId, chargePoint);
     }
 }

@@ -1,12 +1,12 @@
 package com.loopers.domain.point;
 
 
-import com.loopers.domain.user.UserEntity;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -18,15 +18,26 @@ public class PointService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<UserEntity> find(String userId){
+    public Optional<Point> find(String userId){
         return pointRepository.find(userId);
     }
 
+    public Point save(Point point) {
+        return pointRepository.save(point);
+    }
+
     @Transactional
-    public long charge(ChargePointCommand command) {
-        UserEntity user = find(command.getUserId())
+    public BigDecimal charge(ChargePointCommand command) {
+        Point point = find(command.getUserId())
+                .orElseGet(() -> pointRepository.save(Point.from(command.getUserId(), BigDecimal.ZERO)));
+        return point.charge(command.getChargePoint());
+    }
+
+    @Transactional
+    public BigDecimal deduct(DeductPointCommand command){
+        Point point = find(command.getUserId())
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 User 입니다."));
-        return user.charge(command.getChargePoint());
+        return point.deduct(command.getDeductPoint());
     }
 
 }

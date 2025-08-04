@@ -1,9 +1,11 @@
 package com.loopers.domain.point;
 
 
+import com.loopers.application.point.PointFacade;
 import com.loopers.domain.user.UserCommand;
-import com.loopers.domain.user.UserEntity;
+import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
+import com.loopers.interfaces.api.point.PointV1Dto;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -20,12 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class PointServiceIntegrationTest {
+    private final PointFacade pointFacade;
     private final PointService pointService;
     private final DatabaseCleanUp databaseCleanUp;
     private final UserService userService;
 
     @Autowired
-    public PointServiceIntegrationTest(PointService pointService, DatabaseCleanUp databaseCleanUp, UserService userService) {
+    public PointServiceIntegrationTest(PointFacade pointFacade, PointService pointService, DatabaseCleanUp databaseCleanUp, UserService userService) {
+        this.pointFacade = pointFacade;
         this.pointService = pointService;
         this.databaseCleanUp = databaseCleanUp;
         this.userService = userService;
@@ -38,7 +43,7 @@ public class PointServiceIntegrationTest {
 
     @DisplayName("포인트 조회")
     @Nested
-    class Point{
+    class PointSelect{
         final String ENROLLED_USER = "oong";
         final String UNKNOWN_USER = "UNKNOWN_USER";
 
@@ -47,7 +52,7 @@ public class PointServiceIntegrationTest {
             userService.save(UserCommand.of(
                     ENROLLED_USER,
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
             ));
@@ -56,19 +61,20 @@ public class PointServiceIntegrationTest {
         @DisplayName("해당 ID 의 회원이 존재할 경우, 보유 포인트가 반환된다.")
         @Test
         void returnUserPoint_whenUserExist(){
-            Optional<UserEntity> user = pointService.find(ENROLLED_USER);
+            pointService.charge(ChargePointCommand.of(ENROLLED_USER, BigDecimal.valueOf(1000L)));
+            Optional<Point> point = pointService.find(ENROLLED_USER);
 
-            assertTrue(user.isPresent());
-            assertThat(user.get().getUserId()).isEqualTo(ENROLLED_USER);
-            assertThat(user.get().getPoint()).isEqualTo(0L);
+            assertTrue(point.isPresent());
+            assertThat(point.get().getUserId()).isEqualTo(ENROLLED_USER);
+            assertThat(point.get().getPoint()).isEqualByComparingTo(BigDecimal.valueOf(1000L));
         }
 
         @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
         @Test
         void returnNull_whenUserIsNotExist(){
-            Optional<UserEntity> user = pointService.find(UNKNOWN_USER);
+            Optional<Point> point = pointService.find(UNKNOWN_USER);
 
-            assertTrue(user.isEmpty());
+            assertTrue(point.isEmpty());
         }
     }
 
@@ -84,7 +90,7 @@ public class PointServiceIntegrationTest {
             userService.save(UserCommand.of(
                     ENROLLED_USER,
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
             ));
@@ -94,7 +100,9 @@ public class PointServiceIntegrationTest {
         @Test
         void failed_whenChargeWithUnknownUserId(){
             CoreException exception = assertThrows(CoreException.class, () -> {
-                pointService.charge(ChargePointCommand.of(UNKNOWN_USER, 1000L));
+                pointService.charge(ChargePointCommand.of(UNKNOWN_USER, BigDecimal.valueOf(1000L)));
+
+                pointFacade.charge(UNKNOWN_USER, new PointV1Dto.ChargePointRequest(BigDecimal.valueOf(1000L)));
             });
 
             Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
@@ -103,10 +111,10 @@ public class PointServiceIntegrationTest {
         @DisplayName("충전이 완료된 경우, JPA 가 저장을 제대로 하는지 확인.")
         @Test
         void compare_successCharge_findOnDB(){
-            long chargedPoint = pointService.charge(ChargePointCommand.of(ENROLLED_USER, 1000L));
-            Optional<UserEntity> userAfterCharge = pointService.find(ENROLLED_USER);
+            BigDecimal chargedPoint = pointService.charge(ChargePointCommand.of(ENROLLED_USER, BigDecimal.valueOf(1000L)));
+            Optional<Point> pointAfterCharge = pointService.find(ENROLLED_USER);
 
-            assertThat(chargedPoint).isEqualTo(userAfterCharge.get().getPoint());
+            assertThat(chargedPoint).isEqualByComparingTo(pointAfterCharge.get().getPoint());
         }
     }
 

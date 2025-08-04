@@ -15,20 +15,20 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public UserEntity save(UserCommand command){
+    public User save(UserCommand command){
         try{
             userRepository.find(command.userId())
                     .ifPresent(e -> {
                         throw new CoreException(ErrorType.CONFLICT, "이미 존재하는 User 입니다.");
                     });
 
-            return userRepository.save(UserEntity.from(command));
+            return userRepository.save(User.from(command));
         } catch (DataIntegrityViolationException e){
             throw new CoreException(ErrorType.CONFLICT, "이미 존재하는 User 입니다.");
         }
     }
 
-    public Optional<UserEntity> find(String userId){
+    public Optional<User> find(String userId){
         return userRepository.find(userId);
     }
 }

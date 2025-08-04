@@ -1,8 +1,10 @@
 package com.loopers.interfaces.api.point;
 
 
+import com.loopers.domain.point.Point;
+import com.loopers.domain.point.PointService;
 import com.loopers.domain.user.UserCommand;
-import com.loopers.domain.user.UserEntity;
+import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.utils.DatabaseCleanUp;
@@ -14,6 +16,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -22,12 +26,14 @@ public class PointV1ApiE2ETest {
     private final TestRestTemplate testRestTemplate;
     private final DatabaseCleanUp databaseCleanUp;
     private final UserService userService;
+    private final PointService pointService;
 
     @Autowired
-    public PointV1ApiE2ETest(TestRestTemplate testRestTemplate, DatabaseCleanUp databaseCleanUp, UserService userService) {
+    public PointV1ApiE2ETest(TestRestTemplate testRestTemplate, DatabaseCleanUp databaseCleanUp, UserService userService, PointService pointService) {
         this.testRestTemplate = testRestTemplate;
         this.databaseCleanUp = databaseCleanUp;
         this.userService = userService;
+        this.pointService = pointService;
     }
 
     @AfterEach
@@ -46,10 +52,12 @@ public class PointV1ApiE2ETest {
             userService.save(UserCommand.of(
                     ENROLLED_USER,
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
             ));
+
+            pointService.save(Point.from(ENROLLED_USER, BigDecimal.valueOf(1000L)));
         }
 
         @DisplayName("포인트 조회에 성공할 경우, 보유 포인트를 응답으로 반환한다.")
@@ -93,7 +101,7 @@ public class PointV1ApiE2ETest {
             userService.save(UserCommand.of(
                     ENROLLED_USER,
                     "오옹",
-                    UserEntity.Gender.M,
+                    User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
             ));
@@ -105,7 +113,7 @@ public class PointV1ApiE2ETest {
             HttpHeaders headers = new HttpHeaders();
             headers.set("X-USER-ID", ENROLLED_USER);
 
-            PointV1Dto.ChargePointRequest beforeCharge = new PointV1Dto.ChargePointRequest(1000L);
+            PointV1Dto.ChargePointRequest beforeCharge = new PointV1Dto.ChargePointRequest(BigDecimal.valueOf(1000L));
 
             ParameterizedTypeReference<ApiResponse<PointV1Dto.UserPointResponse>> responseType = new ParameterizedTypeReference<>(){};
             ResponseEntity<ApiResponse<PointV1Dto.UserPointResponse>> response =
@@ -113,8 +121,9 @@ public class PointV1ApiE2ETest {
 
             assertAll(
                     () -> assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK),
-                    () -> assertThat(response.getBody().data().point()).isEqualTo(1000L)
+                    () -> assertThat(response.getBody().data().point()).isEqualByComparingTo(BigDecimal.valueOf(1000L))
             );
+
         }
 
         @DisplayName("존재하지 않는 유저로 요청할 경우, 404 Not Found 응답을 반환한다.")
@@ -123,7 +132,7 @@ public class PointV1ApiE2ETest {
             HttpHeaders headers = new HttpHeaders();
             headers.set("X-USER-ID", "TEST_USER");
 
-            PointV1Dto.ChargePointRequest beforeCharge = new PointV1Dto.ChargePointRequest(1000L);
+            PointV1Dto.ChargePointRequest beforeCharge = new PointV1Dto.ChargePointRequest(BigDecimal.valueOf(1000L));
 
             ParameterizedTypeReference<ApiResponse<PointV1Dto.UserPointResponse>> responseType = new ParameterizedTypeReference<>(){};
             ResponseEntity<ApiResponse<PointV1Dto.UserPointResponse>> response =
