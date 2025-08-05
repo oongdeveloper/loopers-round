@@ -37,13 +37,11 @@ public class OrderService {
         return savedOrder;
     }
 
-    @Transactional(readOnly = true)
     public Page<OrderInfo.OrderResponseInfo> getOrderList(Long userId, Pageable pageable) {
         Page<Order> ordersPage = orderRepository.findByUserId(userId, pageable);
         return ordersPage.map(OrderInfo.OrderResponseInfo::from);
     }
 
-    @Transactional(readOnly = true)
     public OrderInfo.OrderDetailInfo getOrderDetail(Long orderId) {
         Order order = orderRepository.findByIdWithOrderItems(orderId)
                 .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "주문을 찾을 수 없습니다. orderId: " + orderId));
