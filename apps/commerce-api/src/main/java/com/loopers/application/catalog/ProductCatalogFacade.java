@@ -41,8 +41,7 @@ public class ProductCatalogFacade {
         ProductCatalog productCatalog = productCatalogService.findById(productId)
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "상품을 찾을 수 없습니다."));
 
-        BrandCatalog brandCatalog = brandCatalogService.find(productCatalog.getBrandId())
-                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "브랜드를 찾을 수 없습니다."));
+        BrandCatalog brandCatalog = brandCatalogService.find(productCatalog.getBrandId());
 
         List<ProductSku> skus = productSkuService.findByProductCatalogId(productId);
         List<ProductCatalogDetailInfo.SkuInfo> skuInfos = convertSkuToSkuInfos(skus);
@@ -93,8 +92,7 @@ public class ProductCatalogFacade {
         Sort sort = Sort.by(Sort.Direction.fromString(request.direction().name()), request.sortBy().getPropertyName());
         Pageable pageable = PageRequest.of(request.page(), request.size(), sort);
 
-        brandId.ifPresent(id -> brandCatalogService.find(id)
-                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "Brand 를 찾을 수 없습니다.")));
+        brandId.ifPresent(id -> brandCatalogService.find(id));
         Page<ProductCatalog> productCatalogs = productCatalogService.find(brandId, pageable);
         return convertToProductCatalogInfoPage(productCatalogs);
     }
@@ -140,5 +138,4 @@ public class ProductCatalogFacade {
         }).collect(Collectors.toList());
         return skuInfos;
     }
-
 }

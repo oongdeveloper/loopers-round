@@ -53,7 +53,7 @@ public class BrandCatalogIntegrationTest {
 
             // act
             CoreException exception = assertThrows(CoreException.class, () -> {
-                brandCatalogFacade.getBrandDetailWithProducts(4L);
+                brandCatalogFacade.getBrandDetail(4L);
             });
             // asserts
             Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);

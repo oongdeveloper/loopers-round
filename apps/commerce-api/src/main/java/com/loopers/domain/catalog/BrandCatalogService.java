@@ -1,10 +1,9 @@
 package com.loopers.domain.catalog;
 
 
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BrandCatalogService {
@@ -14,11 +13,8 @@ public class BrandCatalogService {
         this.brandRepository = brandRepository;
     }
 
-    public Optional<BrandCatalog> find(Long id) {
-        return brandRepository.find(id);
-    }
-
-    public List<BrandCatalog>  findAllByIds(Iterable<Long> ids){
-        return brandRepository.findAllById(ids);
+    public BrandCatalog find(Long id) {
+        return brandRepository.find(id)
+                .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "해당 ID의 브랜드를 찾을 수 없습니다."));
     }
 }
