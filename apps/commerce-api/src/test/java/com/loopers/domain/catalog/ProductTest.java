@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @UnitTest
-class ProductCatalogTest {
+class ProductTest {
 
     @Test
     @DisplayName("Brand ID 가 없으면 BAD_REQUEST 오류를 반환한다.")
@@ -25,7 +25,7 @@ class ProductCatalogTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductCatalog.from(brandId, productName, price, imageUrl, description);
+            Product.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
@@ -40,7 +40,7 @@ class ProductCatalogTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductCatalog.from(brandId, productName, price, imageUrl, description);
+            Product.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
@@ -55,7 +55,7 @@ class ProductCatalogTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductCatalog.from(brandId, productName, price, imageUrl, description);
+            Product.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
@@ -70,7 +70,7 @@ class ProductCatalogTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductCatalog.from(brandId, productName, price, imageUrl, description);
+            Product.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }
@@ -85,7 +85,7 @@ class ProductCatalogTest {
         String description = "";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductCatalog.from(brandId, productName, price, imageUrl, description);
+            Product.from(brandId, productName, price, imageUrl, description);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }

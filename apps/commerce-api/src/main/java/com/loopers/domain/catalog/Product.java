@@ -23,7 +23,7 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
-public class ProductCatalog extends BaseEntity {
+public class Product extends BaseEntity {
 
     @Column(name = "ref_brand_id", nullable = false)
     private Long brandId;
@@ -32,8 +32,8 @@ public class ProductCatalog extends BaseEntity {
     private String productName;
 
     // TODO. 설계서 반영
-    @Column(name = "base_price", nullable = false, precision = 12, scale = 2)
-    private BigDecimal basePrice;
+    @Column(name = "price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
 
     @Column(name = "image_url", length = 2048)
     private String imageUrl;
@@ -45,18 +45,18 @@ public class ProductCatalog extends BaseEntity {
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime publishedAt;
 
-    private ProductCatalog(Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description) {
+    private Product(Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description) {
         validate(brandId, productName, basePrice, imageUrl);
 
         this.brandId = brandId;
         this.productName = productName;
-        this.basePrice = basePrice;
+        this.price = basePrice;
         this.imageUrl = imageUrl;
         this.description = description;
     }
 
-    public static ProductCatalog from (Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description){
-        return new ProductCatalog(
+    public static Product from (Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description){
+        return new Product(
                 brandId, productName, basePrice, imageUrl, description
         );
     }

@@ -22,22 +22,22 @@ import java.net.URL;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 @Getter
-public class BrandCatalog extends BaseEntity {
+public class Brand extends BaseEntity {
     @Column(name = "brand_name", nullable = false, length = 100, unique = true)
     String brandName;
 
     @Column(name = "logo_url", length = 2048)
     String logoUrl;
 
-    private BrandCatalog(String brandName, String logoUrl) {
+    private Brand(String brandName, String logoUrl) {
         validate(brandName, logoUrl);
 
         this.brandName = brandName;
         this.logoUrl = logoUrl;
     }
 
-    public static BrandCatalog from(String brandName, String logoUrl) {
-        return new BrandCatalog(brandName, logoUrl);
+    public static Brand from(String brandName, String logoUrl) {
+        return new Brand(brandName, logoUrl);
     }
 
     private void validate(String brandName, String logoUrl) {

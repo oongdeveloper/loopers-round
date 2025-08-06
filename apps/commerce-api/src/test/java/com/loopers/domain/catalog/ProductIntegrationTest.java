@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @IntegrationTest
 @SpringBootTest
-public class ProductCatalogIntegrationTest {
+public class ProductIntegrationTest {
     private final BrandRepository brandRepository;
     private final ProductRepository productRepository;
     private final ProductCatalogFacade productCatalogFacade;
@@ -32,7 +32,7 @@ public class ProductCatalogIntegrationTest {
     private final DatabaseCleanUp databaseCleanUp;
 
     @Autowired
-    public ProductCatalogIntegrationTest(BrandRepository brandRepository, ProductRepository productRepository, ProductCatalogFacade productCatalogFacade, DatabaseCleanUp databaseCleanUp) {
+    public ProductIntegrationTest(BrandRepository brandRepository, ProductRepository productRepository, ProductCatalogFacade productCatalogFacade, DatabaseCleanUp databaseCleanUp) {
         this.brandRepository = brandRepository;
         this.productRepository = productRepository;
         this.productCatalogFacade = productCatalogFacade;

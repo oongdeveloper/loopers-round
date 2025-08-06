@@ -1,5 +1,6 @@
 package com.loopers.domain.order;
 
+import com.loopers.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import java.util.Objects;
 @Table(name = "order_line")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class OrderLine {
+public class OrderLine extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -25,23 +26,23 @@ public class OrderLine {
 
     @Column(name = "quantity", nullable = false)
     Long quantity;
-    @Column(name = "total_item_price", nullable = false)
-    BigDecimal totalItemPrice;
+    @Column(name = "total_line_price", nullable = false)
+    BigDecimal totalLinePrice;
 
-    @Column(name = "order_item_product_name", nullable = false)
-    String orderItemProductName;
-    @Column(name = "order_item_unit_price", nullable = false)
-    BigDecimal orderItemUnitPrice;
+    @Column(name = "order_line_product_name", nullable = false)
+    String orderLineProductName;
+    @Column(name = "order_line_price", nullable = false)
+    BigDecimal orderLinePrice;
 
     public OrderLine(Long productSkuId, Long productCatalogId, Long quantity,
-                     BigDecimal totalItemPrice, String orderItemProductName, BigDecimal orderItemUnitPrice) {
+                     BigDecimal totalLinePrice, String orderLineProductName, BigDecimal orderLinePrice) {
         this.order = order;
         this.productSkuId = productSkuId;
         this.productCatalogId = productCatalogId;
         this.quantity = quantity;
-        this.totalItemPrice = totalItemPrice;
-        this.orderItemProductName = orderItemProductName;
-        this.orderItemUnitPrice = orderItemUnitPrice;
+        this.totalLinePrice = totalLinePrice;
+        this.orderLineProductName = orderLineProductName;
+        this.orderLinePrice = orderLinePrice;
     }
 
     public static OrderLine from(OrderFactory.OrderCommand.OrderItem item){

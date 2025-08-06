@@ -2,7 +2,7 @@ package com.loopers.domain.order;
 
 import com.loopers.application.order.OrderFacade;
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.catalog.ProductCatalog;
+import com.loopers.domain.catalog.Product;
 import com.loopers.domain.catalog.ProductRepository;
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
@@ -64,7 +64,7 @@ public class OrderIntegrationTest {
             // 1. 주문에 필요한 엔티티 생성 및 저장 (재고 부족 상황)
             //    - 재고: 1개
             //    - 요청 수량: 2개
-            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            Product catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
             ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.AVAILABLE, BigDecimal.valueOf(10000));
             Stock stock = helper.createStock(sku.getId(), 1L); // 재고 1개
             Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(100000)); // 충분한 포인트
@@ -85,7 +85,7 @@ public class OrderIntegrationTest {
             // Given
             // 1. 주문에 필요한 엔티티 생성 및 저장 (판매 중지 상태)
             //    - 상품 상태: DISCONTINUED (판매 중지)
-            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            Product catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
             ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.DISCONTINUED, BigDecimal.valueOf(10000)); // 판매 중지 상태
             Stock stock = helper.createStock(sku.getId(), 10L); // 충분한 재고
             Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(100000)); // 충분한 포인트
@@ -107,7 +107,7 @@ public class OrderIntegrationTest {
             //    - 상품 가격: 10000원
             //    - 요청 수량: 2개 (총 20000원)
             //    - 사용자 포인트: 10000원
-            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            Product catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
             ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.AVAILABLE, BigDecimal.valueOf(10000));
             Stock stock = helper.createStock(sku.getId(), 10L); // 충분한 재고
             Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(10000)); // 10000원 포인트
@@ -167,8 +167,8 @@ public class OrderIntegrationTest {
             }
         }
 
-        public ProductCatalog createProductCatalog(String productName, BigDecimal basePrice) {
-            ProductCatalog catalog = ProductCatalog.from(
+        public Product createProductCatalog(String productName, BigDecimal basePrice) {
+            Product catalog = Product.from(
                     1L, productName, basePrice, "http://image.url", "description"
             );
             return productCatalogRepository.save(catalog);

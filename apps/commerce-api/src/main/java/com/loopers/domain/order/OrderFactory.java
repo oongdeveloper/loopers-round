@@ -1,6 +1,6 @@
 package com.loopers.domain.order;
 
-import com.loopers.domain.catalog.ProductCatalog;
+import com.loopers.domain.catalog.Product;
 import com.loopers.domain.product.ProductSku;
 
 import java.math.BigDecimal;
@@ -13,10 +13,10 @@ public class OrderFactory {
 
     public static Order createOrder(
             String userId, Map<Long, Long> requestMap,
-            List<ProductSku> skus, List<ProductCatalog> catalogs){
+            List<ProductSku> skus, List<Product> catalogs){
 
-        Map<Long, ProductCatalog> catalogMap = catalogs.stream()
-                .collect(Collectors.toMap(ProductCatalog::getId, Function.identity()));
+        Map<Long, Product> catalogMap = catalogs.stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
 
         List<OrderCommand.OrderItem> items = skus.stream()
                 .map(sku -> {

@@ -1,6 +1,6 @@
 package com.loopers.application.order;
 
-import com.loopers.domain.catalog.ProductCatalog;
+import com.loopers.domain.catalog.Product;
 import com.loopers.domain.catalog.ProductCatalogService;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderFactory;
@@ -63,9 +63,9 @@ public class OrderFacade {
                 .map(ProductSku::getProductCatalogId)
                 .collect(Collectors.toSet());
 
-        List<ProductCatalog> foundCatalogs = productCatalogService.findByIds(catalogIds);
-        Map<Long, ProductCatalog> catalogMap = foundCatalogs.stream()
-                .collect(Collectors.toMap(ProductCatalog::getId, Function.identity()));
+        List<Product> foundCatalogs = productCatalogService.findByIds(catalogIds);
+        Map<Long, Product> catalogMap = foundCatalogs.stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
 
         List<OrderCreateCommand.OrderItemCreateCommand> orderItemsToCreate = request.items().stream()
                 .map(reqItem -> {
@@ -78,8 +78,8 @@ public class OrderFacade {
                         throw new CoreException(ErrorType.CONFLICT, "상품이 판매 중 상태가 아닙니다. " + reqItem.productSkuId());
                     }
 
-                    ProductCatalog productCatalog = catalogMap.get(productSku.getProductCatalogId());
-                    if (productCatalog == null) {
+                    Product product = catalogMap.get(productSku.getProductCatalogId());
+                    if (product == null) {
                         throw new CoreException(ErrorType.BAD_REQUEST,"Product Catalog를 찾을 수 없습니다: " + productSku.getProductCatalogId());
                     }
 
@@ -91,7 +91,7 @@ public class OrderFacade {
                             productSku.getProductCatalogId(),
                             reqItem.quantity(),
                             productSku.getUnitPrice(),
-                            productCatalog.getProductName()
+                            product.getProductName()
                     );
                 })
                 .collect(Collectors.toList());
@@ -126,7 +126,7 @@ public class OrderFacade {
         Set<Long> catalogIds = foundSkus.stream()
                 .map(ProductSku::getProductCatalogId)
                 .collect(Collectors.toSet());
-        List<ProductCatalog> foundCatalogs = productCatalogService.findByIds(catalogIds);
+        List<Product> foundCatalogs = productCatalogService.findByIds(catalogIds);
 
         Order order = OrderFactory.createOrder(userId, requestMap, foundSkus, foundCatalogs);
         // TODO. INSERT 가 여러 번 요청됨.

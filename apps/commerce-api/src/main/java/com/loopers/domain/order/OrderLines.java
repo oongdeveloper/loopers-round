@@ -3,11 +3,13 @@ package com.loopers.domain.order;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Embeddable
+@Getter
 public class OrderLines {
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)

@@ -1,9 +1,9 @@
 package com.loopers.application.catalog;
 
 import com.loopers.application.like.LikeProductDetailInfo;
-import com.loopers.domain.catalog.BrandCatalog;
+import com.loopers.domain.catalog.Brand;
 import com.loopers.domain.catalog.BrandCatalogService;
-import com.loopers.domain.catalog.ProductCatalog;
+import com.loopers.domain.catalog.Product;
 import com.loopers.domain.catalog.ProductCatalogService;
 import com.loopers.domain.like.Like;
 import com.loopers.domain.like.LikeService;
@@ -38,23 +38,22 @@ public class ProductCatalogFacade {
     }
 
     public ProductCatalogDetailInfo retrieveProductDetail(Long productId){
-        ProductCatalog productCatalog = productCatalogService.findById(productId)
+        Product product = productCatalogService.findById(productId)
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "상품을 찾을 수 없습니다."));
 
-        BrandCatalog brandCatalog = brandCatalogService.find(productCatalog.getBrandId())
-                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "브랜드를 찾을 수 없습니다."));
+        Brand brand = brandCatalogService.find(product.getBrandId());
 
         List<ProductSku> skus = productSkuService.findByProductCatalogId(productId);
         List<ProductCatalogDetailInfo.SkuInfo> skuInfos = convertSkuToSkuInfos(skus);
 
         return new ProductCatalogDetailInfo(
-                productCatalog.getId(),
-                brandCatalog.getBrandName(),
-                productCatalog.getProductName(),
-                productCatalog.getBasePrice(),
-                productCatalog.getImageUrl(),
-                productCatalog.getDescription(),
-                productCatalog.getPublishedAt(),
+                product.getId(),
+                brand.getBrandName(),
+                product.getProductName(),
+                product.getPrice(),
+                product.getImageUrl(),
+                product.getDescription(),
+                product.getPublishedAt(),
                 skuInfos
         );
     }
@@ -69,15 +68,15 @@ public class ProductCatalogFacade {
                 .map(like -> like.getId().getProductCatalogId())
                 .collect(Collectors.toList());
 
-        List<ProductCatalog> productCatalogs = productCatalogService.findByIds(productCatalogIds);
+        List<Product> products = productCatalogService.findByIds(productCatalogIds);
 
-        Map<Long, ProductCatalog> productCatalogMap = productCatalogs.stream()
-                .collect(Collectors.toMap(ProductCatalog::getId, productCatalog -> productCatalog));
+        Map<Long, Product> productCatalogMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, productCatalog -> productCatalog));
 
         List<LikeProductDetailInfo> likedProductDetails = likesPage.getContent().stream()
                 .map(like -> {
-                    ProductCatalog productCatalog = productCatalogMap.get(like.getId().getProductCatalogId());
-                    return new LikeProductDetailInfo(like, productCatalog);
+                    Product product = productCatalogMap.get(like.getId().getProductCatalogId());
+                    return new LikeProductDetailInfo(like, product);
                 })
                 .collect(Collectors.toList());
 
@@ -93,23 +92,22 @@ public class ProductCatalogFacade {
         Sort sort = Sort.by(Sort.Direction.fromString(request.direction().name()), request.sortBy().getPropertyName());
         Pageable pageable = PageRequest.of(request.page(), request.size(), sort);
 
-        brandId.ifPresent(id -> brandCatalogService.find(id)
-                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "Brand 를 찾을 수 없습니다.")));
-        Page<ProductCatalog> productCatalogs = productCatalogService.find(brandId, pageable);
+        brandId.ifPresent(id -> brandCatalogService.find(id));
+        Page<Product> productCatalogs = productCatalogService.find(brandId, pageable);
         return convertToProductCatalogInfoPage(productCatalogs);
     }
 
-    private Page<ProductCatalogInfo> convertToProductCatalogInfoPage(Page<ProductCatalog> productCatalogsPage) {
-        List<ProductCatalog> productCatalogs = productCatalogsPage.getContent();
+    private Page<ProductCatalogInfo> convertToProductCatalogInfoPage(Page<Product> productCatalogsPage) {
+        List<Product> products = productCatalogsPage.getContent();
 
-        Set<Long> brandIds = productCatalogs.stream()
-                .map(ProductCatalog::getBrandId)
+        Set<Long> brandIds = products.stream()
+                .map(Product::getBrandId)
                 .collect(Collectors.toSet());
 
-        List<BrandCatalog> brandCatalogs = brandCatalogService.findAllByIds(brandIds);
+        List<Brand> brands = brandCatalogService.findAllByIds(brandIds);
 
-        Map<Long, String> brandIdToNameMap = brandCatalogs.stream()
-                .collect(Collectors.toMap(BrandCatalog::getId, BrandCatalog::getBrandName));
+        Map<Long, String> brandIdToNameMap = brands.stream()
+                .collect(Collectors.toMap(Brand::getId, Brand::getBrandName));
 
         return productCatalogsPage.map(productCatalog -> {
             String brandName = brandIdToNameMap.getOrDefault(
@@ -140,5 +138,4 @@ public class ProductCatalogFacade {
         }).collect(Collectors.toList());
         return skuInfos;
     }
-
 }
