@@ -2,15 +2,15 @@ package com.loopers.infrastructure.catalog.query;
 
 import com.loopers.application.catalog.query.ProductProjection;
 import com.loopers.application.catalog.query.ProductQuery;
-import com.loopers.domain.catalog.ProductCatalog;
+import com.loopers.domain.catalog.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface ProductCatalogJpaRepository extends JpaRepository<ProductCatalog, Long> {
+public interface ProductCatalogJpaRepository extends JpaRepository<Product, Long> {
     @Query(value = """
-        SELECT 
+        SELECT
             p.id AS id,
             p.productName AS name,
             p.basePrice AS basePrice,

@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface ProductRepository {
     long count();
-    Optional<ProductCatalog> find(Long id);
-    List<ProductCatalog> findTop5ByBrandIdOrderByPublishedAtDesc(Long id);
-    ProductCatalog save(ProductCatalog product);
+    Optional<Product> find(Long id);
+    List<Product> findTop5ByBrandIdOrderByPublishedAtDesc(Long id);
+    Product save(Product product);
 
-    Page<ProductCatalog> findAll(Pageable pageable);
+    Page<Product> findAll(Pageable pageable);
 
-    Page<ProductCatalog> findByBrandId(Long id, Pageable pageable);
+    Page<Product> findByBrandId(Long id, Pageable pageable);
 
-    List<ProductCatalog> findByIdIn(Collection<Long> ids);
+    List<Product> findByIdIn(Collection<Long> ids);
 }

@@ -13,7 +13,7 @@ public class BrandCatalogService {
         this.brandRepository = brandRepository;
     }
 
-    public BrandCatalog find(Long id) {
+    public Brand find(Long id) {
         return brandRepository.find(id)
                 .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "해당 ID의 브랜드를 찾을 수 없습니다."));
     }
