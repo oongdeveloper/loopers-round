@@ -5,7 +5,7 @@ import com.loopers.domain.point.Point;
 import java.math.BigDecimal;
 
 public record PointInfo (
-        String userId,
+        Long userId,
         BigDecimal point
 ){
     public static PointInfo from(Point point){

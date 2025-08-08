@@ -1,5 +1,6 @@
 package com.loopers.interfaces.api.order;
 
+import com.loopers.application.order.OrderCommand;
 import com.loopers.application.order.OrderQuery;
 import org.springframework.data.domain.Sort;
 
@@ -39,12 +40,21 @@ public class OrderV1Dto {
     ){
         public Map<Long, Long> toMap(){
             return this.items().stream()
-                    .collect(Collectors.toMap(ItemCreateRequest::productSkuId, ItemCreateRequest::quantity));
+                    .collect(Collectors.toMap(ItemCreateRequest::skuId, ItemCreateRequest::quantity));
+        }
+
+        public OrderCommand.Create toCommand(Long userId){
+            return new OrderCommand.Create(
+                    userId,
+                    items.stream()
+                            .map(item -> new OrderCommand.ItemCreate(item.skuId, item.quantity()))
+                            .collect(Collectors.toList()
+                            ));
         }
     }
 
     public record ItemCreateRequest(
-       Long productSkuId,
+       Long skuId,
        Long quantity
     ){}
 

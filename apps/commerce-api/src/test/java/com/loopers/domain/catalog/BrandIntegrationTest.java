@@ -1,8 +1,10 @@
 package com.loopers.domain.catalog;
 
 
-import com.loopers.application.catalog.BrandCatalogFacade;
+import com.loopers.application.catalog.query.BrandQuery;
+import com.loopers.application.catalog.query.BrandQueryFacade;
 import com.loopers.env.IntegrationTest;
+import com.loopers.infrastructure.catalog.query.BrandRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
@@ -20,15 +22,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 public class BrandIntegrationTest {
 
-    private final BrandCatalogFacade brandCatalogFacade;
     private final BrandRepository brandRepository;
     private final DatabaseCleanUp databaseCleanUp;
 
+    private final BrandQueryFacade brandQueryFacade;
+
     @Autowired
-    public BrandIntegrationTest(BrandCatalogFacade brandCatalogFacade, BrandRepository brandRepository, DatabaseCleanUp databaseCleanUp) {
-        this.brandCatalogFacade = brandCatalogFacade;
+    public BrandIntegrationTest(BrandRepository brandRepository, DatabaseCleanUp databaseCleanUp, BrandQueryFacade brandQueryFacade) {
         this.brandRepository = brandRepository;
         this.databaseCleanUp = databaseCleanUp;
+        this.brandQueryFacade = brandQueryFacade;
     }
 
     @AfterEach
@@ -41,7 +44,7 @@ public class BrandIntegrationTest {
     class RetrieveBrand {
         @Test
         @DisplayName("브랜드 정보가 존재하지 않으면 Not Found 오류가 발생합니다.")
-        void returnNotFount_whenBrandNotFound(){
+        void returnNotFound_whenBrandNotFound(){
             // arrange
             Brand appleBrand = Brand.from("Apple", "https://example.com/logos/apple.png");
             Brand samsungBrand = Brand.from("Samsung", "https://example.com/logos/samsung.png");
@@ -50,10 +53,11 @@ public class BrandIntegrationTest {
             brandRepository.save(appleBrand);
             brandRepository.save(samsungBrand);
             brandRepository.save(lgBrand);
-
             // act
             CoreException exception = assertThrows(CoreException.class, () -> {
-                brandCatalogFacade.getBrandDetail(4L);
+                brandQueryFacade.getBrandDetail(
+                        BrandQuery.Detail.of(4L)
+                );
             });
             // asserts
             Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);

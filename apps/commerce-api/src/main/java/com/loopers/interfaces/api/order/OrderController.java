@@ -14,8 +14,8 @@ public class OrderController implements OrderV1ApiSpec{
 
     @Override
     @PostMapping("/api/v1/orders")
-    public ApiResponse<?> create(@RequestHeader(value = "X-USER-ID") String userId, @RequestBody OrderV1Dto.CreateRequest request) {
-        orderFacade.createOrder(userId, request);
+    public ApiResponse<?> create(@RequestHeader(value = "X-USER-ID") Long userId, @RequestBody OrderV1Dto.CreateRequest request) {
+        orderFacade.createOrder(request.toCommand(userId));
         return ApiResponse.success();
 
     }

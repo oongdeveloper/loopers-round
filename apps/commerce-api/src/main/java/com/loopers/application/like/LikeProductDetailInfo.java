@@ -19,14 +19,14 @@ public class LikeProductDetailInfo {
     private Long brandId;
 
     public LikeProductDetailInfo(Like productLike, Product product) {
-        this.likeId = productLike.getId().getProductCatalogId();
+        this.likeId = productLike.getId().getProductId();
         this.userId = productLike.getId().getUserId();
-        this.productCatalogId = productLike.getId().getProductCatalogId();
+        this.productCatalogId = productLike.getId().getProductId();
         this.likedAt = productLike.getCreatedAt();
 
         if (product != null) {
             this.productName = product.getProductName();
-            this.basePrice = product.getBasePrice();
+            this.basePrice = product.getPrice();
             this.imageUrl = product.getImageUrl();
             this.description = product.getDescription();
             this.brandId = product.getBrandId();

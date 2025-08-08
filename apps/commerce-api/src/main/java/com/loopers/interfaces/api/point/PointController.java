@@ -5,8 +5,6 @@ import com.loopers.application.point.PointInfo;
 import com.loopers.interfaces.api.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-
 @RestController
 public class PointController implements PointV1ApiSpec{
     private final PointFacade pointFacade;
@@ -28,10 +26,10 @@ public class PointController implements PointV1ApiSpec{
     @PostMapping("/api/v1/points/charge")
     @Override
     public ApiResponse<PointV1Dto.UserPointResponse> charge(@RequestHeader("X-USER-ID") String userId, @RequestBody PointV1Dto.ChargePointRequest request) {
-        BigDecimal chargedPoint = pointFacade.charge(userId, request);
+        PointInfo pointInfo = pointFacade.charge(userId, request);
         return ApiResponse.success(new PointV1Dto.UserPointResponse(
-                userId,
-                chargedPoint
+                pointInfo.userId(),
+                pointInfo.point()
         ));
     }
 }
