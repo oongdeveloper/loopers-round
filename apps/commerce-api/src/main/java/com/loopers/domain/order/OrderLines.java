@@ -5,6 +5,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,5 +34,11 @@ public class OrderLines {
         if (exist) {
             throw new IllegalArgumentException("동일한 상품 목록이 주문에 존재합니다." + orderLine.productSkuId);
         }
+    }
+
+    BigDecimal calculateTotalAmount() {
+        return lines.stream()
+                .map(OrderLine::calculateTotalLinePrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

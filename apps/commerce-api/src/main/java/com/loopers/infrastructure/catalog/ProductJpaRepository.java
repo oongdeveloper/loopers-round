@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface ProductJpaRepository extends JpaRepository<Product, Long> {
     List<Product> findTop5ByBrandIdOrderByPublishedAtDesc(Long id);
 
-    @Query("SELECT p FROM ProductCatalog p " +
+    @Query("SELECT p FROM Product p " +
             "WHERE (:#{#brandId == null} = true OR p.brandId = :brandId) " +
             "ORDER BY p.publishedAt DESC")
     List<Product> findProductsByBrandIdOrAll(@Param("brandId") Long id);

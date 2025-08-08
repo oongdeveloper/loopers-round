@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface OrderRepository {
     Order save(Order order);
     Page<Order> findByUserId(Long userId, Pageable pageable);
-    Optional<Order> findByIdWithOrderItems(Long orderId);
+    Optional<Order> findByIdWithOrderLines(Long orderId);
 }

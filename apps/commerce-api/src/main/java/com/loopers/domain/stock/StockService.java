@@ -3,11 +3,12 @@ package com.loopers.domain.stock;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class StockService {
@@ -17,8 +18,9 @@ public class StockService {
         this.stockRepository = stockRepository;
     }
 
-    public Optional<Stock> findStock(Long id) {
-        return stockRepository.findByProductSkuId(id);
+    public Stock find(Long id) {
+        return stockRepository.findByProductSkuId(id)
+                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "상품 재고를 찾을 수 없습니다."));
     }
 
     public List<Stock> findBySkuIds(Collection<Long> skuIds){
@@ -28,19 +30,20 @@ public class StockService {
         return stockRepository.findBySkuIdIn(skuIds);
     }
 
-    public void decreaseStock(Long id, Long quantity){
-        stockRepository.findByProductSkuId(id)
-                .ifPresentOrElse(
-                        stock1 -> {stock1.decreaseStock(quantity);},
-                        () -> {
-                            throw new CoreException(ErrorType.BAD_REQUEST, "재고가 존재하지 않는 상품입니다.");
-                        }
-                );
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void decreaseStock(Map<Long,Long> requestMap){
+        List<Stock> stocks = findBySkuIds(requestMap.keySet());
+        stocks.forEach(stock ->{
+                    stock.decreaseStock(requestMap.get(stock.productSkuId));
+                }
+        );
     }
 
-    public void decreaseStock(List<Stock> skuIds, Map<Long,Long> requestMap){
-        skuIds.forEach(sku ->{
-                    sku.decreaseStock(requestMap.get(sku.productSkuId));
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void increaseStock(Map<Long,Long> requestMap){
+        List<Stock> stocks = findBySkuIds(requestMap.keySet());
+        stocks.forEach(stock ->{
+                    stock.increaseStock(requestMap.get(stock.productSkuId));
                 }
         );
     }

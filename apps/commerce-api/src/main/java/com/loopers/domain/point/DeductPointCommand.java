@@ -10,10 +10,10 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 public class DeductPointCommand {
-    private String  userId;
+    private Long  userId;
     private BigDecimal deductPoint;
 
-    public static DeductPointCommand of(String userId, BigDecimal deductPoint) {
+    public static DeductPointCommand of(Long userId, BigDecimal deductPoint) {
         return new DeductPointCommand(userId, deductPoint);
     }
 }

@@ -20,7 +20,7 @@ public record ProductCatalogInfo (
                 product.getId(),
                 brandName,
                 product.getProductName(),
-                product.getBasePrice(),
+                product.getPrice(),
                 product.getImageUrl(),
                 product.getDescription()
         );

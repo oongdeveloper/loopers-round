@@ -1,9 +1,11 @@
 package com.loopers.domain.catalog;
 
 import com.loopers.application.catalog.ProductCatalogFacade;
-import com.loopers.application.catalog.ProductCatalogInfo;
+import com.loopers.application.catalog.query.ProductInfo;
+import com.loopers.application.catalog.query.ProductQuery;
+import com.loopers.application.catalog.query.ProductQueryFacade;
 import com.loopers.env.IntegrationTest;
-import com.loopers.interfaces.api.catalog.ProductCatalogV1Dto;
+import com.loopers.infrastructure.catalog.query.BrandRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
@@ -14,10 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,14 +28,15 @@ public class ProductIntegrationTest {
     private final BrandRepository brandRepository;
     private final ProductRepository productRepository;
     private final ProductCatalogFacade productCatalogFacade;
-
+    private final ProductQueryFacade productQueryFacade;
     private final DatabaseCleanUp databaseCleanUp;
 
     @Autowired
-    public ProductIntegrationTest(BrandRepository brandRepository, ProductRepository productRepository, ProductCatalogFacade productCatalogFacade, DatabaseCleanUp databaseCleanUp) {
+    public ProductIntegrationTest(BrandRepository brandRepository, ProductRepository productRepository, ProductCatalogFacade productCatalogFacade, ProductQueryFacade productQueryFacade, DatabaseCleanUp databaseCleanUp) {
         this.brandRepository = brandRepository;
         this.productRepository = productRepository;
         this.productCatalogFacade = productCatalogFacade;
+        this.productQueryFacade = productQueryFacade;
         this.databaseCleanUp = databaseCleanUp;
     }
 
@@ -55,41 +56,23 @@ public class ProductIntegrationTest {
             assertThat(brandRepository.count()).isEqualTo(3);
 
             CoreException exception = assertThrows(CoreException.class, () -> {
-                productCatalogFacade.retrieveProductCatalog(
-                        Optional.of(999L),
-                        ProductCatalogV1Dto.ProductCatalogRequest.of(
-                                0, 5, ProductCatalogV1Dto.ProductCatalogSortBy.PUBLISHED_AT, Sort.Direction.DESC
-                        ));
+                productQueryFacade.getProductList(
+                        ProductQuery.Summary.of(999L, "LATEST", PageRequest.of(0, 20))
+                );
             });
             assertThat(exception.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
         }
 
         @Test
         @DisplayName("상품 목록 조회 시, 개수만큼 반환한다. BrandId 있을 때")
-        void returnList_whenRetrieveProductCatalogWithBrandId(){
+        void returnList_whenRetrieveProductWithBrandId(){
             assertThat(brandRepository.count()).isEqualTo(3);
 
-            Page<ProductCatalogInfo> productCatalogInfos =  productCatalogFacade.retrieveProductCatalog(
-                    Optional.of(1L),
-                    ProductCatalogV1Dto.ProductCatalogRequest.of(
-                            0, 5, ProductCatalogV1Dto.ProductCatalogSortBy.PUBLISHED_AT, Sort.Direction.DESC
-                    ));
+            Page<ProductInfo.DataList> productInfos =  productQueryFacade.getProductList(
+                    ProductQuery.Summary.of(1L, "LATEST", PageRequest.of(0, 20))
+            );
 
-            assertThat(productCatalogInfos.getContent().size()).isEqualTo(5);
-        }
-
-        @Test
-        @DisplayName("상품 목록 조회 시, 개수만큼 반환한다.")
-        void returnList_whenRetrieveProductCatalog(){
-            assertThat(brandRepository.count()).isEqualTo(3);
-
-            Page<ProductCatalogInfo> productCatalogInfos =  productCatalogFacade.retrieveProductCatalog(
-                    Optional.empty(),
-                    ProductCatalogV1Dto.ProductCatalogRequest.of(
-                            0, 10, ProductCatalogV1Dto.ProductCatalogSortBy.PUBLISHED_AT, Sort.Direction.DESC
-                    ));
-
-            assertThat(productCatalogInfos.getContent().size()).isEqualTo(10);
+            assertThat(productInfos.getContent().size()).isEqualTo(5);
         }
 
         @Test
@@ -98,7 +81,9 @@ public class ProductIntegrationTest {
             assertThat(productRepository.count()).isEqualTo(30);
 
             CoreException exception = assertThrows(CoreException.class, () -> {
-                productCatalogFacade.retrieveProductDetail(999L);
+                productQueryFacade.getProductDetail(
+                        ProductQuery.Detail.of(999L)
+                );
             });
             assertThat(exception.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
         }
@@ -110,7 +95,9 @@ public class ProductIntegrationTest {
             Long productIdWithNoBrand = 1L;
 
             CoreException exception = assertThrows(CoreException.class, () -> {
-                productCatalogFacade.retrieveProductDetail(productIdWithNoBrand);
+                productQueryFacade.getProductDetail(
+                        ProductQuery.Detail.of(productIdWithNoBrand)
+                );
             });
 
             // 예외 타입 및 메시지 검증
