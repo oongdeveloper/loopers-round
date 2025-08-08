@@ -7,7 +7,8 @@ import java.util.stream.Collectors;
 public class OrderCommand {
     public record Create(
             Long userId,
-            List<ItemCreate> items
+            List<ItemCreate> items,
+            Long couponId
     ){
             public Map<Long, Long> toMap(){
                 return this.items.stream()
