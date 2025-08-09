@@ -1,9 +1,8 @@
 package com.loopers.application.order;
 
-import com.loopers.application.order.query.OrderInfo;
 import com.loopers.domain.catalog.Product;
 import com.loopers.domain.catalog.ProductCatalogService;
-import com.loopers.domain.coupons.issued.CouponService;
+import com.loopers.domain.coupons.issued.UserCouponService;
 import com.loopers.domain.coupons.issued.UserCouponCommand;
 import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderFactory;
@@ -30,19 +29,19 @@ public class OrderFacade {
 
     private final PointService pointService;
     private final StockService stockService;
-    private final CouponService couponService;
+    private final UserCouponService userCouponService;
 
-    public OrderFacade(OrderService orderService, ProductCatalogService productCatalogService, ProductSkuService productSkuService, PointService pointService, StockService stockService, CouponService couponService) {
+    public OrderFacade(OrderService orderService, ProductCatalogService productCatalogService, ProductSkuService productSkuService, PointService pointService, StockService stockService, UserCouponService userCouponService) {
         this.orderService = orderService;
         this.productCatalogService = productCatalogService;
         this.productSkuService = productSkuService;
         this.pointService = pointService;
         this.stockService = stockService;
-        this.couponService = couponService;
+        this.userCouponService = userCouponService;
     }
 
     @Transactional
-    public OrderInfo.DataList createOrder(OrderCommand.Create request){
+    public OrderInfo createOrder(OrderCommand.Create request){
         Map<Long, Long> requestMap = request.toMap();
 
         try{
@@ -58,7 +57,7 @@ public class OrderFacade {
             Order order = OrderFactory.createOrder(request.userId(), requestMap, foundSkus, foundCatalogs);
 
             orderService.save(order);
-            BigDecimal finalPrice = couponService.applyCoupon(
+            BigDecimal finalPrice = userCouponService.applyCoupon(
                     UserCouponCommand.Apply.of(
                             request.userId(),
                             request.couponId(),
@@ -67,10 +66,10 @@ public class OrderFacade {
             );
             order.updateFinalTotalPrice(finalPrice);
             order.created();
-            return OrderInfo.DataList.of(order);
+            return OrderInfo.of(order);
         } catch (RuntimeException e) {
             CompletableFuture.runAsync(
-                    () -> stockService.increaseStock(requestMap)
+                    () -> stockService.restoreStock(requestMap)
             );
             throw new RuntimeException(e);
         }

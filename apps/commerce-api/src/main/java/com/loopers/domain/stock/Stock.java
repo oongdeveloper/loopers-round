@@ -44,7 +44,7 @@ public class Stock extends BaseEntity {
         return new Stock(productSkuId, quantity);
     }
 
-    public void increaseStock(long quantity){
+    public void restoreStock(long quantity){
         if (quantity <= 0) {
             throw new CoreException(ErrorType.BAD_REQUEST,"증가시킬 재고 수량은 0보다 커야 합니다.");
         }

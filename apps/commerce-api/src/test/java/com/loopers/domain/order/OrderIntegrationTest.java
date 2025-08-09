@@ -78,7 +78,8 @@ public class OrderIntegrationTest {
 
             OrderCommand.Create create = new OrderCommand.Create(
                     TEST_USER_ID,
-                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)) // 요청 수량 2개
+                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)),
+                    0L
             );
 
             assertThrows(CoreException.class, () -> orderFacade.createOrder(create));
@@ -95,7 +96,8 @@ public class OrderIntegrationTest {
 
             OrderCommand.Create create = new OrderCommand.Create(
                     TEST_USER_ID,
-                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)) // 요청 수량 2개
+                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)),
+                    0L
             );
 
 
@@ -107,12 +109,13 @@ public class OrderIntegrationTest {
         void returnConflict_whenInsufficientPoint() {
             Product catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
             ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.AVAILABLE, BigDecimal.valueOf(10000));
-            Stock stock = helper.createStock(sku.getId(), 10L); // 충분한 재고
-            Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(10000)); // 10000원 포인트
+            Stock stock = helper.createStock(sku.getId(), 10L);
+            Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(10000));
 
             OrderCommand.Create create = new OrderCommand.Create(
                     TEST_USER_ID,
-                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)) // 요청 수량 2개
+                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)),
+                    0L
             );
 
             assertThrows(CoreException.class, () -> orderFacade.createOrder(create));

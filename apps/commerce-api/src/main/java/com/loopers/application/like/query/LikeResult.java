@@ -3,7 +3,7 @@ package com.loopers.application.like.query;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 
-public class LikeInfo {
+public class LikeResult {
     public record DataList(
             Long userId,
             Long productCatalogId,

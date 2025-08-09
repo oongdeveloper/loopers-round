@@ -1,7 +1,7 @@
 package com.loopers.domain.catalog;
 
 import com.loopers.application.catalog.ProductCatalogFacade;
-import com.loopers.application.catalog.query.ProductInfo;
+import com.loopers.application.catalog.query.ProductResult;
 import com.loopers.application.catalog.query.ProductQuery;
 import com.loopers.application.catalog.query.ProductQueryFacade;
 import com.loopers.env.IntegrationTest;
@@ -68,7 +68,7 @@ public class ProductIntegrationTest {
         void returnList_whenRetrieveProductWithBrandId(){
             assertThat(brandRepository.count()).isEqualTo(3);
 
-            Page<ProductInfo.DataList> productInfos =  productQueryFacade.getProductList(
+            Page<ProductResult.DataList> productInfos =  productQueryFacade.getProductList(
                     ProductQuery.Summary.of(1L, "LATEST", PageRequest.of(0, 20))
             );
 

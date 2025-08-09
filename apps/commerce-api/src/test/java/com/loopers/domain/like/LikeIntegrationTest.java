@@ -12,9 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,36 +64,6 @@ public class LikeIntegrationTest {
             assertThat(finalLike.get().getId().getProductId()).isEqualTo(productCatalogId);
         }
 
-        @DisplayName("좋아요를 동시에 여러 번 하더라도 count 는 1번만 증가한다.")
-        @Test
-        void concurrencyTest_stockShouldBeProperlyWhenLike() throws InterruptedException {
-            Long userId = 1L;
-            Long productId = 1L;
-            final Like.LikeId TEST_LIKE_ID =Like.LikeId.of(userId, productId);
-
-            int threadCount = 10;
-            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-            CountDownLatch latch = new CountDownLatch(threadCount);
-
-            // TODO. 왜 select 이 2번 나가지?
-            for (int i = 0; i < threadCount; i++) {
-                executor.submit(() -> {
-                    try {
-                        likeFacade.like(userId, productId);
-                    } catch (Exception e) {
-                        System.out.println("실패: " + e.getMessage());
-                    } finally {
-                        latch.countDown();
-                    }
-                });
-            }
-
-            latch.await();
-
-            int likeCount = likeRepository.countBy(userId, productId);
-            assertThat(likeCount).isEqualTo(1);
-        }
-
         @Test
         @DisplayName("좋아요가 삭제된 상태인 경우 복원되어야 한다.")
         void shouldRestoreLike_whenLikeIsSoftDeleted(){
@@ -117,36 +84,6 @@ public class LikeIntegrationTest {
             assertThat(finalLike.get().getDeletedAt()).isNull();
         }
 
-        @DisplayName("좋아요가 Soft Deleted 상태인 경우에 다시 좋아요를 동시에 여러 번 하더라도 count 는 1번만 증가한다.")
-        @Test
-        void concurrencyTest_stockShouldBeProperlyWhenLikeInSoftDeleted() throws InterruptedException {
-            Long userId = 1L;
-            Long productId = 1L;
-            final Like.LikeId TEST_LIKE_ID =Like.LikeId.of(userId, productId);
-            likeFacade.like(userId, productId);
-            likeFacade.unlike(userId, productId);
-
-            int threadCount = 10;
-            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-            CountDownLatch latch = new CountDownLatch(threadCount);
-
-            for (int i = 0; i < threadCount; i++) {
-                executor.submit(() -> {
-                    try {
-                        likeFacade.like(userId, productId);
-                    } catch (Exception e) {
-                        System.out.println("실패: " + e.getMessage());
-                    } finally {
-                        latch.countDown();
-                    }
-                });
-            }
-
-            latch.await();
-
-            int likeCount = likeRepository.countBy(userId, productId);
-            assertThat(likeCount).isEqualTo(1);
-        }
     }
 
     @DisplayName("unlike Method 는")

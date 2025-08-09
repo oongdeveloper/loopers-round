@@ -20,4 +20,13 @@ public interface UserCouponJpaRepository extends JpaRepository<UserCoupon, Long>
               AND uc.expiresAt > CURRENT_TIMESTAMP
             """)
     Optional<UserCoupon> findUserCouponForUpdate(@Param("userId") Long userId, @Param("couponId") Long couponId);
+
+    @Query(value = """
+            SELECT uc 
+            FROM UserCoupon uc
+            WHERE uc.userId = :userId
+              AND uc.couponId = :couponId
+              AND uc.expiresAt > CURRENT_TIMESTAMP
+            """)
+    Optional<UserCoupon> findUserCoupon(@Param("userId") Long userId, @Param("couponId") Long couponId);
 }

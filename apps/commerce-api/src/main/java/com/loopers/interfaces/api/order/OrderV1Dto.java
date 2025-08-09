@@ -49,7 +49,8 @@ public class OrderV1Dto {
                     items.stream()
                             .map(item -> new OrderCommand.ItemCreate(item.skuId, item.quantity()))
                             .collect(Collectors.toList()
-                            ));
+                            )
+                            ,0L);
         }
     }
 

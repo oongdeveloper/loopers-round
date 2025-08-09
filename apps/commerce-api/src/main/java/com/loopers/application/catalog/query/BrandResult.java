@@ -1,6 +1,6 @@
 package com.loopers.application.catalog.query;
 
-public record BrandInfo(
+public record BrandResult(
         Long id,
         String brandName,
         String logoUrl

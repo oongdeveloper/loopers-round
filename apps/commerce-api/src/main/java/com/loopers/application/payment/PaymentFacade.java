@@ -56,9 +56,8 @@ public class PaymentFacade {
             throw new CoreException(ErrorType.CONFLICT, "이미 처리된 주문입니다.");
         } catch (RuntimeException e){
             // TODO. 재고 복구
-            // Payment 에서 Duplicate 가 발생하는 경우엔 Order 를 늘리면 안되나?
             Map<Long, Long> orderLines = orderService.getOrderedProductQuantity(command.orderId());
-            CompletableFuture.runAsync(() -> stockService.increaseStock(orderLines));
+            CompletableFuture.runAsync(() -> stockService.restoreStock(orderLines));
         }
     }
 }

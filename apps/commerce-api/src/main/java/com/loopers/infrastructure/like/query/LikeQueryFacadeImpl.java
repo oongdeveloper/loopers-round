@@ -1,6 +1,6 @@
 package com.loopers.infrastructure.like.query;
 
-import com.loopers.application.like.query.LikeInfo;
+import com.loopers.application.like.query.LikeResult;
 import com.loopers.application.like.query.LikeQuery;
 import com.loopers.application.like.query.LikeQueryFacade;
 import com.loopers.infrastructure.like.query.projections.LikeProductProjection;
@@ -16,10 +16,10 @@ public class LikeQueryFacadeImpl implements LikeQueryFacade {
     }
 
     @Override
-    public Page<LikeInfo.DataList> getLikeProductList(LikeQuery.Summary query) {
+    public Page<LikeResult.DataList> getLikeProductList(LikeQuery.Summary query) {
         Page<LikeProductProjection> likeProductList = likeQueryRepository.findByUserId(query.userId(), query.pageable());
         return likeProductList.map(projection ->
-            new LikeInfo.DataList(
+            new LikeResult.DataList(
                     projection.getUserId(),
                     projection.getProductCatalogId(),
                     projection.getBrandName(),

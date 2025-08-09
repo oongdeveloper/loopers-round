@@ -7,14 +7,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OrderInfo {
+public class OrderResult {
     public record DataList(
             Long id,
-            BigDecimal totalOrderPrice,
+            BigDecimal finalTotalPrice,
+            BigDecimal originalTotalPrice,
             String status
     ){
         public static DataList of(Order order){
-            return new DataList(order.getId(), order.getTotalOrderPrice(), order.getStatus());
+            return new DataList(order.getId(), order.getFinalTotalPrice(), order.getOriginalTotalPrice(), order.getStatus());
         }
     }
 

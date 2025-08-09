@@ -52,7 +52,7 @@ public class UserCoupon extends BaseEntity {
     @Column(name = "avaliable_target_id")
     private Long avaliableTargetId;
 
-    @Column(name = "discount_value", nullable = false, precision = 5, scale = 2)
+    @Column(name = "discount_value", nullable = false)
     private BigDecimal discountValue;
 
     @Column(name = "max_discount_value", nullable = false, precision = 12, scale = 2)
@@ -60,6 +60,9 @@ public class UserCoupon extends BaseEntity {
 
     @Column(name = "min_order_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal minOrderAmount;
+
+    @Version
+    private Long version;
 
     private UserCoupon(Long userId, Long couponId, ZonedDateTime expiresAt,
                       String name, Coupon.CouponType type,
@@ -74,7 +77,7 @@ public class UserCoupon extends BaseEntity {
         Objects.requireNonNull(discountValue, "할인 금액은 null일 수 없습니다.");
 
         if (type.equals(Coupon.CouponType.RATE)) {
-            if (discountValue.compareTo(new BigDecimal(100L)) > 0) {
+            if (discountValue.compareTo(BigDecimal.valueOf(100L)) > 0) {
                 throw new IllegalArgumentException("정률 할인율은 100을 초과할 수 없습니다.");
             }
         }

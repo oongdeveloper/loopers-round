@@ -1,6 +1,6 @@
 package com.loopers.infrastructure.catalog.query;
 
-import com.loopers.application.catalog.query.ProductInfo;
+import com.loopers.application.catalog.query.ProductResult;
 import com.loopers.application.catalog.query.ProductQuery;
 import com.loopers.application.catalog.query.ProductQueryFacade;
 import com.loopers.domain.catalog.Brand;
@@ -28,10 +28,10 @@ public class ProductQueryFacadeImpl implements ProductQueryFacade {
     }
 
     @Override
-    public Page<ProductInfo.DataList> getProductList(ProductQuery.Summary query) {
+    public Page<ProductResult.DataList> getProductList(ProductQuery.Summary query) {
         Page<ProductListProjection> productList = productQueryRepository.findByBrandId(query.brandId(), query.type().name(), query.pageable());
         return productList.map(projection ->
-                new ProductInfo.DataList(
+                new ProductResult.DataList(
                         projection.getId(),
                         projection.getBrandName(),
                         projection.getProductName(),
@@ -44,7 +44,7 @@ public class ProductQueryFacadeImpl implements ProductQueryFacade {
     }
 
     @Override
-    public ProductInfo.DataDetail getProductDetail(ProductQuery.Detail query) {
+    public ProductResult.DataDetail getProductDetail(ProductQuery.Detail query) {
         Product product = productQueryRepository.findById(query.productId())
                                             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품 정보입니다."));
 
@@ -55,7 +55,7 @@ public class ProductQueryFacadeImpl implements ProductQueryFacade {
         return toDataDetail(product, brand, skus);
     }
 
-    private ProductInfo.DataDetail toDataDetail(Product product, Brand brand, List<ProductSku> skus) {
+    private ProductResult.DataDetail toDataDetail(Product product, Brand brand, List<ProductSku> skus) {
         String brandName = brand.getBrandName();
         String productName = product.getProductName();
         BigDecimal price = product.getPrice();
@@ -63,11 +63,11 @@ public class ProductQueryFacadeImpl implements ProductQueryFacade {
         String description = product.getDescription();
         ZonedDateTime publishedAt = product.getPublishedAt();
 
-        List<ProductInfo.SkuInfo> skuInfos = skus.stream()
+        List<ProductResult.SkuInfo> skuInfos = skus.stream()
                 .map(this::toSkuInfo)
                 .collect(Collectors.toList());
 
-        return new ProductInfo.DataDetail(
+        return new ProductResult.DataDetail(
                 product.getId(),
                 brandName,
                 productName,
@@ -79,12 +79,12 @@ public class ProductQueryFacadeImpl implements ProductQueryFacade {
         );
     }
 
-    private ProductInfo.SkuInfo toSkuInfo(ProductSku sku) {
-        List<ProductInfo.OptionDetail> optionDetails = sku.getSkuOptions().stream()
-                .map(option -> new ProductInfo.OptionDetail(option.getOptionName().getName(), option.getOptionValue().getValue()))
+    private ProductResult.SkuInfo toSkuInfo(ProductSku sku) {
+        List<ProductResult.OptionDetail> optionDetails = sku.getSkuOptions().stream()
+                .map(option -> new ProductResult.OptionDetail(option.getOptionName().getName(), option.getOptionValue().getValue()))
                 .collect(Collectors.toList());
 
-        return new ProductInfo.SkuInfo(
+        return new ProductResult.SkuInfo(
                 sku.getId(),
                 sku.getUnitPrice(),
                 sku.getImageUrl(),
