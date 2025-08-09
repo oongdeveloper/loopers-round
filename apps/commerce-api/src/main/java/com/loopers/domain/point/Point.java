@@ -23,12 +23,12 @@ import java.math.RoundingMode;
 public class Point extends BaseEntity {
 
     @Column(name = "ref_user_id", nullable = false)
-    String userId;
+    Long userId;
 
     @Column(name = "point", nullable = false, precision = 12, scale = 2)
     BigDecimal point;
 
-    private Point(String userId, BigDecimal initialPoint) {
+    private Point(Long userId, BigDecimal initialPoint) {
         if (userId == null) {
             throw new CoreException(ErrorType.BAD_REQUEST, "사용자 ID는 필수입니다.");
         }
@@ -39,7 +39,7 @@ public class Point extends BaseEntity {
         this.point = initialPoint.setScale(2, RoundingMode.HALF_UP);
     }
 
-    public static Point from(String userId, BigDecimal initialPoint) {
+    public static Point from(Long userId, BigDecimal initialPoint) {
         return new Point(userId, initialPoint);
     }
 
@@ -59,7 +59,6 @@ public class Point extends BaseEntity {
         if (this.point.compareTo(deductPoint) < 0) {
             throw new CoreException(ErrorType.BAD_REQUEST, "포인트가 부족합니다.");
         }
-
         this.point = this.point.subtract(deductPoint).setScale(2, RoundingMode.HALF_UP);
         return this.point;
     }

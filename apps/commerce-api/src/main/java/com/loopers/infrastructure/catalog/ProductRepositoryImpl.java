@@ -1,6 +1,6 @@
 package com.loopers.infrastructure.catalog;
 
-import com.loopers.domain.catalog.ProductCatalog;
+import com.loopers.domain.catalog.Product;
 import com.loopers.domain.catalog.ProductRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,31 +24,31 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Optional<ProductCatalog> find(Long id) {
+    public Optional<Product> find(Long id) {
         return jpaRepository.findById(id);
     }
 
-    public List<ProductCatalog> findTop5ByBrandIdOrderByPublishedAtDesc(Long id){
+    public List<Product> findTop5ByBrandIdOrderByPublishedAtDesc(Long id){
         return jpaRepository.findTop5ByBrandIdOrderByPublishedAtDesc(id);
     }
 
     @Override
-    public ProductCatalog save(ProductCatalog product) {
+    public Product save(Product product) {
         return jpaRepository.save(product);
     }
 
     @Override
-    public Page<ProductCatalog> findAll(Pageable pageable) {
+    public Page<Product> findAll(Pageable pageable) {
         return jpaRepository.findAll(pageable);
     }
 
     @Override
-    public Page<ProductCatalog> findByBrandId(Long id, Pageable pageable) {
+    public Page<Product> findByBrandId(Long id, Pageable pageable) {
         return jpaRepository.findByBrandId(id,pageable);
     }
 
     @Override
-    public List<ProductCatalog> findByIdIn(Collection<Long> ids) {
+    public List<Product> findByIdIn(Collection<Long> ids) {
         return jpaRepository.findByIdIn(ids);
     }
 }

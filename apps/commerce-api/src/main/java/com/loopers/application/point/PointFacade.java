@@ -2,10 +2,9 @@ package com.loopers.application.point;
 
 import com.loopers.domain.point.ChargePointCommand;
 import com.loopers.domain.point.PointService;
+import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.point.PointV1Dto;
-import com.loopers.support.error.CoreException;
-import com.loopers.support.error.ErrorType;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -20,16 +19,18 @@ public class PointFacade {
         this.userService = userService;
     }
 
-    public BigDecimal charge(String userId, PointV1Dto.ChargePointRequest chargePointRequest) {
-        userService.find(userId)
-                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 User 입니다."));
-        ChargePointCommand chargeCommand = ChargePointCommand.of(userId, chargePointRequest.point());
-        return pointService.charge(chargeCommand);
+    public PointInfo charge(String userId, PointV1Dto.ChargePointRequest chargePointRequest) {
+        User user = userService.find(userId);
+        ChargePointCommand chargeCommand = ChargePointCommand.of(user.getId(), chargePointRequest.point());
+
+        BigDecimal chargedPoint = pointService.charge(chargeCommand);
+        return new PointInfo(user.getId(), chargedPoint);
+//        return pointService.charge(chargeCommand);
     }
 
     public PointInfo get(String userId){
-        return pointService.find(userId)
-                .map(PointInfo::from)
-                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 User 입니다."));
+        User user = userService.find(userId);
+
+        return PointInfo.from(pointService.find(user.getId()));
     }
 }

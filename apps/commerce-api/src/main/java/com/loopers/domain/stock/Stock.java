@@ -44,7 +44,7 @@ public class Stock extends BaseEntity {
         return new Stock(productSkuId, quantity);
     }
 
-    public void increaseStock(long quantity){
+    public void restoreStock(long quantity){
         if (quantity <= 0) {
             throw new CoreException(ErrorType.BAD_REQUEST,"증가시킬 재고 수량은 0보다 커야 합니다.");
         }
@@ -53,10 +53,10 @@ public class Stock extends BaseEntity {
 
     public void decreaseStock(long quantity) {
         if (quantity <= 0) {
-            throw new CoreException(ErrorType.BAD_REQUEST,"감소시킬 재고 수량은 0보다 커야 합니다.");
+            throw new IllegalArgumentException("감소시킬 재고 수량은 0보다 커야 합니다.");
         }
         if (this.quantity - quantity < 0) {
-            throw new CoreException(ErrorType.BAD_REQUEST,"재고가 부족하여 감소시킬 수 없습니다.");
+            throw  new IllegalArgumentException("재고가 부족하여 감소시킬 수 없습니다.");
         }
         this.quantity -= quantity;
     }

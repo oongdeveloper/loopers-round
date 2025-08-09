@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 public class PointService {
@@ -17,9 +16,9 @@ public class PointService {
         this.pointRepository = pointRepository;
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Point> find(String userId){
-        return pointRepository.find(userId);
+    public Point find(Long userId){
+        return pointRepository.find(userId)
+                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 User 입니다."));
     }
 
     public Point save(Point point) {
@@ -28,16 +27,16 @@ public class PointService {
 
     @Transactional
     public BigDecimal charge(ChargePointCommand command) {
-        Point point = find(command.getUserId())
-                .orElseGet(() -> pointRepository.save(Point.from(command.getUserId(), BigDecimal.ZERO)));
+        Point point = pointRepository.findForUpdate(command.getUserId())
+                .orElseGet(() -> pointRepository.save(Point.from(Long.valueOf(command.getUserId()), BigDecimal.ZERO)));
         return point.charge(command.getChargePoint());
     }
 
     @Transactional
-    public BigDecimal deduct(DeductPointCommand command){
-        Point point = find(command.getUserId())
+    public BigDecimal deduct(PointCommand.Deduct command){
+        Point point = pointRepository.findForUpdate(command.userId())
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 User 입니다."));
-        return point.deduct(command.getDeductPoint());
+        return point.deduct(command.amount());
     }
 
 }

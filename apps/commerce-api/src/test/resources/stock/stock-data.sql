@@ -1,0 +1,1 @@
+INSERT INTO stock (ref_product_sku_id, quantity, created_at, updated_at) VALUES (1, 100, NOW(), NOW());

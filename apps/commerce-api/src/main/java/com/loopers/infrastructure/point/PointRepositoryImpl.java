@@ -15,8 +15,13 @@ public class PointRepositoryImpl implements PointRepository {
     }
 
     @Override
-    public Optional<Point> find(String findId) {
+    public Optional<Point> find(Long findId) {
         return pointJpaRepository.findByUserId(findId);
+    }
+
+    @Override
+    public Optional<Point> findForUpdate(Long findId) {
+        return pointJpaRepository.findByUserIdForUpdate(findId);
     }
 
     @Override

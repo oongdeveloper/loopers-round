@@ -17,27 +17,27 @@ public class ProductCatalogService {
         this.productRepository = productRepository;
     }
 
-    public List<ProductCatalog> findTop5ByBrandIdOrderByPublishedAtDesc(Long id) {
+    public List<Product> findTop5ByBrandIdOrderByPublishedAtDesc(Long id) {
         return productRepository.findTop5ByBrandIdOrderByPublishedAtDesc(id);
     }
 
     @Transactional
-    public ProductCatalog save(ProductCatalog productCatalog) {
-        return productRepository.save(productCatalog);
+    public Product save(Product product) {
+        return productRepository.save(product);
     }
 
-    public Page<ProductCatalog> find(Optional<Long> brandId, Pageable pageable) {
+    public Page<Product> find(Optional<Long> brandId, Pageable pageable) {
         if (brandId.isPresent())
             return productRepository.findByBrandId(brandId.get(), pageable);
         else
             return productRepository.findAll(pageable);
     }
 
-    public Optional<ProductCatalog> findById(Long productId) {
+    public Optional<Product> findById(Long productId) {
         return productRepository.find(productId);
     }
 
-    public List<ProductCatalog> findByIds(Collection<Long> productCatalogIds) {
+    public List<Product> findByIds(Collection<Long> productCatalogIds) {
         if (productCatalogIds == null || productCatalogIds.isEmpty()) {
             return List.of(); // 빈 목록이 들어오면 빈 리스트 반환
         }

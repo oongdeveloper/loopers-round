@@ -15,12 +15,12 @@ public class Like extends BaseAuditableEntity {
     @EmbeddedId
     private LikeId id;
 
-    private Like(Long userId, Long productCatalogId) {
-        this.id = new LikeId(userId, productCatalogId);
+    private Like(Long userId, Long productId) {
+        this.id = new LikeId(userId, productId);
     }
 
-    public static Like of(Long userId, Long productCatalogId) {
-        return new Like(userId, productCatalogId);
+    public static Like of(Long userId, Long productId) {
+        return new Like(userId, productId);
     }
 
     @Embeddable
@@ -32,15 +32,15 @@ public class Like extends BaseAuditableEntity {
         Long userId;
 
         @Column(name = "ref_product_catalog_id", nullable = false)
-        Long productCatalogId;
+        Long productId;
 
-        private LikeId(Long userId, Long productCatalogId){
+        private LikeId(Long userId, Long productId){
             this.userId = userId;
-            this.productCatalogId = productCatalogId;
+            this.productId = productId;
         }
 
-        public static LikeId of(Long userId, Long productCatalogId) {
-            return new LikeId(userId, productCatalogId);
+        public static LikeId of(Long userId, Long productId) {
+            return new LikeId(userId, productId);
         }
     }
 }

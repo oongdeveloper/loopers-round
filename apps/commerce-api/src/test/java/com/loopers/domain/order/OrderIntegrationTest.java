@@ -1,8 +1,11 @@
 package com.loopers.domain.order;
 
+import com.loopers.application.order.OrderCommand;
 import com.loopers.application.order.OrderFacade;
+import com.loopers.application.order.query.OrderQuery;
+import com.loopers.application.order.query.OrderQueryFacade;
 import com.loopers.domain.BaseEntity;
-import com.loopers.domain.catalog.ProductCatalog;
+import com.loopers.domain.catalog.Product;
 import com.loopers.domain.catalog.ProductRepository;
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointRepository;
@@ -32,6 +35,9 @@ public class OrderIntegrationTest {
     private OrderFacade orderFacade;
 
     @Autowired
+    private OrderQueryFacade orderQueryFacade;
+
+    @Autowired
     private DatabaseCleanUp databaseCleanUp; // DB 초기화 헬퍼
 
     @Autowired private ProductRepository productCatalogRepository;
@@ -40,7 +46,8 @@ public class OrderIntegrationTest {
     @Autowired private PointRepository pointRepository;
 
     private TestOrderHelper helper;
-    private final String TEST_USER_ID = "user1";
+//    private final String TEST_USER_ID = "user1";
+    private final Long TEST_USER_ID = 1L;
 
     @BeforeEach
     void setUp() {
@@ -60,11 +67,7 @@ public class OrderIntegrationTest {
         @DisplayName("재고가 부족하면 Bad Request 오류를 반환한다.")
         @Transactional
         void returnBadRequst_whenOutOfStock() {
-            // Given
-            // 1. 주문에 필요한 엔티티 생성 및 저장 (재고 부족 상황)
-            //    - 재고: 1개
-            //    - 요청 수량: 2개
-            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            Product catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
             ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.AVAILABLE, BigDecimal.valueOf(10000));
             Stock stock = helper.createStock(sku.getId(), 1L); // 재고 1개
             Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(100000)); // 충분한 포인트
@@ -73,52 +76,49 @@ public class OrderIntegrationTest {
                     Collections.singletonList(new OrderV1Dto.OrderItemCreateRequest(sku.getId(), 2L)) // 요청 수량 2개
             );
 
-            // When & Then
-            assertThrows(CoreException.class, () -> orderFacade.createOrder(TEST_USER_ID, request));
-//             재고 부족 예외 메시지를 더 구체적으로 검증할 수 있습니다.
-//             (예: exception.getMessage().contains("재고가 부족합니다."))
+            OrderCommand.Create create = new OrderCommand.Create(
+                    TEST_USER_ID,
+                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)),
+                    0L
+            );
+
+            assertThrows(CoreException.class, () -> orderFacade.createOrder(create));
+//            assertThrows(CoreException.class, () -> orderFacade.createOrder(TEST_USER_ID, request));
         }
 
         @Test
         @DisplayName("상품이 판매중 상태가 아니면 Conflict 오류를 반환한다.")
         void returnConflict_whenProductNotAvaliable() {
-            // Given
-            // 1. 주문에 필요한 엔티티 생성 및 저장 (판매 중지 상태)
-            //    - 상품 상태: DISCONTINUED (판매 중지)
-            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            Product catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
             ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.DISCONTINUED, BigDecimal.valueOf(10000)); // 판매 중지 상태
             Stock stock = helper.createStock(sku.getId(), 10L); // 충분한 재고
             Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(100000)); // 충분한 포인트
 
-            OrderV1Dto.OrderCreateRequest request = new OrderV1Dto.OrderCreateRequest(
-                    Collections.singletonList(new OrderV1Dto.OrderItemCreateRequest(sku.getId(), 2L)) // 요청 수량 2개
+            OrderCommand.Create create = new OrderCommand.Create(
+                    TEST_USER_ID,
+                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)),
+                    0L
             );
 
-            // When & Then
-            assertThrows(CoreException.class, () -> orderFacade.createOrder(TEST_USER_ID, request));
-            // 상태 관련 예외 메시지를 더 구체적으로 검증할 수 있습니다.
+
+            assertThrows(CoreException.class, () -> orderFacade.createOrder(create));
         }
 
         @Test
         @DisplayName("사용자의 포인트가 부족하면 Conflict 오류를 반환한다.")
         void returnConflict_whenInsufficientPoint() {
-            // Given
-            // 1. 주문에 필요한 엔티티 생성 및 저장 (포인트 부족 상황)
-            //    - 상품 가격: 10000원
-            //    - 요청 수량: 2개 (총 20000원)
-            //    - 사용자 포인트: 10000원
-            ProductCatalog catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
+            Product catalog = helper.createProductCatalog("테스트 상품", BigDecimal.valueOf(10000));
             ProductSku sku = helper.createProductSku(catalog.getId(), ProductSku.SkuStatus.AVAILABLE, BigDecimal.valueOf(10000));
-            Stock stock = helper.createStock(sku.getId(), 10L); // 충분한 재고
-            Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(10000)); // 10000원 포인트
+            Stock stock = helper.createStock(sku.getId(), 10L);
+            Point point = helper.createPoint(TEST_USER_ID, BigDecimal.valueOf(10000));
 
-            OrderV1Dto.OrderCreateRequest request = new OrderV1Dto.OrderCreateRequest(
-                    Collections.singletonList(new OrderV1Dto.OrderItemCreateRequest(sku.getId(), 2L)) // 요청 수량 2개
+            OrderCommand.Create create = new OrderCommand.Create(
+                    TEST_USER_ID,
+                    Collections.singletonList(new OrderCommand.ItemCreate(sku.getId(), 2L)),
+                    0L
             );
 
-            // When & Then
-            assertThrows(CoreException.class, () -> orderFacade.createOrder(TEST_USER_ID, request));
-            // 포인트 부족 예외 메시지를 더 구체적으로 검증할 수 있습니다.
+            assertThrows(CoreException.class, () -> orderFacade.createOrder(create));
         }
     }
 
@@ -132,7 +132,9 @@ public class OrderIntegrationTest {
             Long nonExistingOrderId = 9999L;
 
             CoreException exception = assertThrows(CoreException.class,
-                    () -> orderFacade.getOrderDetail(nonExistingOrderId)
+                    () -> orderQueryFacade.getOrderDetail(
+                            OrderQuery.Detail.of(nonExistingOrderId)
+                    )
             );
 
             assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
@@ -167,8 +169,8 @@ public class OrderIntegrationTest {
             }
         }
 
-        public ProductCatalog createProductCatalog(String productName, BigDecimal basePrice) {
-            ProductCatalog catalog = ProductCatalog.from(
+        public Product createProductCatalog(String productName, BigDecimal basePrice) {
+            Product catalog = Product.from(
                     1L, productName, basePrice, "http://image.url", "description"
             );
             return productCatalogRepository.save(catalog);
@@ -186,7 +188,7 @@ public class OrderIntegrationTest {
             return stockRepository.save(stock);
         }
 
-        public Point createPoint(String userId, BigDecimal pointAmount) {
+        public Point createPoint(Long userId, BigDecimal pointAmount) {
             Point point = Point.from(userId, pointAmount);
             return pointRepository.save(point);
         }

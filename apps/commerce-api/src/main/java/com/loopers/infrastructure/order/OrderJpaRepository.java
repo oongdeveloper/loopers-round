@@ -12,10 +12,6 @@ import java.util.Optional;
 public interface OrderJpaRepository extends JpaRepository<Order, Long> {
     Page<Order> findByUserId(Long userId, Pageable pageable);
 
-    @Query("SELECT o FROM Order o JOIN FETCH o.orderItems WHERE o.id = :orderId AND o.deletedAt IS NULL")
-    Optional<Order> findByIdWithOrderItems(@Param("orderId") Long orderId);
-
-//    @Query("SELECT o FROM Order o JOIN FETCH o.orderItems WHERE o.id = :orderId AND o.deletedAt IS NULL")
-    @Query("SELECT o FROM Order o JOIN FETCH o.orderLines.lines WHERE o.userId = :userId AND o.deletedAt IS NULL")
+    @Query("SELECT o FROM Order o JOIN FETCH o.lines.lines WHERE o.id = :orderId AND o.deletedAt IS NULL")
     Optional<Order> findByIdWithOrderLines(@Param("orderId") Long orderId);
 }

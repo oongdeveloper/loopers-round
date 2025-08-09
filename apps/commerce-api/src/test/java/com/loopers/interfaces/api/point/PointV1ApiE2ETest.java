@@ -1,10 +1,9 @@
 package com.loopers.interfaces.api.point;
 
 
-import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointService;
-import com.loopers.domain.user.UserCommand;
 import com.loopers.domain.user.User;
+import com.loopers.domain.user.UserCommand;
 import com.loopers.domain.user.UserService;
 import com.loopers.interfaces.api.ApiResponse;
 import com.loopers.utils.DatabaseCleanUp;
@@ -14,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-
 
 import java.math.BigDecimal;
 
@@ -57,7 +55,7 @@ public class PointV1ApiE2ETest {
                     "oong@oo.ng"
             ));
 
-            pointService.save(Point.from(ENROLLED_USER, BigDecimal.valueOf(1000L)));
+//            pointService.save(Point.from(ENROLLED_USER, BigDecimal.valueOf(1000L)));
         }
 
         @DisplayName("포인트 조회에 성공할 경우, 보유 포인트를 응답으로 반환한다.")

@@ -15,4 +15,6 @@ public interface LikeRepository {
     Page<Like> findByIdUserId(Long userId, Pageable pageable);
     List<Object[]> countLikesByProductCatalogIds(Collection<Long> productCatalogIds);
 
+    int countBy(Long userId, Long productId);
+
 }

@@ -25,7 +25,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         return jpaRepository.findByUserId(userId, pageable);
     };
 
-    public Optional<Order> findByIdWithOrderItems(Long orderId){
-        return jpaRepository.findByIdWithOrderItems(orderId);
+    public Optional<Order> findByIdWithOrderLines(Long orderId){
+        return jpaRepository.findByIdWithOrderLines(orderId);
     };
 }

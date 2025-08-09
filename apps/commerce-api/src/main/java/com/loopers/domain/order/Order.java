@@ -1,16 +1,12 @@
 package com.loopers.domain.order;
 
 import com.loopers.domain.BaseEntity;
-import com.loopers.support.error.CoreException;
-import com.loopers.support.error.ErrorType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -19,70 +15,53 @@ import java.util.List;
 public class Order extends BaseEntity {
 
     @Column(name = "ref_user_id", nullable = false)
-    String userId;
+    Long userId;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
-    List<OrderItem> orderItems = new ArrayList<>();
+//    @Column(name = "total_order_price", nullable = false)
+//    BigDecimal totalOrderPrice;
 
-    @Column(name = "total_order_price", nullable = false)
-    BigDecimal totalOrderPrice;
+    @Column(name = "original_total_price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal originalTotalPrice;
 
+    @Column(name = "discount_amount", nullable = true, precision = 12, scale = 2)
+    private BigDecimal discountAmount;
+
+    @Column(name = "final_total_price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal finalTotalPrice;
+
+    // TODO. Enum 처리 해야됨
+//    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     String status;
 
     @Embedded
     OrderLines lines;
 
-    private Order(String userId, String status){
+    private Order(Long userId, String status){
         this.userId = userId;
         this.status = status;
     }
 
-    public static Order of(String userId, String status){
-        return new Order(userId, status);
-    }
-
-    public static Order create(OrderFactory.OrderCommand.Create createCommand) {
-        Order createdOrder = new Order(createCommand.userId(), "NEW");
+    public static Order create(Long userId) {
+        Order createdOrder = new Order(userId, "NEW");
         createdOrder.lines = OrderLines.empty();
-
-        createCommand.items().forEach(itemCommand -> {
-            createdOrder.lines.add(OrderLine.from(itemCommand));
-        });
         return createdOrder;
     }
 
-    public void addOrderItem(OrderItem item) {
-        if (item == null) {
-            throw new CoreException(ErrorType.BAD_REQUEST,"OrderItem은 null이 될 수 없습니다.");
-        }
-        this.orderItems.add(item);
-        item.setOrder(this);
-        calculateTotalPrice();
-    }
-
-    public void removeOrderItem(OrderItem item) {
-        if (item == null) {
-            return;
-        }
-
-        boolean removed = this.orderItems.remove(item);
-        if (removed) {
-            item.setOrder(null);
-            calculateTotalPrice();
-        }
+    public void addOrderLine(OrderLine line) {
+        lines.add(line);
     }
 
     public void calculateTotalPrice() {
-        if (this.orderItems == null || this.orderItems.isEmpty()) {
-            this.totalOrderPrice = BigDecimal.ZERO;
-            return;
-        }
-        BigDecimal sum = this.orderItems.stream()
-                .map(OrderItem::getTotalItemPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.originalTotalPrice = this.lines.calculateTotalAmount();
+    }
 
-        this.totalOrderPrice = sum;
+    public void updateFinalTotalPrice(BigDecimal finalTotalPrice){
+        this.finalTotalPrice = finalTotalPrice;
+    }
+
+    public void created(){
+        this.status = "CREATED";
     }
 
     public void updateStatus(String newStatus) {

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import com.loopers.support.error.InsufficientStockException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -32,6 +33,12 @@ public class ApiControllerAdvice {
     public ResponseEntity<ApiResponse<?>> handle(CoreException e) {
         log.warn("CoreException : {}", e.getCustomMessage() != null ? e.getCustomMessage() : e.getMessage(), e);
         return failureResponse(e.getErrorType(), e.getCustomMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<?>> handleInsufficientStockException(InsufficientStockException e) {
+        Map<String, String> errors = new HashMap<>();
+        return failureResponse(ErrorType.BAD_REQUEST, e.getMessage(), errors);
     }
 
     @ExceptionHandler

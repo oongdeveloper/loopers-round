@@ -11,10 +11,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ChargePointCommand {
 
-    private String userId;
+    private Long userId;
     private BigDecimal chargePoint;
 
-    public static ChargePointCommand of(String userId, BigDecimal chargePoint) {
+    public static ChargePointCommand of(Long userId, BigDecimal chargePoint) {
         return new ChargePointCommand(userId, chargePoint);
     }
 }
