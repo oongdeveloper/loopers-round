@@ -20,7 +20,10 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 public class CouponConcurrencyTest {
@@ -90,6 +93,7 @@ public class CouponConcurrencyTest {
             int threadCount = 10;
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
             CountDownLatch latch = new CountDownLatch(threadCount);
+            AtomicInteger failedCount = new AtomicInteger(0);
 
             for (int i = 0; i < threadCount; i++) {
                 executor.submit(() -> {
@@ -104,6 +108,7 @@ public class CouponConcurrencyTest {
 
                     } catch (Exception e) {
                         System.out.println("실패: " + e.getMessage());
+                        failedCount.incrementAndGet();
                     } finally {
                         latch.countDown();
                     }
@@ -111,7 +116,8 @@ public class CouponConcurrencyTest {
             }
 
             latch.await();
-        }
 
+            assertThat(failedCount.get()).isEqualTo(9);
+        }
     }
 }
