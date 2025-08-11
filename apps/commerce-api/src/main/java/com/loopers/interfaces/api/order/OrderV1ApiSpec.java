@@ -13,7 +13,7 @@ public interface OrderV1ApiSpec {
     )
     ApiResponse<?> create(
             @Schema(name = "사용자 ID")
-            String userId,
+            Long userId,
             @Schema(name = "주문 상품 정보", description = "주문할 상품과 수량 정보")
             OrderV1Dto.CreateRequest request
     );

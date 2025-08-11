@@ -5,8 +5,6 @@ import com.loopers.support.error.ErrorType;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -28,7 +26,14 @@ public class UserService {
         }
     }
 
-    public Optional<User> find(String userId){
-        return userRepository.find(userId);
+    public User find(String userId){
+        return userRepository.find(userId)
+                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 User 입니다."));
+    }
+
+    public Long findUserPkId(String userId){
+        return userRepository.find(userId)
+                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 User 입니다."))
+                .getId();
     }
 }

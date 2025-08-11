@@ -10,7 +10,7 @@ public class PointV1Dto {
     }
 
     public record UserPointResponse(
-            String userId,
+            Long userId,
             BigDecimal point
     ){}
 }

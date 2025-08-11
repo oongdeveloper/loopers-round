@@ -42,4 +42,9 @@ public class LikeRepositoryImpl implements LikeRepository {
     public List<Object[]> countLikesByProductCatalogIds(Collection<Long> productCatalogIds) {
         return List.of();
     }
+
+    @Override
+    public int countBy(Long userId, Long productId) {
+        return jpaRepository.countBy(userId,productId);
+    }
 }

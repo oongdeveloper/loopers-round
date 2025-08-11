@@ -52,7 +52,7 @@ public class LikeIntegrationTest {
             assertThat(initialLike).isPresent();
             assertThat(initialLike.get().getDeletedAt()).isNull();
             assertThat(initialLike.get().getId().getUserId()).isEqualTo(userId);
-            assertThat(initialLike.get().getId().getProductCatalogId()).isEqualTo(productCatalogId);
+            assertThat(initialLike.get().getId().getProductId()).isEqualTo(productCatalogId);
 
             likeFacade.like(userId, productCatalogId);
 
@@ -61,7 +61,7 @@ public class LikeIntegrationTest {
             assertThat(finalLike).isPresent();
             assertThat(finalLike.get().getDeletedAt()).isNull();
             assertThat(finalLike.get().getId().getUserId()).isEqualTo(userId);
-            assertThat(finalLike.get().getId().getProductCatalogId()).isEqualTo(productCatalogId);
+            assertThat(finalLike.get().getId().getProductId()).isEqualTo(productCatalogId);
         }
 
         @Test
@@ -83,6 +83,7 @@ public class LikeIntegrationTest {
             assertThat(finalLike).isPresent();
             assertThat(finalLike.get().getDeletedAt()).isNull();
         }
+
     }
 
     @DisplayName("unlike Method 는")

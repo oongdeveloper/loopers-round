@@ -1,5 +1,8 @@
 package com.loopers.domain.order;
 
+import com.loopers.domain.BaseEntity;
+import com.loopers.support.error.CoreException;
+import com.loopers.support.error.ErrorType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,51 +15,68 @@ import java.util.Objects;
 @Table(name = "order_line")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class OrderLine {
+public class OrderLine extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "ref_order_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     Order order;
 
-    @Column(name = "product_sku_id", nullable = false)
+    @Column(name = "ref_product_sku_id", nullable = false)
     Long productSkuId;
-    @Column(name = "product_catalog_id", nullable = false)
-    Long productCatalogId;
 
     @Column(name = "quantity", nullable = false)
     Long quantity;
-    @Column(name = "total_item_price", nullable = false)
-    BigDecimal totalItemPrice;
+    @Column(name = "total_line_price", nullable = false)
+    BigDecimal totalLinePrice;
 
-    @Column(name = "order_item_product_name", nullable = false)
-    String orderItemProductName;
-    @Column(name = "order_item_unit_price", nullable = false)
-    BigDecimal orderItemUnitPrice;
+    @Column(name = "order_line_product_name", nullable = false)
+    String orderLineProductName;
+    @Column(name = "order_line_price", nullable = false)
+    BigDecimal orderLinePrice;
 
-    public OrderLine(Long productSkuId, Long productCatalogId, Long quantity,
-                     BigDecimal totalItemPrice, String orderItemProductName, BigDecimal orderItemUnitPrice) {
-        this.order = order;
+    private OrderLine(Long productSkuId, Long quantity,
+                     String orderLineProductName, BigDecimal orderLinePrice) {
+
+        validate(quantity, orderLinePrice);
+
         this.productSkuId = productSkuId;
-        this.productCatalogId = productCatalogId;
         this.quantity = quantity;
-        this.totalItemPrice = totalItemPrice;
-        this.orderItemProductName = orderItemProductName;
-        this.orderItemUnitPrice = orderItemUnitPrice;
+        this.orderLineProductName = orderLineProductName;
+        this.orderLinePrice = orderLinePrice;
+        this.totalLinePrice = calculateTotalLinePrice();
     }
 
-    public static OrderLine from(OrderFactory.OrderCommand.OrderItem item){
-        return new OrderLine(
-                item.productSkuId(),
-                item.productCatalogId(),
-                item.quantity(),
-                item.orderLinePrice(),
-                item.orderLineProuductName(),
-                item.price()
-        );
+    public static OrderLine create(Long productSkuId, Long quantity,
+                     String orderLineProductName, BigDecimal orderLinePrice) {
+        return new OrderLine(productSkuId, quantity, orderLineProductName, orderLinePrice);
     }
 
     public boolean hasSameProduct(OrderLine other){
         return Objects.equals(this.productSkuId, other.productSkuId);
+    }
+
+    public void validate(Long quantity, BigDecimal orderItemUnitPrice){
+        if(quantity == null || quantity < 0){
+            throw new CoreException(ErrorType.BAD_REQUEST, "수량은 0보다 작을 수 없습니다.");
+        }
+
+        if (orderItemUnitPrice == null || orderItemUnitPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "단가는 0보다 작을 수 없습니다.");
+        }
+    }
+
+    public BigDecimal calculateTotalLinePrice() {
+        if (this.quantity == null || this.orderLinePrice == null) {
+            this.totalLinePrice = BigDecimal.ZERO; // 또는 예외 처리
+            return this.totalLinePrice;
+        }
+
+        this.totalLinePrice = this.orderLinePrice.multiply(BigDecimal.valueOf(this.quantity));
+        return this.totalLinePrice;
+    }
+
+    protected void setOrder(Order order){
+        this.order = order;
     }
 
 }
