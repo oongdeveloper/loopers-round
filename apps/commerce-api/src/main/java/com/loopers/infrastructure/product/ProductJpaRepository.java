@@ -22,13 +22,20 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long> {
                 p.price AS price,
                 p.image_url AS imageUrl,
                 p.description AS description,
-                p.published_at AS publishedAt
+                p.published_at AS publishedAt,
+                l.likes_count
             FROM product_catalog p
             INNER JOIN brand_catalog b on p.brand_id = b.id
+            INNER JOIN (
+            	SELECT ref_product_id, count(1) as likes_count
+            	from likes
+            	group by ref_product_id
+            ) l on l.ref_product_id = p.id
             WHERE (:brandId IS NULL OR p.brandId = :brandId)
             ORDER BY
                 CASE WHEN :sort = 'LATEST' THEN p.created_at END desc,
-                CASE WHEN :sort = 'PRICE_ASC' THEN p.price END asc 
+                CASE WHEN :sort = 'PRICE_ASC' THEN p.price END asc
+                CASE WHEN :sort = 'LIKES_DESC' THEN l.likes_count END desc  
             """, nativeQuery = true)
         // TODO. ProductCatalog 는 현재 "상태" 가 없음.
     Page<ProductListProjection> findByBrandId(@Param("brandId") Long brandId,
