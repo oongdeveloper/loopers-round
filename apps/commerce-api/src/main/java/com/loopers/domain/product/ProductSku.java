@@ -20,8 +20,12 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ProductSku extends BaseEntity {
-    @Column(name = "ref_product_catalog_id", nullable = false)
-    private Long productCatalogId;
+//    @Column(name = "ref_product_catalog_id", nullable = false)
+//    private Long productCatalogId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ref_product_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Product product;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -55,23 +59,23 @@ public class ProductSku extends BaseEntity {
     }
 
 
-    public static ProductSku from(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Long productCatalogId){
+    public static ProductSku from(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Product product){
         return new ProductSku(
                 skuOptions,
                 imageUrl,
                 unitPrice,
                 status,
-                productCatalogId
+                product
         );
     }
 
-    private ProductSku(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Long productCatalogId) {
+    private ProductSku(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status,  Product product) {
         validate(imageUrl, unitPrice);
         this.skuOptions = skuOptions;
         this.imageUrl = imageUrl;
         this.unitPrice = unitPrice;
         this.status = status;
-        this.productCatalogId = productCatalogId;
+        this.product = product;
     }
 
     private void validate(String imageUrl, BigDecimal unitPrice){

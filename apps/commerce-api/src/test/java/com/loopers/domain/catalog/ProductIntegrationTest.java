@@ -1,11 +1,11 @@
 package com.loopers.domain.catalog;
 
-import com.loopers.application.catalog.ProductCatalogFacade;
-import com.loopers.application.catalog.query.ProductResult;
-import com.loopers.application.catalog.query.ProductQuery;
-import com.loopers.application.catalog.query.ProductQueryFacade;
+import com.loopers.application.product.ProductFacade;
+import com.loopers.application.product.ProductInfo;
+import com.loopers.application.product.ProductQuery;
 import com.loopers.env.IntegrationTest;
-import com.loopers.infrastructure.catalog.query.BrandRepository;
+import com.loopers.infrastructure.brand.BrandRepository;
+import com.loopers.infrastructure.product.ProductJpaRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
@@ -26,17 +26,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 public class ProductIntegrationTest {
     private final BrandRepository brandRepository;
-    private final ProductRepository productRepository;
-    private final ProductCatalogFacade productCatalogFacade;
-    private final ProductQueryFacade productQueryFacade;
+    private final ProductJpaRepository productRepository;
+    private final ProductFacade productFacade;
     private final DatabaseCleanUp databaseCleanUp;
 
     @Autowired
-    public ProductIntegrationTest(BrandRepository brandRepository, ProductRepository productRepository, ProductCatalogFacade productCatalogFacade, ProductQueryFacade productQueryFacade, DatabaseCleanUp databaseCleanUp) {
+    public ProductIntegrationTest(BrandRepository brandRepository, ProductJpaRepository productRepository, ProductFacade productFacade, DatabaseCleanUp databaseCleanUp) {
         this.brandRepository = brandRepository;
         this.productRepository = productRepository;
-        this.productCatalogFacade = productCatalogFacade;
-        this.productQueryFacade = productQueryFacade;
+        this.productFacade = productFacade;
         this.databaseCleanUp = databaseCleanUp;
     }
 
@@ -56,7 +54,7 @@ public class ProductIntegrationTest {
             assertThat(brandRepository.count()).isEqualTo(3);
 
             CoreException exception = assertThrows(CoreException.class, () -> {
-                productQueryFacade.getProductList(
+                productFacade.getProductList(
                         ProductQuery.Summary.of(999L, "LATEST", PageRequest.of(0, 20))
                 );
             });
@@ -68,7 +66,7 @@ public class ProductIntegrationTest {
         void returnList_whenRetrieveProductWithBrandId(){
             assertThat(brandRepository.count()).isEqualTo(3);
 
-            Page<ProductResult.DataList> productInfos =  productQueryFacade.getProductList(
+            Page<ProductInfo.DataList> productInfos =  productFacade.getProductList(
                     ProductQuery.Summary.of(1L, "LATEST", PageRequest.of(0, 20))
             );
 
@@ -81,7 +79,7 @@ public class ProductIntegrationTest {
             assertThat(productRepository.count()).isEqualTo(30);
 
             CoreException exception = assertThrows(CoreException.class, () -> {
-                productQueryFacade.getProductDetail(
+                productFacade.getProductDetail(
                         ProductQuery.Detail.of(999L)
                 );
             });
@@ -95,7 +93,7 @@ public class ProductIntegrationTest {
             Long productIdWithNoBrand = 1L;
 
             CoreException exception = assertThrows(CoreException.class, () -> {
-                productQueryFacade.getProductDetail(
+                productFacade.getProductDetail(
                         ProductQuery.Detail.of(productIdWithNoBrand)
                 );
             });

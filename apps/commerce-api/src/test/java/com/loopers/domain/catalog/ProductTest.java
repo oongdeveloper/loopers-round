@@ -1,5 +1,6 @@
 package com.loopers.domain.catalog;
 
+import com.loopers.domain.product.Product;
 import com.loopers.env.UnitTest;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;

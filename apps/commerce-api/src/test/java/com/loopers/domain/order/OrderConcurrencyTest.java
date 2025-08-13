@@ -1,7 +1,6 @@
 package com.loopers.domain.order;
 
 import com.loopers.application.order.OrderFacade;
-import com.loopers.application.order.query.OrderQueryFacade;
 import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +11,6 @@ public class OrderConcurrencyTest {
 
     @Autowired
     private OrderFacade orderFacade;
-    @Autowired
-    private OrderQueryFacade orderQueryFacade;
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
 

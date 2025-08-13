@@ -1,10 +1,11 @@
 package com.loopers.domain.catalog;
 
 
-import com.loopers.application.catalog.query.BrandQuery;
-import com.loopers.application.catalog.query.BrandQueryFacade;
+import com.loopers.application.brand.BrandFacade;
+import com.loopers.application.brand.BrandQuery;
+import com.loopers.domain.brand.Brand;
 import com.loopers.env.IntegrationTest;
-import com.loopers.infrastructure.catalog.query.BrandRepository;
+import com.loopers.infrastructure.brand.BrandRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
@@ -25,13 +26,13 @@ public class BrandIntegrationTest {
     private final BrandRepository brandRepository;
     private final DatabaseCleanUp databaseCleanUp;
 
-    private final BrandQueryFacade brandQueryFacade;
+    private final BrandFacade brandFacade;
 
     @Autowired
-    public BrandIntegrationTest(BrandRepository brandRepository, DatabaseCleanUp databaseCleanUp, BrandQueryFacade brandQueryFacade) {
+    public BrandIntegrationTest(BrandRepository brandRepository, DatabaseCleanUp databaseCleanUp, BrandFacade brandFacade) {
         this.brandRepository = brandRepository;
         this.databaseCleanUp = databaseCleanUp;
-        this.brandQueryFacade = brandQueryFacade;
+        this.brandFacade = brandFacade;
     }
 
     @AfterEach
@@ -55,7 +56,7 @@ public class BrandIntegrationTest {
             brandRepository.save(lgBrand);
             // act
             CoreException exception = assertThrows(CoreException.class, () -> {
-                brandQueryFacade.getBrandDetail(
+                brandFacade.getBrandDetail(
                         BrandQuery.Detail.of(4L)
                 );
             });
