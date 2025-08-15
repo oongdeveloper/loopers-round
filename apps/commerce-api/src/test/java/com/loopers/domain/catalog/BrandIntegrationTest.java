@@ -5,7 +5,7 @@ import com.loopers.application.brand.BrandFacade;
 import com.loopers.application.brand.BrandQuery;
 import com.loopers.domain.brand.Brand;
 import com.loopers.env.IntegrationTest;
-import com.loopers.infrastructure.brand.BrandRepository;
+import com.loopers.infrastructure.brand.BrandJpaRepository;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.utils.DatabaseCleanUp;
@@ -23,14 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 public class BrandIntegrationTest {
 
-    private final BrandRepository brandRepository;
+    private final BrandJpaRepository brandJpaRepository;
     private final DatabaseCleanUp databaseCleanUp;
 
     private final BrandFacade brandFacade;
 
     @Autowired
-    public BrandIntegrationTest(BrandRepository brandRepository, DatabaseCleanUp databaseCleanUp, BrandFacade brandFacade) {
-        this.brandRepository = brandRepository;
+    public BrandIntegrationTest(BrandJpaRepository brandJpaRepository, DatabaseCleanUp databaseCleanUp, BrandFacade brandFacade) {
+        this.brandJpaRepository = brandJpaRepository;
         this.databaseCleanUp = databaseCleanUp;
         this.brandFacade = brandFacade;
     }
@@ -51,9 +51,9 @@ public class BrandIntegrationTest {
             Brand samsungBrand = Brand.from("Samsung", "https://example.com/logos/samsung.png");
             Brand lgBrand = Brand.from("LG", "https://example.com/logos/lg.png");
 
-            brandRepository.save(appleBrand);
-            brandRepository.save(samsungBrand);
-            brandRepository.save(lgBrand);
+            brandJpaRepository.save(appleBrand);
+            brandJpaRepository.save(samsungBrand);
+            brandJpaRepository.save(lgBrand);
             // act
             CoreException exception = assertThrows(CoreException.class, () -> {
                 brandFacade.getBrandDetail(

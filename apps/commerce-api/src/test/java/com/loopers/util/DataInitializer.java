@@ -3,12 +3,8 @@ package com.loopers.util;
 import com.loopers.domain.brand.Brand;
 import com.loopers.fixture.BrandFixture;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -22,17 +18,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
-@SpringBootTest
+//@SpringBootTest
 //@JdbcTest
-@ActiveProfiles("local")
-@TestPropertySource(properties = {
-        "spring.test.database.replace=none"
-})
+//@ActiveProfiles("local")
+//@TestPropertySource(properties = {
+//        "spring.test.database.replace=none"
+//})
 public class DataInitializer {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Test
+//    @Test
     void brandDataInitializer() {
         int batchSize = 1000;
 
@@ -56,9 +52,9 @@ public class DataInitializer {
         });
     }
 
-    @Test
+//    @Test
     void productDataInitializer() {
-        final int EXECUTE_COUNT = 500;
+        final int EXECUTE_COUNT = 50;
         final int BULK_INSERT_SIZE = 2000;
         final int threadCount = 10;
 
@@ -68,7 +64,7 @@ public class DataInitializer {
             for (int i = 0; i < threadCount; i++) {
                 int finalI = i;
                 executorService.submit(() -> {
-                    String sql = "INSERT INTO product (ref_brand_id, product_name, price, published_at, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW(), NOW())";
+                    String sql = "INSERT INTO product (ref_brand_id, product_name, price, like_count, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW(), NOW())";
                     ThreadLocalRandom random = ThreadLocalRandom.current();
 
                     for (int batch = 0; batch < EXECUTE_COUNT; batch++) {
@@ -82,6 +78,7 @@ public class DataInitializer {
                                     randomBrandId,
                                     "Product-" + randomBrandId + "-" + finalI + "-" + j,
                                     random.nextLong(1000, 100000), // current() 호출 제거
+                                    random.nextLong(1, 1001), // current() 호출 제거
                             });
                         }
 
@@ -103,7 +100,7 @@ public class DataInitializer {
     }
 
 
-    @Test
+//    @Test
     void likeDataInitializer() {
         final int EXECUTE_COUNT = 200 ;
         final int BULK_INSERT_SIZE = 2000;
@@ -123,7 +120,7 @@ public class DataInitializer {
                         for (int j = 0; j < BULK_INSERT_SIZE; j++) {
                             // 위에 브랜드 1000개 들어가서 1~1000 중 아무 숫자
                             long userId = random.nextLong(1, 100001);
-                            long randomProductId = random.nextLong(1, 10000001);
+                            long randomProductId = random.nextLong(1, 1000001);
 
                             batchArgs.add(new Object[]{
                                     userId,

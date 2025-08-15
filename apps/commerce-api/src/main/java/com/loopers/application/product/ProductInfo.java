@@ -12,7 +12,8 @@ public class ProductInfo {
             BigDecimal price,
             String imageUrl,
             String description,
-            ZonedDateTime publishedAt
+            ZonedDateTime publishedAt,
+            Long likeCount
     ){}
 
     public record DataDetail(
@@ -23,6 +24,7 @@ public class ProductInfo {
             String imageUrl,
             String description,
             ZonedDateTime publishedAt,
+            Long likeCount,
             List<SkuInfo> skuInfos
     ){}
 
