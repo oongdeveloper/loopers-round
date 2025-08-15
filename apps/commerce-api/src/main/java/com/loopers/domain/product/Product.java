@@ -21,6 +21,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
 @Table(name = "product")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -47,6 +48,9 @@ public class Product extends BaseEntity {
     @Column(name = "published_at", updatable = false,
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private ZonedDateTime publishedAt;
+
+    @Column(name = "like_count")
+    private Long likeCount = 0L;
 
     @OneToMany(mappedBy = "product")
     private List<ProductSku> skus = new ArrayList<>();

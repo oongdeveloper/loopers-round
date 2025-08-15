@@ -2,6 +2,8 @@ package com.loopers.infrastructure.product;
 
 import com.loopers.domain.product.Product;
 import com.loopers.domain.product.projections.ProductListProjection;
+import com.loopers.domain.product.projections.ProductListProjectionV2;
+import com.loopers.domain.product.projections.ProductListProjectionV3;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,6 +43,45 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long> {
     Page<ProductListProjection> findByBrandId(@Param("brandId") Long brandId,
                                               @Param("sort") String sort,
                                               Pageable pageable);
+
+
+    @Query(value = """
+            SELECT
+                p.id AS id,
+                p.ref_brand_id AS brandId,
+                p.product_name AS productName,
+                p.price AS price,
+                p.image_url AS imageUrl,
+                p.description AS description,
+                p.like_count
+            FROM product p
+            WHERE (:brandId IS NULL OR p.ref_brand_id = :brandId)
+            """, nativeQuery = true)
+    List<ProductListProjectionV3> findByBrandIdV3(@Param("brandId") Long brandId,
+                                                  Pageable pageable);
+    @Query(value = """
+            SELECT
+                count(1)
+            FROM product p
+            """, nativeQuery = true)
+    long count();
+
+    @Query(value = """
+            SELECT
+                p.id AS id,
+                b.brand_name AS brandName,
+                p.product_name AS productName,
+                p.price AS price,
+                p.image_url AS imageUrl,
+                p.description AS description,
+                p.like_count AS likeCount
+            FROM product p
+            INNER JOIN brand b on p.ref_brand_id = b.id
+            WHERE (:brandId IS NULL OR p.ref_brand_id = :brandId)
+            """, nativeQuery = true)
+        // TODO. ProductCatalog 는 현재 "상태" 가 없음.
+    List<ProductListProjectionV2> findByBrandIdBySortTypeV2(@Param("brandId") Long brandId,
+                                                   Pageable pageable);
 
     @Query("SELECT DISTINCT p " +
             "FROM Product p " +
