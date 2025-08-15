@@ -1,6 +1,6 @@
 package com.loopers.fixture;
 
-import com.loopers.domain.catalog.Product;
+import com.loopers.domain.product.Product;
 import org.instancio.Instancio;
 import org.instancio.InstancioApi;
 

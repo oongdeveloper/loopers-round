@@ -118,6 +118,7 @@ class UserCouponTest {
             );
         }
 
+
         @ParameterizedTest(name = "{0}이 100억을 초과하면 예외가 발생한다")
         @MethodSource("provideExceededMoneyArguments")
         @DisplayName("금액 관련 필드가 100억을 초과하면 예외가 발생한다")
@@ -133,7 +134,7 @@ class UserCouponTest {
         }
 
         static Stream<Arguments> provideExceededMoneyArguments() {
-            BigDecimal exceeded = new BigDecimal("10_000_000_001");
+            BigDecimal exceeded = new BigDecimal(10_000_000_001L);
             return Stream.of(
                     Arguments.of(exceeded, BigDecimal.valueOf(3000L)),
                     Arguments.of(BigDecimal.valueOf(3000L), exceeded)

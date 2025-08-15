@@ -1,5 +1,6 @@
 package com.loopers.domain.like;
 
+import com.loopers.domain.like.projections.LikeProductProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,8 @@ public class LikeService {
         return likeRepository.findById(Like.LikeId.of(userId, productCatalogId));
     }
 
-    public boolean existsById(Long userId, Long productCatalogId){
-        return likeRepository.existsById(Like.LikeId.of(userId, productCatalogId));
-    }
-
-    public Page<Like> findByIdUserId(Long userId, Pageable pageable){
-        return likeRepository.findByIdUserId(userId, pageable);
-    }
+    public Page<LikeProductProjection> findByUserId(Long userId, Pageable pageable){
+        return likeRepository.findByUserId(userId, pageable);
+    };
 
 }

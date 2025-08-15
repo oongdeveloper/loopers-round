@@ -55,6 +55,7 @@ subprojects {
         // Lombok
         implementation("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
+
         // Test
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         // testcontainers:mysql 이 jdbc 사용함
@@ -67,6 +68,9 @@ subprojects {
         testImplementation("org.springframework.boot:spring-boot-testcontainers")
         testImplementation("org.testcontainers:testcontainers")
         testImplementation("org.testcontainers:junit-jupiter")
+
+        testCompileOnly("org.projectlombok:lombok")
+        testAnnotationProcessor("org.projectlombok:lombok")
     }
 
     tasks.withType(Jar::class) { enabled = true }

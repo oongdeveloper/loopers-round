@@ -27,5 +27,12 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     public Optional<Order> findByIdWithOrderLines(Long orderId){
         return jpaRepository.findByIdWithOrderLines(orderId);
-    };
+    }
+
+    @Override
+    public Optional<Order> findById(Long orderId) {
+        return jpaRepository.findById(orderId);
+    }
+
+    ;
 }

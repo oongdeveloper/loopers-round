@@ -4,6 +4,7 @@ import com.loopers.application.like.LikeFacade;
 import com.loopers.domain.like.Like;
 import com.loopers.domain.like.LikeRepository;
 import com.loopers.utils.DatabaseCleanUp;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -96,6 +97,36 @@ public class LikeConcurrencyTest {
 
             int likeCount = likeRepository.countBy(userId, productId);
             assertThat(likeCount).isEqualTo(1);
+        }
+
+        @Transactional
+        @DisplayName("여러 명의 사용자가 동일 상품에 좋아요를 여러 번 눌러도 count 는 정상적으로 증가한다.")
+        @Test
+        void concurrencyTest_stockShouldBeProperlyWhenMultiUserLike() throws InterruptedException {
+            Long productId = 1L;
+
+            int threadCount = 10;
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            CountDownLatch latch = new CountDownLatch(threadCount);
+
+            for (int i = 0; i < threadCount; i++) {
+                int finalI = i;
+                executor.submit(() -> {
+                    try {
+                        likeFacade.like(Long.valueOf(finalI), productId);
+                        likeFacade.like(Long.valueOf(finalI), productId);
+                    } catch (Exception e) {
+                        System.out.println("실패: " + e.getMessage());
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+
+            latch.await();
+
+            int likeCount = likeRepository.countByProductId(productId);
+            assertThat(likeCount).isEqualTo(10);
         }
     }
 

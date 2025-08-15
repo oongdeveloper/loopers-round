@@ -1,7 +1,7 @@
 package com.loopers.application.like;
 
-import com.loopers.domain.catalog.Product;
 import com.loopers.domain.like.Like;
+import com.loopers.domain.product.Product;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;

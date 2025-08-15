@@ -14,4 +14,7 @@ public interface OrderJpaRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT o FROM Order o JOIN FETCH o.lines.lines WHERE o.id = :orderId AND o.deletedAt IS NULL")
     Optional<Order> findByIdWithOrderLines(@Param("orderId") Long orderId);
+
+    @Query("SELECT o FROM Order o JOIN FETCH o.lines.lines WHERE o.id = :orderId AND o.deletedAt IS NULL")
+    Optional<Order> findById(@Param("orderId") Long orderId);
 }

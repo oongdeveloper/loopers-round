@@ -2,6 +2,7 @@ package com.loopers.infrastructure.like;
 
 import com.loopers.domain.like.Like;
 import com.loopers.domain.like.LikeRepository;
+import com.loopers.domain.like.projections.LikeProductProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -46,5 +47,15 @@ public class LikeRepositoryImpl implements LikeRepository {
     @Override
     public int countBy(Long userId, Long productId) {
         return jpaRepository.countBy(userId,productId);
+    }
+
+    @Override
+    public int countByProductId(Long productId) {
+        return jpaRepository.countByProductId(productId);
+    }
+
+    @Override
+    public Page<LikeProductProjection> findByUserId(Long userId, Pageable pageable) {
+        return jpaRepository.findByUserId(userId, pageable);
     }
 }

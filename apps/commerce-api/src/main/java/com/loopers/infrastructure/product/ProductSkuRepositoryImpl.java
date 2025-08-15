@@ -9,24 +9,18 @@ import java.util.List;
 
 @Repository
 public class ProductSkuRepositoryImpl implements ProductSkuRepository {
-    private final ProductSkuJpaRepository jpaRepository;
-
-    public ProductSkuRepositoryImpl(ProductSkuJpaRepository jpaRepository) {
-        this.jpaRepository = jpaRepository;
-    }
-
     @Override
     public List<ProductSku> findByProductCatalogId(Long id) {
-        return jpaRepository.findByProductCatalogIdWithAllOptions(id);
+        return List.of();
     }
 
     @Override
     public List<ProductSku> findByIdIn(Collection<Long> skuIds) {
-        return jpaRepository.findByIdIn(skuIds);
+        return List.of();
     }
 
     @Override
     public ProductSku save(ProductSku entity) {
-        return jpaRepository.save(entity);
+        return null;
     }
 }

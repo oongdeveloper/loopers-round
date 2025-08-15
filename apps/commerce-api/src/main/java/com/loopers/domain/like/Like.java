@@ -31,7 +31,7 @@ public class Like extends BaseAuditableEntity {
         @Column(name = "ref_user_id", nullable = false)
         Long userId;
 
-        @Column(name = "ref_product_catalog_id", nullable = false)
+        @Column(name = "ref_product_id", nullable = false)
         Long productId;
 
         private LikeId(Long userId, Long productId){

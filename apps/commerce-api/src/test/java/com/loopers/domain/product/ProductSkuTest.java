@@ -23,13 +23,13 @@ class ProductSkuTest {
 
 
         CoreException zeroPriceException = assertThrows(CoreException.class, () -> {
-            ProductSku.from(List.of(), imageUrl, zeroPrice, ProductSku.SkuStatus.AVAILABLE, 0L);
+            ProductSku.from(List.of(), imageUrl, zeroPrice, ProductSku.SkuStatus.AVAILABLE, null);
         });
         CoreException minusPriceException = assertThrows(CoreException.class, () -> {
-            ProductSku.from(List.of(), imageUrl, minusPrice, ProductSku.SkuStatus.AVAILABLE, 0L);
+            ProductSku.from(List.of(), imageUrl, minusPrice, ProductSku.SkuStatus.AVAILABLE, null);
         });
         CoreException maxPriceException = assertThrows(CoreException.class, () -> {
-            ProductSku.from(List.of(), imageUrl, maxPrice, ProductSku.SkuStatus.AVAILABLE, 0L);
+            ProductSku.from(List.of(), imageUrl, maxPrice, ProductSku.SkuStatus.AVAILABLE, null);
         });
         Assertions.assertThat(zeroPriceException.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
         Assertions.assertThat(minusPriceException.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
@@ -43,7 +43,7 @@ class ProductSkuTest {
         String imageUrl = "haa.aa.aa";
 
         CoreException exception = assertThrows(CoreException.class, () -> {
-            ProductSku.from(List.of(), imageUrl, price, ProductSku.SkuStatus.AVAILABLE, 0L);
+            ProductSku.from(List.of(), imageUrl, price, ProductSku.SkuStatus.AVAILABLE, null);
         });
         Assertions.assertThat(exception.getErrorType()).isEqualTo(ErrorType.BAD_REQUEST);
     }

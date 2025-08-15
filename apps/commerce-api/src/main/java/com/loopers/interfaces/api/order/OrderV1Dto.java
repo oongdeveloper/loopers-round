@@ -1,7 +1,6 @@
 package com.loopers.interfaces.api.order;
 
 import com.loopers.application.order.OrderCommand;
-import com.loopers.application.order.OrderQuery;
 import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
@@ -66,15 +65,15 @@ public class OrderV1Dto {
         String status,
         ZonedDateTime orderedAt
     ){
-        public static OrderV1Dto.ListResponse from(OrderQuery.ListQuery list){
-            return new ListResponse(
-                    list.orderId(),
-                    list.userId(),
-                    list.totalOrderPrice(),
-                    list.status(),
-                    list.orderedAt()
-            );
-        }
+//        public static OrderV1Dto.ListResponse from(OrderQuery.ListQuery list) {
+//            return new ListResponse(
+//                    list.orderId(),
+//                    list.userId(),
+//                    list.totalOrderPrice(),
+//                    list.status(),
+//                    list.orderedAt()
+//            );
+//        }
     }
 
     public record DetailResponse(
@@ -85,16 +84,16 @@ public class OrderV1Dto {
             ZonedDateTime orderedAt,
             List<ItemDetailResponse> items
     ){
-        public static OrderV1Dto.DetailResponse from(OrderQuery.DetailQuery detail){
-            return new DetailResponse(
-                    detail.orderId(),
-                    detail.userId(),
-                    detail.totalOrderPrice(),
-                    detail.status(),
-                    detail.orderedAt(),
-                    ItemDetailResponse.from(detail.items())
-            );
-        }
+//        public static OrderV1Dto.DetailResponse from(OrderQuery.DetailQuery detail){
+//            return new DetailResponse(
+//                    detail.orderId(),
+//                    detail.userId(),
+//                    detail.totalOrderPrice(),
+//                    detail.status(),
+//                    detail.orderedAt(),
+//                    ItemDetailResponse.from(detail.items())
+//            );
+//        }
     }
 
 
@@ -108,23 +107,23 @@ public class OrderV1Dto {
             String brandName,
             BigDecimal unitPrice
     ){
-        public static OrderV1Dto.ItemDetailResponse from(OrderQuery.ItemDetailQuery item) {
-            return new ItemDetailResponse(
-                    item.orderItemId(),
-                    item.productSkuId(),
-                    item.productCatalogId(),
-                    item.quantity(),
-                    item.totalItemPrice(),
-                    item.productName(),
-                    item.brandName(),
-                    item.unitPrice()
-            );
-        }
+//        public static OrderV1Dto.ItemDetailResponse from(OrderQuery.ItemDetailQuery item) {
+//            return new ItemDetailResponse(
+//                    item.orderItemId(),
+//                    item.productSkuId(),
+//                    item.productCatalogId(),
+//                    item.quantity(),
+//                    item.totalItemPrice(),
+//                    item.productName(),
+//                    item.brandName(),
+//                    item.unitPrice()
+//            );
+//        }
 
-        public static List<OrderV1Dto.ItemDetailResponse> from(List<OrderQuery.ItemDetailQuery> items) {
-            return items.stream()
-                    .map(OrderV1Dto.ItemDetailResponse::from)
-                    .collect(Collectors.toList());
-        }
+//        public static List<OrderV1Dto.ItemDetailResponse> from(List<OrderQuery.ItemDetailQuery> items) {
+//            return items.stream()
+//                    .map(OrderV1Dto.ItemDetailResponse::from)
+//                    .collect(Collectors.toList());
+//        }
     }
 }
