@@ -112,11 +112,15 @@ public class UserServiceIntegrationTest {
 //                    });
         }
 
-        @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, null 이 반환된다.")
+        @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, NOT_FOUND 에러가 발생한다.")
         @Test
         void throwNullPointException_whenCannotFindUserId(){
-            User userEntity = userService.find(UNKNOWN_USER);
-            assertThat(userEntity).isNull();
+            CoreException exception = assertThrows(CoreException.class, () -> {
+//                userService.save(command);
+                User userEntity = userService.find(UNKNOWN_USER);
+            });
+
+            assertThat(exception.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
         }
     }
 }

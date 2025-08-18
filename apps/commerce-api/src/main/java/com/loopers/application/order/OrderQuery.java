@@ -1,36 +1,22 @@
 package com.loopers.application.order;
 
-import java.math.BigDecimal;
-import java.time.ZonedDateTime;
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public class OrderQuery {
+    public record Summary(
+            Long userId,
+            Pageable pageable
+    ){
+        public static Summary of(Long userId, Pageable pageable) {
+            return new Summary(userId, pageable);
+        }
+    }
 
-    public record ListQuery(
-            Long orderId,
-            String userId,
-            BigDecimal totalOrderPrice,
-            String status,
-            ZonedDateTime orderedAt
-    ){}
-
-    public record DetailQuery(
-            Long orderId,
-            String userId,
-            BigDecimal totalOrderPrice,
-            String status,
-            ZonedDateTime orderedAt,
-            List<ItemDetailQuery> items
-    ){}
-
-    public record ItemDetailQuery(
-            Long orderItemId,
-            Long productSkuId,
-            Long productCatalogId,
-            Long quantity,
-            BigDecimal totalItemPrice,
-            String productName,
-            String brandName,
-            BigDecimal unitPrice
-    ){}
+    public record Detail(
+            Long orderId
+    ){
+        public static Detail of(Long orderId){
+            return new Detail(orderId);
+        }
+    }
 }

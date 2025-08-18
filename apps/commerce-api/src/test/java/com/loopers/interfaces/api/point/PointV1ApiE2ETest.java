@@ -1,6 +1,7 @@
 package com.loopers.interfaces.api.point;
 
 
+import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserCommand;
@@ -44,15 +45,21 @@ public class PointV1ApiE2ETest {
     class Get{
         final String END_POINT = "/api/v1/points";
         final String ENROLLED_USER = "oong";
+        private Long USER_ID;
 
         @BeforeEach
         void setUp(){
-            userService.save(UserCommand.of(
+            User user = userService.save(UserCommand.of(
                     ENROLLED_USER,
                     "오옹",
                     User.Gender.M,
                     "2025-06-01",
                     "oong@oo.ng"
+            ));
+            USER_ID = user.getId();
+            pointService.save(Point.from(
+                    user.getId(),
+                    BigDecimal.valueOf(10000L)
             ));
 
 //            pointService.save(Point.from(ENROLLED_USER, BigDecimal.valueOf(1000L)));
@@ -69,7 +76,7 @@ public class PointV1ApiE2ETest {
                     testRestTemplate.exchange(END_POINT, HttpMethod.GET, new HttpEntity<>(null, headers), responseType);
 
             assertAll(
-                    () -> assertThat(response.getBody().data().userId()).isEqualTo(ENROLLED_USER)
+                    () -> assertThat(response.getBody().data().userId()).isEqualTo(USER_ID)
             );
         }
 

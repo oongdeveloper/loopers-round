@@ -1,7 +1,9 @@
 package com.loopers.domain.like;
 
+import com.loopers.domain.like.projections.LikeProductProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,4 +19,7 @@ public interface LikeRepository {
 
     int countBy(Long userId, Long productId);
 
+    int countByProductId(Long productId);
+
+    Page<LikeProductProjection> findByUserId(@Param("userId") Long userId, Pageable pageable);
 }
