@@ -46,20 +46,18 @@ public class PaymentV1Dto {
             Long orderId,
             String idempotencyKey,
             BigDecimal amount,
-            String method,
-            boolean isSuccess,
+            Method method,
             PaymentResult.Status status,
             String reason
     ){
         public static Response of(PaymentResult result){
             return new Response(
-                    result.getOrderId(),
-                    result.getIdempotencyKey(),
-                    result.getAmount(),
-                    result.getMethod(),
-                    result.isSuccess(),
-                    result.getStatus(),
-                    result.getReason()
+                    result.orderId(),
+                    result.idempotencyKey(),
+                    result.amount(),
+                    Method.valueOf(result.method().name()),
+                    result.status(),
+                    result.reason()
             );
         }
     }

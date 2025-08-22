@@ -1,5 +1,6 @@
 package com.loopers.interfaces.api.payment;
 
+import com.loopers.domain.pg.PgPaymentInfo;
 import com.loopers.interfaces.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,6 +18,15 @@ public interface PaymentV1ApiSpec {
             Long userId,
             @Schema(name = "결제 정보", description = "결제한 주문정보와 사용자 정보(카드 등)")
             PaymentV1Dto.Request request
+    );
+
+    @Operation(
+            summary = "결제 PG 콜백",
+            description = "PG 사의 콜백 메소드"
+    )
+    ApiResponse<?> callback(
+            @Schema(name = "PG 사 콜백 응답 정보", description = "PG 사에서 콜백메소드에 보내주는 응답 정보")
+            PgPaymentInfo.TransactionResponse.Data req
     );
 
     @Operation(
