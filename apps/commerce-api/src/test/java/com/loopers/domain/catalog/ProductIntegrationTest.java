@@ -65,7 +65,7 @@ public class ProductIntegrationTest {
             assertThat(brandJpaRepository.count()).isEqualTo(3);
         }
 
-//        @Test
+        @Test
         @DisplayName("상품 상세 조회 시, 존재하지 않는 상품이면 Not Found 오류를 반환한다.")
         void returnNotFound_whenProductDetailNotFound(){
             assertThat(productRepository.count()).isEqualTo(30);
