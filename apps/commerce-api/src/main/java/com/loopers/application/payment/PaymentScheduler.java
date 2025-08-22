@@ -29,7 +29,7 @@ public class PaymentScheduler {
         this.pgGatewayService = pgGatewayService;
     }
 
-    @Scheduled(cron = "* * * * * *")
+    @Scheduled(cron = "0 * * * * *")
     @Transactional
     public void paymentSync(){
         List<Payment> payments = paymentService.findByStatus(Payment.Status.PENDING);

@@ -8,5 +8,5 @@ public interface PaymentRepository {
 
     Optional<Payment> findByKey(String key);
 
-    List<Payment> findByStatus(String status);
+    List<Payment> findByStatus(Payment.Status status);
 }

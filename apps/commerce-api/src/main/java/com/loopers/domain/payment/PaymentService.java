@@ -45,6 +45,6 @@ public class PaymentService {
     }
 
     public List<Payment> findByStatus(Payment.Status status) {
-        return paymentRepository.finByStatus(status.name());
+        return paymentRepository.findByStatus(status);
     }
 }

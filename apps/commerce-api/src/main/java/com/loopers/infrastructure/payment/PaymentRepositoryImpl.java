@@ -26,7 +26,7 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public List<Payment> findByStatus(String status) {
+    public List<Payment> findByStatus(Payment.Status status) {
         return jpaRepository.findByStatus(status);
     }
 }

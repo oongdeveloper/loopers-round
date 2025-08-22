@@ -10,5 +10,5 @@ public interface PaymentJpaRepository extends JpaRepository<Payment, Long> {
 
     Optional<Payment> findByIdempotencyKey(String key);
 
-    List<Payment> findByStatus(String status);
+    List<Payment> findByStatus(Payment.Status status);
 }
