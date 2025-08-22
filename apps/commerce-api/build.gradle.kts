@@ -17,6 +17,12 @@ dependencies {
     // querydsl
     implementation("com.querydsl:querydsl-jpa::jakarta")
 
+    // feign
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    // resilience
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:2.0.2")
+
+
     // test-fixtures
     testImplementation(testFixtures(project(":modules:jpa")))
     testImplementation(testFixtures(project(":modules:rediss")))
