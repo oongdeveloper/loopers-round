@@ -2,10 +2,10 @@ package com.loopers.domain.pg;
 
 public interface PgGatewayRepository {
 
-    PgPaymentInfo.Response requestPay(PgPaymentInfo.Request request);
+    PgPaymentInfo.ReqResponse requestPay(PgPaymentInfo.Request request);
 
-    PgSourceInfo.Response checkTransactionStatus(String transactionKey);
+    PgPaymentInfo.TransactionResponse.Data checkTransaction(String transactionKey);
 
-    PgSourceInfo.ResponseByOrderId checkOrderStatus(String orderId);
+    PgPaymentInfo.OrderResponse.Data checkOrder(String orderId);
 
 }

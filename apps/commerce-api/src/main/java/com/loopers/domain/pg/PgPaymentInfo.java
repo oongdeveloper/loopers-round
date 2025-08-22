@@ -5,6 +5,7 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class PgPaymentInfo {
 
@@ -26,7 +27,7 @@ public class PgPaymentInfo {
         }
 
         public Request{
-            validate(orderId, cardNo, amount);
+//            validate(orderId, cardNo, amount);
         }
 
         private void validate(String orderId, String cardNo, BigDecimal amount){
@@ -45,24 +46,60 @@ public class PgPaymentInfo {
         }
     }
 
-    public record Response(
-//            String transactionKey,
-//            Status status,
-//            String reason
-            Object meta,
-            @JsonProperty("data") TransactionData transactionData
-    ){}
 
-    public record TransactionData(
-            String transactionKey,
-            Status status,
-            String reason
-    ){}
-
-    public enum Status{
+    public record Meta(
+            MetaStatus result,
+            String errorCode,
+            String message
+    ){
+        public enum MetaStatus{
+            FAIL, SUCCESS
+        }
+    }
+    public enum ResStatus{
         PENDING,
         SUCCESS,
         FAILED,
         ;
+    }
+
+    public record ReqResponse(
+            @JsonProperty("meta") Meta meta,
+            @JsonProperty("data") Data data
+    ){
+        public record Data(
+                String transactionKey,
+                ResStatus status,
+                String reason
+        ){}
+    }
+
+    public record TransactionResponse(
+            @JsonProperty("meta") Meta meta,
+            @JsonProperty("data") Data transactionData
+    ){
+        public record Data(
+                String transactionKey,
+                String orderId,
+                CardType cardType,
+                String cardNo,
+                BigDecimal amount,
+                ResStatus status,
+                String reason
+        ){
+            public enum CardType{
+                SAMSUNG, KB, HYUNDAI
+            }
+        }
+    }
+
+    public record OrderResponse(
+            @JsonProperty("meta") Meta meta,
+            @JsonProperty("data") Data transactionData
+    ){
+        public record Data(
+                String orderId,
+                List<TransactionResponse.Data> transactions
+        ){}
     }
 }

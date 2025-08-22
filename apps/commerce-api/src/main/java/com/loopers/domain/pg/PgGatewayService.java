@@ -5,6 +5,8 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.stereotype.Service;
 
+import static com.loopers.domain.pg.PgPaymentInfo.*;
+
 @Service
 public class PgGatewayService {
 
@@ -16,36 +18,36 @@ public class PgGatewayService {
 
     @Retry(name = "pgRetry", fallbackMethod = "fallbackRequestPay")
     @CircuitBreaker(name = "pgCircuit", fallbackMethod = "fallbackRequestPay")
-    public PgPaymentInfo.Response requestPay(PgPaymentInfo.Request request){
+    public ReqResponse requestPay(Request request){
         return pgGatewayRepository.requestPay(request);
     }
 
-    public PgPaymentInfo.Response fallbackRequestPay(PgPaymentInfo.Request request, RetryableException e){
-        return new PgPaymentInfo.Response(
+    public ReqResponse fallbackRequestPay(Request request, RetryableException e){
+        return new ReqResponse(
                 null,
-                new PgPaymentInfo.TransactionData(
+                new ReqResponse.Data(
                         null,
-                        PgPaymentInfo.Status.FAILED,
+                        ResStatus.FAILED,
                         "결제 서버 오류"
                 )
         );
     }
 
-    @Retry(name = "pgRetry", fallbackMethod = "fallbackCheckTransactionStatus")
-    public PgSourceInfo.PgTransactionDetail checkTransactionStatus(String transactionKey) {
-        return pgGatewayRepository.checkTransactionStatus(transactionKey).transactionData();
+    @Retry(name = "pgRetry", fallbackMethod = "fallbackCheckTransaction")
+    public TransactionResponse.Data checkTransaction(String transactionKey) {
+        return pgGatewayRepository.checkTransaction(transactionKey);
     }
 
-    @Retry(name = "pgRetry", fallbackMethod = "fallbackCheckOrderStatus")
-    public PgSourceInfo.ResponseByOrderId checkOrderStatus(String orderId) {
-        return pgGatewayRepository.checkOrderStatus(orderId);
+    @Retry(name = "pgRetry", fallbackMethod = "fallbackCheckOrder")
+    public OrderResponse.Data checkOrder(String orderId) {
+        return pgGatewayRepository.checkOrder(orderId);
     }
 
-    public PgPaymentInfo.Response fallbackCheckTransactionStatus(String transactionKey, RetryableException e){
+    public ReqResponse fallbackCheckTransaction(String transactionKey, RetryableException e){
         throw new RuntimeException("CheckTransaction API 오류 발생. ", e);
     }
 
-    public PgPaymentInfo.Response fallbackCheckOrderStatus(String transactionKey, RetryableException e){
+    public ReqResponse fallbackCheckOrder(String transactionKey, RetryableException e){
         throw new RuntimeException("CheckOrder API 오류 발생. ", e);
     }
 
