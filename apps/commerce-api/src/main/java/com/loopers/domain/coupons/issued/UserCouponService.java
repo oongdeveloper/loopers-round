@@ -26,4 +26,11 @@ public class UserCouponService {
         coupon.use();
         return calculator.applyCoupon(coupon, command.amount());
     }
+
+    @Transactional
+    public void rollbackCoupon(Long userId, Long id) {
+        UserCoupon coupon = userCouponRepository.findUserCoupon(userId, id)
+                .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "사용자에게 존재하지 않는 쿠폰입니다."));
+        coupon.rollback();
+    }
 }

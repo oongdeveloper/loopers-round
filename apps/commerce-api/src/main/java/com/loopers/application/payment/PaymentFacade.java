@@ -1,63 +1,96 @@
 package com.loopers.application.payment;
 
 
+import com.loopers.application.payment.method.PaymentMethodExecutor;
+import com.loopers.domain.order.Order;
 import com.loopers.domain.order.OrderService;
 import com.loopers.domain.payment.Payment;
+import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.domain.payment.PaymentService;
-import com.loopers.domain.point.PointCommand;
-import com.loopers.domain.point.PointService;
-import com.loopers.domain.stock.StockService;
-import com.loopers.domain.user.UserService;
+import com.loopers.domain.pg.PgGatewayService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import static com.loopers.domain.pg.PgSourceInfo.PgTransactionDetail;
 
 @Service
 @Slf4j
 public class PaymentFacade {
-
-    private final UserService userService;
-    private final PointService pointService;
-    private final PaymentService paymentService;
-    private final StockService stockService;
+    private final PaymentManager paymentManager;
+    private final PaymentMethodExecutor paymentMethodExecutor;
+    private final PostPaymentHandler postPaymentHandler;
     private final OrderService orderService;
+    private final PaymentService paymentService;
+    private final PgGatewayService pgGatewayService;
 
-    public PaymentFacade(UserService userService, PointService pointService, PaymentService paymentService, StockService stockService, OrderService orderService) {
-        this.userService = userService;
-        this.pointService = pointService;
-        this.paymentService = paymentService;
-        this.stockService = stockService;
+    public PaymentFacade(PaymentManager paymentManager, PaymentMethodExecutor paymentMethodExecutor, PostPaymentHandler postPaymentHandler, OrderService orderService, PaymentService paymentService, PgGatewayService pgGatewayService) {
+        this.paymentManager = paymentManager;
+        this.paymentMethodExecutor = paymentMethodExecutor;
+        this.postPaymentHandler = postPaymentHandler;
         this.orderService = orderService;
+        this.paymentService = paymentService;
+        this.pgGatewayService = pgGatewayService;
     }
 
-    public void payment(String userId, PaymentCommand.Pay command){
+    public PaymentResult pay(PaymentCommand command){
         try{
-            Long userPkId = userService.findUserPkId(userId);
-            // 포인트 차감
-            pointService.deduct(
-                    PointCommand.Deduct.of(userPkId, command.paymentAmount())
-            );
-            // 주문 이력을 확인
-            // TODO. 주문 상태를 확인해서 Lock
-            // 다른 사람이 주문을 하러 못 들어옴. -> 이것도 맞는데 Payment 에서 "주문"으로 Lock 을 거는게 맞나. 여기서만 사용하려고 생성?
+            // 결제키 확인
+            if(!command.getIdempotencyKey().equals(paymentService.findIdempotencyKey(command)))
+                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 키 요청입니다.");
 
-            // 결제 이력 저장
-            // 포인트가 차감되더라도 결제 이력이 있으면 다시 롤백됨.
-            paymentService.save(Payment.of(
-                    command.orderId(), Payment.Type.POINT, command.paymentAmount()
-            ));
-        } catch (DataIntegrityViolationException e) {
+            Order order = orderService.findByIdAndUserId(command.getOrderId(), command.getUserId())
+                    .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 주문에 대한 결제 요청입니다."));
+
+            if (command.getAmount().compareTo(order.getFinalTotalPrice()) != 0)
+                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 요청입니다.");
+            Payment payment = paymentManager.create(command);
+
+            // 결제 요청
+            PaymentResult result = paymentMethodExecutor.execute(command);
+            Payment paidPayment = paymentManager.find(command);
+            postPaymentHandler.postPayment(paidPayment);
+
+            return result;
+        } catch (Exception e) {
             log.error("결제 처리 오류 ", e);
-            throw new CoreException(ErrorType.CONFLICT, "이미 처리된 주문입니다.");
-        } catch (RuntimeException e){
-            // TODO. 재고 복구
-            Map<Long, Long> orderLines = orderService.getOrderedProductQuantity(command.orderId());
-            CompletableFuture.runAsync(() -> stockService.restoreStock(orderLines));
+            throw new CoreException(ErrorType.INTERNAL_ERROR, "결제 처리 중 오류가 발생했습니다.");
         }
+    }
+
+    @Transactional
+    public void postPg(PgTransactionDetail req){
+        try{
+            // 상태 API 를 찔러서 받은 결과와 비교
+            PgTransactionDetail response = pgGatewayService.checkTransactionStatus(req.transactionKey());
+            if (!req.status().equals(response.status()) || req.amount().compareTo(response.amount()) != 0){
+                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 Callback 입니다. " + req.transactionKey());
+            }
+
+            // key 로 주문 테이블 찾아서 비교 후 업데이트
+            Payment payment = paymentService.findByKey(req.orderId())
+                    .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 결제 이력입니다. Callback 확인 필요 " + req.transactionKey()));
+
+            if (req.amount().compareTo(payment.getAmount()) != 0) {
+                throw new CoreException(ErrorType.BAD_REQUEST, "결제 정보가 일치하지 않습니다. Callback 확인 필요 " + req.transactionKey());
+            }
+
+            if(req.status().equals(PgTransactionDetail.Status.SUCCESS)){
+                payment.updateStatus(Payment.Status.COMPLETED);
+            } else if(req.status().equals(PgTransactionDetail.Status.FAILED)) {
+                payment.updateStatus(Payment.Status.FAILED);
+                payment.setReason(req.reason());
+            }
+            postPaymentHandler.postPayment(payment);
+        } catch (RuntimeException e){
+            log.error("결제 콜백 오류 발생.", e);
+            throw e;
+        }
+    }
+
+    public String generateKey(Long userId, Long orderId){
+        return paymentService.generateKey(userId, orderId).getKey();
     }
 }

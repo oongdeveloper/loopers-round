@@ -64,7 +64,9 @@ public class StockService {
             maxAttempts = 3,
             backoff = @Backoff(delay = 3000, multiplier = 2)
     )
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void restoreStock(Map<Long,Long> requestMap){
         List<Stock> stocks = findBySkuIds(requestMap.keySet());
         stocks.forEach(stock ->{

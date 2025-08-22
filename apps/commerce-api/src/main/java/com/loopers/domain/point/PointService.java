@@ -1,6 +1,7 @@
 package com.loopers.domain.point;
 
 
+import com.loopers.domain.point.exception.InsufficientPointsException;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class PointService {
     }
 
     @Transactional
-    public BigDecimal deduct(PointCommand.Deduct command){
+    public BigDecimal deduct(PointCommand.Deduct command) throws InsufficientPointsException {
         Point point = pointRepository.findForUpdate(command.userId())
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 User 입니다."));
         return point.deduct(command.amount());
