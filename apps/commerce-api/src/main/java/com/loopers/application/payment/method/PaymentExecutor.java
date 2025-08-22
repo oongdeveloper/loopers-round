@@ -1,6 +1,5 @@
 package com.loopers.application.payment.method;
 
-import com.loopers.application.payment.PaymentManager;
 import com.loopers.application.payment.PaymentResult;
 import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.support.error.CoreException;
@@ -10,24 +9,18 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static com.loopers.domain.payment.Payment.Method;
-import static com.loopers.domain.payment.Payment.Status;
 
 @Component
-public class PaymentMethodExecutor {
+public class PaymentExecutor {
     private final List<PaymentMethod> methods;
-    private final PaymentManager paymentManager;
 
-    public PaymentMethodExecutor(List<PaymentMethod> methods, PaymentManager paymentManager) {
+    public PaymentExecutor(List<PaymentMethod> methods) {
         this.methods = methods;
-        this.paymentManager = paymentManager;
     }
 
     public PaymentResult execute(PaymentCommand command) {
-        paymentManager.updateStatus(command.getIdempotencyKey(), Status.PENDING);
-        PaymentResult result = getPaymentMethod(command.getMethod())
+        return getPaymentMethod(command.getMethod())
                 .pay(command);
-        paymentManager.updateStatus(command.getIdempotencyKey(), result.getImmutable());
-        return result;
     }
 
     private PaymentMethod getPaymentMethod(Method method){

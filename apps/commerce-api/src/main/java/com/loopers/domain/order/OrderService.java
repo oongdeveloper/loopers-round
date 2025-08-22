@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,5 +50,15 @@ public class OrderService {
 
     public Optional<Order> findByIdAndUserId(Long id, Long userId){
         return orderRepository.findByIdAndUserId(id, userId);
+    }
+
+    public Order validateOrder(Long orderId, Long userId, BigDecimal amount) {
+        Order order = findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 주문입니다."));
+
+        if (amount.compareTo(order.getFinalTotalPrice()) != 0) {
+            throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 금액입니다.");
+        }
+        return order;
     }
 }

@@ -1,8 +1,8 @@
 package com.loopers.application.payment;
 
 
-import com.loopers.application.payment.method.PaymentMethodExecutor;
-import com.loopers.domain.order.Order;
+import com.loopers.application.payment.processor.PaymentPostProcessor;
+import com.loopers.application.payment.processor.PaymentProcessor;
 import com.loopers.domain.order.OrderService;
 import com.loopers.domain.payment.Payment;
 import com.loopers.domain.payment.PaymentCommand;
@@ -14,46 +14,45 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static com.loopers.domain.pg.PgSourceInfo.PgTransactionDetail;
+import static com.loopers.domain.pg.PgPaymentInfo.TransactionResponse;
 
 @Service
 @Slf4j
 public class PaymentFacade {
-    private final PaymentManager paymentManager;
-    private final PaymentMethodExecutor paymentMethodExecutor;
-    private final PostPaymentHandler postPaymentHandler;
-    private final OrderService orderService;
     private final PaymentService paymentService;
+    private final OrderService orderService;
     private final PgGatewayService pgGatewayService;
+    private final PaymentProcessor paymentProcessor;
+    private final PaymentPostProcessor postProcessor;
 
-    public PaymentFacade(PaymentManager paymentManager, PaymentMethodExecutor paymentMethodExecutor, PostPaymentHandler postPaymentHandler, OrderService orderService, PaymentService paymentService, PgGatewayService pgGatewayService) {
-        this.paymentManager = paymentManager;
-        this.paymentMethodExecutor = paymentMethodExecutor;
-        this.postPaymentHandler = postPaymentHandler;
-        this.orderService = orderService;
+    public PaymentFacade(PaymentService paymentService, OrderService orderService, PgGatewayService pgGatewayService, PaymentProcessor paymentProcessor, PaymentPostProcessor postProcessor) {
         this.paymentService = paymentService;
+        this.orderService = orderService;
         this.pgGatewayService = pgGatewayService;
+        this.paymentProcessor = paymentProcessor;
+        this.postProcessor = postProcessor;
     }
 
     public PaymentResult pay(PaymentCommand command){
         try{
-            // 결제키 확인
             if(!command.getIdempotencyKey().equals(paymentService.findIdempotencyKey(command)))
                 throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 키 요청입니다.");
 
-            Order order = orderService.findByIdAndUserId(command.getOrderId(), command.getUserId())
-                    .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 주문에 대한 결제 요청입니다."));
-
-            if (command.getAmount().compareTo(order.getFinalTotalPrice()) != 0)
-                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 요청입니다.");
-            Payment payment = paymentManager.create(command);
+            // TODO. Service 에서 Optional 을 안주면 내가 Controller 할 수가 없음.
+//            Order order = orderService.findByIdAndUserId(command.getOrderId(), command.getUserId())
+//                    .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 주문에 대한 결제 요청입니다."));
+//
+//            if (command.getAmount().compareTo(order.getFinalTotalPrice()) != 0)
+//                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 요청입니다.");
+            orderService.validateOrder(command.getOrderId(), command.getUserId(), command.getAmount());
+            paymentService.findByKey(command.getIdempotencyKey()).
+                    ifPresentOrElse(
+                            payment -> PaymentStatusHandler.handleExistingPayment(payment.getStatus()),
+                            () -> paymentService.save(Payment.of(command))
+                    );
 
             // 결제 요청
-            PaymentResult result = paymentMethodExecutor.execute(command);
-            Payment paidPayment = paymentManager.find(command);
-            postPaymentHandler.postPayment(paidPayment);
-
-            return result;
+            return paymentProcessor.process(command);
         } catch (Exception e) {
             log.error("결제 처리 오류 ", e);
             throw new CoreException(ErrorType.INTERNAL_ERROR, "결제 처리 중 오류가 발생했습니다.");
@@ -61,33 +60,32 @@ public class PaymentFacade {
     }
 
     @Transactional
-    public void postPg(PgTransactionDetail req){
+    public void postPg(TransactionResponse.Data res){
         try{
-            // 상태 API 를 찔러서 받은 결과와 비교
-            PgTransactionDetail response = pgGatewayService.checkTransactionStatus(req.transactionKey());
-            if (!req.status().equals(response.status()) || req.amount().compareTo(response.amount()) != 0){
-                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 Callback 입니다. " + req.transactionKey());
-            }
+            validatePgResponse(res);
+            Payment payment = validateInternalPayment(res);
 
-            // key 로 주문 테이블 찾아서 비교 후 업데이트
-            Payment payment = paymentService.findByKey(req.orderId())
-                    .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 결제 이력입니다. Callback 확인 필요 " + req.transactionKey()));
-
-            if (req.amount().compareTo(payment.getAmount()) != 0) {
-                throw new CoreException(ErrorType.BAD_REQUEST, "결제 정보가 일치하지 않습니다. Callback 확인 필요 " + req.transactionKey());
-            }
-
-            if(req.status().equals(PgTransactionDetail.Status.SUCCESS)){
-                payment.updateStatus(Payment.Status.COMPLETED);
-            } else if(req.status().equals(PgTransactionDetail.Status.FAILED)) {
-                payment.updateStatus(Payment.Status.FAILED);
-                payment.setReason(req.reason());
-            }
-            postPaymentHandler.postPayment(payment);
+            PaymentResult paymentResult = PaymentResult.from(payment, res.status().name());
+            postProcessor.postprocess(paymentResult);
         } catch (RuntimeException e){
             log.error("결제 콜백 오류 발생.", e);
             throw e;
         }
+    }
+
+    private void validatePgResponse(TransactionResponse.Data res) {
+        TransactionResponse.Data data = pgGatewayService.checkTransaction(res.transactionKey());
+        if (!res.status().equals(data.status()) || res.amount().compareTo(data.amount()) != 0) {
+            throw new CoreException(ErrorType.BAD_REQUEST,
+                    "잘못된 결제 Callback 입니다. " + res.transactionKey());
+        }
+    }
+
+    private Payment validateInternalPayment(TransactionResponse.Data res) {
+        return paymentService.findByKey(res.orderId())
+                .filter(payment -> res.amount().compareTo(payment.getAmount()) == 0)
+                .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST,
+                        "존재하지 않는 결제 이력이거나 결제 정보가 일치하지 않습니다. Callback 확인 필요 " + res.transactionKey()));
     }
 
     public String generateKey(Long userId, Long orderId){
