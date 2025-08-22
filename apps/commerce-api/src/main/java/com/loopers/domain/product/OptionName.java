@@ -12,8 +12,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "option_name")
@@ -29,7 +29,7 @@ public class OptionName extends BaseEntity {
 
     // 양방향 관계 설정 (OptionName -> OptionValue)
     @OneToMany(mappedBy = "optionName")
-    private List<OptionValue> optionValues = new ArrayList<>();
+    private Set<OptionValue> optionValues = new HashSet<>();
 
     private OptionName(String name, String description){
         validate(name, description);

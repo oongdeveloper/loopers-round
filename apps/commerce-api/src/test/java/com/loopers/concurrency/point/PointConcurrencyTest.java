@@ -3,6 +3,7 @@ package com.loopers.concurrency.point;
 import com.loopers.domain.point.Point;
 import com.loopers.domain.point.PointCommand;
 import com.loopers.domain.point.PointService;
+import com.loopers.domain.point.exception.InsufficientPointsException;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserCommand;
 import com.loopers.domain.user.UserService;
@@ -61,6 +62,8 @@ public class PointConcurrencyTest {
                 } catch (RuntimeException e){
                     // TODO. Exception 을 먹어버림.
                     System.out.println("실패 " + e);
+                } catch (InsufficientPointsException e) {
+                    throw new RuntimeException(e);
                 } finally{
                     latch.countDown();
                 }

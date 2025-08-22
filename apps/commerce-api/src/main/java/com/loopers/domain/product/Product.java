@@ -18,8 +18,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -53,7 +53,7 @@ public class Product extends BaseEntity {
     private Long likeCount = 0L;
 
     @OneToMany(mappedBy = "product")
-    private List<ProductSku> skus = new ArrayList<>();
+    private Set<ProductSku> skus = new HashSet<>();
 
     private Product(Long brandId, String productName, BigDecimal basePrice, String imageUrl, String description) {
         validate(brandId, productName, basePrice, imageUrl);

@@ -3,14 +3,19 @@ package com.loopers.domain.order;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Embeddable
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderLines {
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
@@ -40,5 +45,10 @@ public class OrderLines {
         return lines.stream()
                 .map(OrderLine::calculateTotalLinePrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public Map<Long, Long> getOrderLineQuantity(){
+        return lines.stream()
+                .collect(Collectors.toMap(OrderLine::getId, OrderLine::getQuantity));
     }
 }

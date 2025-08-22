@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,5 +45,9 @@ public class OrderService {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
 //        return OrderResult.DataDetail.of(order.getId(), order.getLines().getLines());
+    }
+
+    public Optional<Order> findByIdAndUserId(Long id, Long userId){
+        return orderRepository.findByIdAndUserId(id, userId);
     }
 }

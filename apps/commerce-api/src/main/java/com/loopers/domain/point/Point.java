@@ -1,6 +1,7 @@
 package com.loopers.domain.point;
 
 import com.loopers.domain.BaseEntity;
+import com.loopers.domain.point.exception.InsufficientPointsException;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import jakarta.persistence.Column;
@@ -51,13 +52,13 @@ public class Point extends BaseEntity {
         return this.point;
     }
 
-    public BigDecimal deduct(BigDecimal deductPoint){
+    public BigDecimal deduct(BigDecimal deductPoint) throws InsufficientPointsException {
         if (deductPoint == null || deductPoint.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new CoreException(ErrorType.BAD_REQUEST, "사용할 포인트는 0보다 커야 합니다.");
+            throw new InsufficientPointsException("사용할 포인트는 0보다 커야 합니다.");
         }
 
         if (this.point.compareTo(deductPoint) < 0) {
-            throw new CoreException(ErrorType.BAD_REQUEST, "포인트가 부족합니다.");
+            throw new InsufficientPointsException("포인트가 부족합니다.");
         }
         this.point = this.point.subtract(deductPoint).setScale(2, RoundingMode.HALF_UP);
         return this.point;
