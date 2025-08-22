@@ -1,6 +1,9 @@
 package com.loopers.data.feign;
 
 public class RetryableException extends RuntimeException{
+    public RetryableException() {
+    }
+
     public RetryableException(String message) {
         super(message);
     }

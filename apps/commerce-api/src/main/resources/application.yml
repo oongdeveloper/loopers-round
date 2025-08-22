@@ -37,11 +37,12 @@ resilience4j:
         wait-duration: 500ms
         retry-exceptions:
           - com.loopers.data.feign.RetryableException
-          - com.loopers.data.feign.BusinessFeignException
         fail-after-max-attempts: true
   circuitbreaker:
     instances:
       pgCircuit:
+        recordExceptions:
+          - com.loopers.data.feign.RetryableException
         sliding-window-size: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 3s

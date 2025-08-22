@@ -23,20 +23,15 @@ public class CustomErrorDecoder implements ErrorDecoder {
 
         if (httpStatus == HttpStatus.BAD_REQUEST) {
             try {
-                ErrorResponse errorResponse = objectMapper.readValue(response.body().asInputStream(), ErrorResponse.class);
-                return new BusinessFeignException(errorResponse.code(), errorResponse.reason());
+                BadReqErrorResponse errorResponse = objectMapper.readValue(response.body().asInputStream(), BadReqErrorResponse.class);
+                return new ValidateParamException(errorResponse.meta().errorCode(), errorResponse.meta().message());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        else if (httpStatus == HttpStatus.INTERNAL_SERVER_ERROR) {
-            try {
-                ErrorResponse errorResponse = objectMapper.readValue(response.body().asInputStream(), ErrorResponse.class);
-                return new RetryableException(errorResponse.reason());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        if (httpStatus == HttpStatus.INTERNAL_SERVER_ERROR) {
+            return new RetryableException();
         }
         return errorDecoder.decode(methodKey, response);
     }
