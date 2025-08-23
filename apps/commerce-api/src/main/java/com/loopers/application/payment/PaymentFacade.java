@@ -10,7 +10,6 @@ import com.loopers.domain.payment.PaymentService;
 import com.loopers.domain.pg.PgGatewayService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +58,6 @@ public class PaymentFacade {
         }
     }
 
-    @Transactional
     public void postPg(TransactionResponse.Data res){
         try{
             validatePgResponse(res);
