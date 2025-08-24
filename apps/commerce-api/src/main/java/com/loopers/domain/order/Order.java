@@ -29,10 +29,17 @@ public class Order extends BaseEntity {
     @Column(name = "final_total_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal finalTotalPrice;
 
+    @Column(name = "ref_user_coupon_id", nullable = false)
+    Long couponId;
+
     // TODO. Enum 처리 해야됨
 //    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_v2")
+    Status statusV2;
 
     @Embedded
     OrderLines lines;
@@ -64,7 +71,11 @@ public class Order extends BaseEntity {
         this.status = "CREATED";
     }
 
-    public void updateStatus(String newStatus) {
-        this.status = newStatus;
+    public void updateStatus(Status status) {
+        this.statusV2 = status;
+    }
+
+    public enum Status{
+        NEW, PENDING, COMPLETED, FAILED
     }
 }

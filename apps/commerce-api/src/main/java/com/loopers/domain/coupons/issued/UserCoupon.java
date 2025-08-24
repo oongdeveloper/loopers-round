@@ -122,6 +122,13 @@ public class UserCoupon extends BaseEntity {
         this.usedAt = ZonedDateTime.now();
     }
 
+    public void rollback() {
+        if (this.isUsed) {
+            this.isUsed = false;
+            this.usedAt = null;
+        }
+    }
+
     private void validateMoneyValue(BigDecimal amount, String fieldName) {
         BigDecimal MAX_MONEY_LIMIT = BigDecimal.valueOf(10_000_000_000L);
         if (amount != null) {

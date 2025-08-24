@@ -8,13 +8,10 @@ import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import com.loopers.domain.product.ProductSku;
 import com.loopers.domain.product.projections.ProductListProjectionV2;
-import com.loopers.domain.product.projections.ProductListProjectionV3;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -46,40 +43,15 @@ public class ProductFacade {
         );
     }
 
-    public List<ProductInfo.DataList> getProductListV3(ProductQuery.Summary query) {
-        long startTime = System.currentTimeMillis();
-        List<ProductListProjectionV3> productList = productService.getProductListV3(query.brandId(), query.type().name(), query.pageable());
-        long endTime = System.currentTimeMillis();
-        long executionTime = endTime - startTime;
-        System.out.println("상품 목록 조회 실행 시간: 222 " + executionTime + "ms");
-
-        startTime = System.currentTimeMillis();
-        List<Long> brandIds = query.brandId() == null ? productList.stream().map(ProductListProjectionV3::getBrandId).toList() : Collections.singletonList(query.brandId());
-        Map<Long,String> brands = brandService.getList(brandIds)
-                .stream().collect(Collectors.toMap(Brand::getId, Brand::getBrandName));
-        endTime = System.currentTimeMillis();
-        executionTime = endTime - startTime;
-        System.out.println("상품 목록 조회 실행 시간: 333 " + executionTime + "ms");
-
-        return productList.stream().map(pj ->
-                new ProductInfo.DataList(
-                        pj.getId(),
-                        brands.get(pj.getBrandId()),
-                        pj.getProductName(),
-                        pj.getPrice(),
-                        pj.getImageUrl(),
-                        pj.getDescription(),
-                        pj.getPublishedAt(),
-                        pj.getLikeCount()
-                )
-        ).toList();
-    }
-
     public ProductInfo.DataDetail getProductDetail(ProductQuery.Detail query) {
+        long startTime = System.currentTimeMillis();
         Product product = productService.getProductDetail(query.productId());
         Brand brand = brandService.get(product.getBrandId());
         ProductLike productLike = productLikeService.get(query.productId());
 
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+        System.out.println("상품 목록 조회 실행 시간: 222 " + executionTime + "ms");
         return toDataDetail(product, brand, productLike.getLikeCount());
     }
 

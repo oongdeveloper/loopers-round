@@ -11,7 +11,10 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new HeaderValidationInterceptor())
                 .addPathPatterns("/api/v1/**")
-                .excludePathPatterns("/api/v1/users");
+                .excludePathPatterns(
+                        "/api/v1/users",
+                        "/api/v1/payment/**"
+                );
         WebMvcConfigurer.super.addInterceptors(registry);
     }
 }

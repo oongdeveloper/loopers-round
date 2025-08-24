@@ -1,63 +1,92 @@
 package com.loopers.application.payment;
 
 
+import com.loopers.application.payment.processor.PaymentPostProcessor;
+import com.loopers.application.payment.processor.PaymentProcessor;
 import com.loopers.domain.order.OrderService;
 import com.loopers.domain.payment.Payment;
+import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.domain.payment.PaymentService;
-import com.loopers.domain.point.PointCommand;
-import com.loopers.domain.point.PointService;
-import com.loopers.domain.stock.StockService;
-import com.loopers.domain.user.UserService;
+import com.loopers.domain.pg.PgGatewayService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import static com.loopers.domain.pg.PgPaymentInfo.TransactionResponse;
 
 @Service
 @Slf4j
 public class PaymentFacade {
-
-    private final UserService userService;
-    private final PointService pointService;
     private final PaymentService paymentService;
-    private final StockService stockService;
     private final OrderService orderService;
+    private final PgGatewayService pgGatewayService;
+    private final PaymentProcessor paymentProcessor;
+    private final PaymentPostProcessor postProcessor;
 
-    public PaymentFacade(UserService userService, PointService pointService, PaymentService paymentService, StockService stockService, OrderService orderService) {
-        this.userService = userService;
-        this.pointService = pointService;
+    public PaymentFacade(PaymentService paymentService, OrderService orderService, PgGatewayService pgGatewayService, PaymentProcessor paymentProcessor, PaymentPostProcessor postProcessor) {
         this.paymentService = paymentService;
-        this.stockService = stockService;
         this.orderService = orderService;
+        this.pgGatewayService = pgGatewayService;
+        this.paymentProcessor = paymentProcessor;
+        this.postProcessor = postProcessor;
     }
 
-    public void payment(String userId, PaymentCommand.Pay command){
+    public PaymentResult pay(PaymentCommand command){
         try{
-            Long userPkId = userService.findUserPkId(userId);
-            // 포인트 차감
-            pointService.deduct(
-                    PointCommand.Deduct.of(userPkId, command.paymentAmount())
-            );
-            // 주문 이력을 확인
-            // TODO. 주문 상태를 확인해서 Lock
-            // 다른 사람이 주문을 하러 못 들어옴. -> 이것도 맞는데 Payment 에서 "주문"으로 Lock 을 거는게 맞나. 여기서만 사용하려고 생성?
+            if(!command.getIdempotencyKey().equals(paymentService.findIdempotencyKey(command)))
+                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 키 요청입니다.");
 
-            // 결제 이력 저장
-            // 포인트가 차감되더라도 결제 이력이 있으면 다시 롤백됨.
-            paymentService.save(Payment.of(
-                    command.orderId(), Payment.Type.POINT, command.paymentAmount()
-            ));
-        } catch (DataIntegrityViolationException e) {
+            // TODO. Service 에서 Optional 을 안주면 내가 Controller 할 수가 없음.
+//            Order order = orderService.findByIdAndUserId(command.getOrderId(), command.getUserId())
+//                    .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 주문에 대한 결제 요청입니다."));
+//
+//            if (command.getAmount().compareTo(order.getFinalTotalPrice()) != 0)
+//                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 요청입니다.");
+            orderService.validateOrder(command.getOrderId(), command.getUserId(), command.getAmount());
+            paymentService.findByKey(command.getIdempotencyKey()).
+                    ifPresentOrElse(
+                            payment -> PaymentStatusHandler.handleExistingPayment(payment.getStatus()),
+                            () -> paymentService.save(Payment.of(command))
+                    );
+
+            // 결제 요청
+            return paymentProcessor.process(command);
+        } catch (Exception e) {
             log.error("결제 처리 오류 ", e);
-            throw new CoreException(ErrorType.CONFLICT, "이미 처리된 주문입니다.");
-        } catch (RuntimeException e){
-            // TODO. 재고 복구
-            Map<Long, Long> orderLines = orderService.getOrderedProductQuantity(command.orderId());
-            CompletableFuture.runAsync(() -> stockService.restoreStock(orderLines));
+            throw new CoreException(ErrorType.INTERNAL_ERROR, "결제 처리 중 오류가 발생했습니다.");
         }
+    }
+
+    public void postPg(TransactionResponse.Data res){
+        try{
+            validatePgResponse(res);
+            Payment payment = validateInternalPayment(res);
+
+            PaymentResult paymentResult = PaymentResult.from(payment, res.status().name());
+            postProcessor.postprocess(paymentResult);
+        } catch (RuntimeException e){
+            log.error("결제 콜백 오류 발생.", e);
+            throw e;
+        }
+    }
+
+    private void validatePgResponse(TransactionResponse.Data res) {
+        TransactionResponse.Data data = pgGatewayService.checkTransaction(res.transactionKey());
+        if (!res.status().equals(data.status()) || res.amount().compareTo(data.amount()) != 0) {
+            throw new CoreException(ErrorType.BAD_REQUEST,
+                    "잘못된 결제 Callback 입니다. " + res.transactionKey());
+        }
+    }
+
+    private Payment validateInternalPayment(TransactionResponse.Data res) {
+        return paymentService.findByKey(res.orderId())
+                .filter(payment -> res.amount().compareTo(payment.getAmount()) == 0)
+                .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST,
+                        "존재하지 않는 결제 이력이거나 결제 정보가 일치하지 않습니다. Callback 확인 필요 " + res.transactionKey()));
+    }
+
+    public String generateKey(Long userId, Long orderId){
+        return paymentService.generateKey(userId, orderId).getKey();
     }
 }

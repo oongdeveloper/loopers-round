@@ -2,8 +2,9 @@ rootProject.name = "loopers-ecommerce"
 
 include(
     ":apps:commerce-api",
+    ":apps:pg-simulator",
     ":modules:jpa",
-    "modules:rediss",
+    ":modules:rediss",
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",

@@ -25,7 +25,7 @@ public interface UserCouponJpaRepository extends JpaRepository<UserCoupon, Long>
             SELECT uc 
             FROM UserCoupon uc
             WHERE uc.userId = :userId
-              AND uc.couponId = :couponId
+              AND uc.id = :couponId
               AND uc.expiresAt > CURRENT_TIMESTAMP
             """)
     Optional<UserCoupon> findUserCoupon(@Param("userId") Long userId, @Param("couponId") Long couponId);

@@ -1,6 +1,7 @@
 package com.loopers.concurrency.payment;
 
-import com.loopers.application.payment.PaymentCommand;
+import com.loopers.domain.payment.Payment;
+import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.application.payment.PaymentFacade;
 import com.loopers.domain.point.Point;
 import com.loopers.domain.stock.StockService;
@@ -67,7 +68,14 @@ public class PaymentConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executor.submit(() -> {
                 try {
-                    paymentFacade.payment("oong", new PaymentCommand.Pay(1L, DEDUCT_POINT));
+                    paymentFacade.pay(PaymentCommand.of(
+                            USER_ID,
+                            1L,
+                            null,
+                            BigDecimal.ZERO,
+                            Payment.Method.CARD.name(),
+                            null
+                    ));
                 } catch (RuntimeException e){
                     // TODO. Exception 을 먹어버림.
                     System.out.println("실패 " + e);

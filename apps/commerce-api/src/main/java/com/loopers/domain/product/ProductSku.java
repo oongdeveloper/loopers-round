@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "product_sku")
@@ -38,7 +38,7 @@ public class ProductSku extends BaseEntity {
     private String imageUrl;
 
     @OneToMany(mappedBy = "productSku")
-    private List<SkuOption> skuOptions = new ArrayList<>();
+    private Set<SkuOption> skuOptions = new HashSet<>();
 
     @Getter
     public enum SkuStatus{
@@ -59,7 +59,7 @@ public class ProductSku extends BaseEntity {
     }
 
 
-    public static ProductSku from(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Product product){
+    public static ProductSku from(Set<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Product product){
         return new ProductSku(
                 skuOptions,
                 imageUrl,
@@ -69,7 +69,7 @@ public class ProductSku extends BaseEntity {
         );
     }
 
-    private ProductSku(List<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status,  Product product) {
+    private ProductSku(Set<SkuOption> skuOptions, String imageUrl, BigDecimal unitPrice, SkuStatus status, Product product) {
         validate(imageUrl, unitPrice);
         this.skuOptions = skuOptions;
         this.imageUrl = imageUrl;

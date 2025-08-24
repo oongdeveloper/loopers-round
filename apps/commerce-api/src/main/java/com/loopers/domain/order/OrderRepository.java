@@ -2,7 +2,6 @@ package com.loopers.domain.order;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -13,4 +12,6 @@ public interface OrderRepository {
 
 //    Page<Order> findByUserId(Long id, Pageable pageable);
     Optional<Order> findById(Long orderId);
+
+    Optional<Order> findByIdAndUserId(Long id, Long userId);
 }
