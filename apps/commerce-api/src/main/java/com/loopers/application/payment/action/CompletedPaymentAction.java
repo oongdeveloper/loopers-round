@@ -8,8 +8,6 @@ import com.loopers.domain.payment.PaymentService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 
-import static com.loopers.domain.payment.Payment.Status.COMPLETED;
-
 public class CompletedPaymentAction implements PaymentAction{
     private final PaymentService paymentService;
     private final OrderService orderService;
@@ -24,10 +22,13 @@ public class CompletedPaymentAction implements PaymentAction{
         Payment payment = paymentService.findByKey(result.idempotencyKey())
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "잘못된 결제 요청입니다. " + result.idempotencyKey()));
 
-        payment.updateStatus(COMPLETED);
+//        payment.updateStatus(COMPLETED);
         payment.setReason(result.reason());
         payment.setPgProvider(result.pgProvider());
         payment.setPgTransactionId(result.pgTransactionKey());
+        payment.completed();
+        // EventPublish 어떻게 할거냐
+//        paymentService.save(payment);
 
         orderService.find(payment.getOrderId())
                     .updateStatus(Order.Status.COMPLETED);

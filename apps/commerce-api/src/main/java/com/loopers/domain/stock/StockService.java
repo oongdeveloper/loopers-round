@@ -8,7 +8,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -37,7 +36,8 @@ public class StockService {
         return stockRepository.findBySkuIdIn(skuIds);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void decreaseStock(Map<Long,Long> requestMap){
         List<Stock> stocks = findBySkuIds(requestMap.keySet());
 //        stocks.forEach(stock ->{
@@ -54,6 +54,7 @@ public class StockService {
             }
         }
 
+        // TODO. 어떤 제품이 재고가 부족한지
         if (!failedSkuIds.isEmpty()) {
             throw new InsufficientStockException(failedSkuIds);
         }

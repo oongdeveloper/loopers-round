@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "payment")
@@ -14,6 +16,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @ToString
 public class Payment extends BaseEntity {
+    @Transient
+    private final List<PaymentEvent> domainEvents = new ArrayList<>();
 
     @Column(name = "idempotency_key", unique = true, nullable = false)
     String idempotencyKey;
@@ -66,6 +70,16 @@ public class Payment extends BaseEntity {
 
     public void updateStatus(Status status) {
         this.status = status;
+    }
+
+    public void completed(){
+        this.status = Status.COMPLETED;
+        domainEvents.add(PaymentEvent.Completed.from(this));
+    }
+
+    public void failed(){
+        this.status = Status.FAILED;
+        domainEvents.add(PaymentEvent.Canceled.from(this));
     }
 
     public void setPgProvider(int provider){

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OrderFacade {
@@ -36,35 +35,21 @@ public class OrderFacade {
     public OrderInfo createOrder(OrderCommand.Create request){
         Map<Long, Long> requestMap = request.toMap();
 
-        try{
-            stockService.decreaseStock(requestMap);
-            List<Product> foundProducts = productService.getProuctListByIds(requestMap.keySet());
+        List<Product> foundProducts = productService.getProuctListByIds(requestMap.keySet());
+        Order order = OrderFactory.createOrder(request.userId(), requestMap, foundProducts);
+        BigDecimal finalPrice = userCouponService.applyCoupon(
+                UserCouponCommand.Apply.of(
+                        request.userId(),
+                        request.couponId(),
+                        order.getOriginalTotalPrice()
+                )
+        );
+        order.updateFinalTotalPrice(finalPrice);
+        order.created();
 
-//            List<ProductSku> foundSkus =  productSkuService.findByIds(requestMap.keySet());
-//            Set<Long> catalogIds = foundSkus.stream()
-//                    .map(ProductSku::getProductCatalogId)
-//                    .collect(Collectors.toSet());
-//            List<Product> foundCatalogs = productCatalogService.findByIds(catalogIds);
-//            Order order = OrderFactory.createOrder(request.userId(), requestMap, foundSkus, foundCatalogs);
-            Order order = OrderFactory.createOrder(request.userId(), requestMap, foundProducts);
-
-            orderService.save(order);
-            BigDecimal finalPrice = userCouponService.applyCoupon(
-                    UserCouponCommand.Apply.of(
-                            request.userId(),
-                            request.couponId(),
-                            order.getOriginalTotalPrice()
-                    )
-            );
-            order.updateFinalTotalPrice(finalPrice);
-            order.created();
-            return OrderInfo.of(order);
-        } catch (RuntimeException e) {
-            CompletableFuture.runAsync(
-                    () -> stockService.restoreStock(requestMap)
-            );
-            throw new RuntimeException(e);
-        }
+        orderService.save(order);
+        stockService.decreaseStock(requestMap);
+        return OrderInfo.of(order);
     }
 
     public Page<OrderResult.DataList> getOrderList(OrderQuery.Summary query) {

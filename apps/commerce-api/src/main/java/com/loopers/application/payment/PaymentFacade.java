@@ -62,7 +62,6 @@ public class PaymentFacade {
         try{
             validatePgResponse(res);
             Payment payment = validateInternalPayment(res);
-
             PaymentResult paymentResult = PaymentResult.from(payment, res.status().name());
             postProcessor.postprocess(paymentResult);
         } catch (RuntimeException e){
