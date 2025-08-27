@@ -1,7 +1,7 @@
 package com.loopers.domain.payment;
 
 
-import com.loopers.domain.BaseEntity;
+import com.loopers.domain.common.AggregateRoot;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @ToString
-public class Payment extends BaseEntity {
+public class Payment extends AggregateRoot {
     @Transient
     private final List<PaymentEvent> domainEvents = new ArrayList<>();
 
@@ -74,12 +74,14 @@ public class Payment extends BaseEntity {
 
     public void completed(){
         this.status = Status.COMPLETED;
-        domainEvents.add(PaymentEvent.Completed.from(this));
+//        domainEvents.add(PaymentEvent.Completed.from(this));
+        registerEvent(PaymentEvent.Completed.from(this));
     }
 
     public void failed(){
         this.status = Status.FAILED;
-        domainEvents.add(PaymentEvent.Canceled.from(this));
+//        domainEvents.add(PaymentEvent.Canceled.from(this));
+        registerEvent(PaymentEvent.Canceled.from(this));
     }
 
     public void setPgProvider(int provider){

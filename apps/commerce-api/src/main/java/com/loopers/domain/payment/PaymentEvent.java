@@ -3,7 +3,7 @@ package com.loopers.domain.payment;
 import com.loopers.domain.common.DomainEvent;
 
 //public sealed interface PaymentEvent permits PaymentEvent.Completed, PaymentEvent.Canceled {
-public class PaymentEvent implements DomainEvent {
+public class PaymentEvent {
     record Completed(
             Long paymentId,
             Long orderId,
@@ -11,7 +11,7 @@ public class PaymentEvent implements DomainEvent {
             String method,
             String status,
             String reason
-            ){
+            ) implements DomainEvent {
 
         public static Completed from(Payment payment) {
             return new Completed(
@@ -31,7 +31,7 @@ public class PaymentEvent implements DomainEvent {
             String method,
             String status,
             String reason
-    ){
+    ) implements DomainEvent {
         public static Canceled from(Payment payment) {
             return new Canceled(
                     payment.getId(),
