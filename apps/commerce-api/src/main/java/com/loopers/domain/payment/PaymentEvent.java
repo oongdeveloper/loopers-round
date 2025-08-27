@@ -1,6 +1,9 @@
 package com.loopers.domain.payment;
 
-public sealed interface PaymentEvent permits PaymentEvent.Completed, PaymentEvent.Canceled {
+import com.loopers.domain.common.DomainEvent;
+
+//public sealed interface PaymentEvent permits PaymentEvent.Completed, PaymentEvent.Canceled {
+public class PaymentEvent implements DomainEvent {
     record Completed(
             Long paymentId,
             Long orderId,
@@ -8,7 +11,7 @@ public sealed interface PaymentEvent permits PaymentEvent.Completed, PaymentEven
             String method,
             String status,
             String reason
-            ) implements PaymentEvent {
+            ){
 
         public static Completed from(Payment payment) {
             return new Completed(
@@ -28,7 +31,7 @@ public sealed interface PaymentEvent permits PaymentEvent.Completed, PaymentEven
             String method,
             String status,
             String reason
-    ) implements PaymentEvent {
+    ){
         public static Canceled from(Payment payment) {
             return new Canceled(
                     payment.getId(),
