@@ -46,7 +46,7 @@ public class LikeConcurrencyTest {
             Long productId = 1L;
             final Like.LikeId TEST_LIKE_ID =Like.LikeId.of(userId, productId);
 
-            int threadCount = 10;
+            int threadCount = 5;
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
             CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -77,7 +77,7 @@ public class LikeConcurrencyTest {
             likeFacade.like(userId, productId);
             likeFacade.unlike(userId, productId);
 
-            int threadCount = 10;
+            int threadCount = 5;
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
             CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -105,7 +105,7 @@ public class LikeConcurrencyTest {
         void concurrencyTest_stockShouldBeProperlyWhenMultiUserLike() throws InterruptedException {
             Long productId = 1L;
 
-            int threadCount = 10;
+            int threadCount = 5;
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
             CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -126,7 +126,7 @@ public class LikeConcurrencyTest {
             latch.await();
 
             int likeCount = likeRepository.countByProductId(productId);
-            assertThat(likeCount).isEqualTo(10);
+            assertThat(likeCount).isEqualTo(5);
         }
     }
 

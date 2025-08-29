@@ -72,6 +72,7 @@ public class ProductIntegrationTest {
 
             CoreException exception = assertThrows(CoreException.class, () -> {
                 productFacade.getProductDetail(
+                        null,
                         ProductQuery.Detail.of(999L)
                 );
             });
@@ -86,6 +87,7 @@ public class ProductIntegrationTest {
 
             CoreException exception = assertThrows(CoreException.class, () -> {
                 productFacade.getProductDetail(
+                        null,
                         ProductQuery.Detail.of(productIdWithNoBrand)
                 );
             });

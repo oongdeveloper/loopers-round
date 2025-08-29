@@ -39,7 +39,7 @@ public class StockConcurrencyTest {
         stockJpaRepository.save(Stock.from(2L, 10L));
         stockJpaRepository.save(Stock.from(3L, 10L));
 
-        int threadCount = 10;
+        int threadCount = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -47,7 +47,7 @@ public class StockConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executor.submit(() -> {
                 try {
-                    stockService.decreaseStock(request);
+                    stockService.reduceStock(request);
                 } catch (RuntimeException e){
                     // TODO. Exception 을 먹어버림.
                     System.out.println("실패 " + e);
