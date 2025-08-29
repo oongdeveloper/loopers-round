@@ -4,9 +4,6 @@ import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import com.loopers.support.error.InsufficientStockException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +35,7 @@ public class StockService {
 
 //    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Transactional
-    public void decreaseStock(Map<Long,Long> requestMap){
+    public void reduceStock(Map<Long,Long> requestMap){
         List<Stock> stocks = findBySkuIds(requestMap.keySet());
 //        stocks.forEach(stock ->{
 //                    stock.decreaseStock(requestMap.get(stock.productSkuId));
@@ -60,13 +57,6 @@ public class StockService {
         }
     }
 
-    @Retryable(
-            value = {RuntimeException.class},
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 3000, multiplier = 2)
-    )
-
-//    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Transactional
     public void restoreStock(Map<Long,Long> requestMap){
         List<Stock> stocks = findBySkuIds(requestMap.keySet());
@@ -76,7 +66,7 @@ public class StockService {
         );
     }
 
-    @Recover
+//    @Recover
     public void recover(RuntimeException e, Map<Long,Long> requestMap) {
         log.error("모든 재시도 실패! 복구 메서드 실행.");
         log.error("예외 메시지: {}", e.getMessage());

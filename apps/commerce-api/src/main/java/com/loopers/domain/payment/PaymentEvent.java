@@ -4,7 +4,7 @@ import com.loopers.domain.common.DomainEvent;
 
 //public sealed interface PaymentEvent permits PaymentEvent.Completed, PaymentEvent.Canceled {
 public class PaymentEvent {
-    record Completed(
+    public record Completed(
             Long paymentId,
             Long orderId,
             Long userId,
@@ -24,7 +24,7 @@ public class PaymentEvent {
             );
         }
     }
-    record Canceled(
+    public record Canceled(
             Long paymentId,
             Long orderId,
             Long userId,

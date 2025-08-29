@@ -1,6 +1,6 @@
 package com.loopers.domain.order;
 
-import com.loopers.domain.BaseEntity;
+import com.loopers.domain.common.AggregateRoot;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Table(name = "orders")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Order extends BaseEntity {
+public class Order extends AggregateRoot {
 
     @Column(name = "ref_user_id", nullable = false)
     Long userId;
@@ -20,16 +20,16 @@ public class Order extends BaseEntity {
 //    @Column(name = "total_order_price", nullable = false)
 //    BigDecimal totalOrderPrice;
 
-    @Column(name = "original_total_price", nullable = false, precision = 12, scale = 2)
+    @Column(name = "original_total_price", nullable = true, precision = 12, scale = 2)
     private BigDecimal originalTotalPrice;
 
     @Column(name = "discount_amount", nullable = true, precision = 12, scale = 2)
     private BigDecimal discountAmount;
 
-    @Column(name = "final_total_price", nullable = false, precision = 12, scale = 2)
+    @Column(name = "final_total_price", nullable = true, precision = 12, scale = 2)
     private BigDecimal finalTotalPrice;
 
-    @Column(name = "ref_user_coupon_id", nullable = false)
+    @Column(name = "ref_user_coupon_id", nullable = true)
     Long couponId;
 
     // TODO. Enum 처리 해야됨
@@ -47,6 +47,7 @@ public class Order extends BaseEntity {
     private Order(Long userId, String status){
         this.userId = userId;
         this.status = status;
+        this.statusV2 = Status.valueOf(status);
     }
 
     public static Order create(Long userId) {
@@ -69,10 +70,25 @@ public class Order extends BaseEntity {
 
     public void created(){
         this.status = "CREATED";
+        registerEvent(OrderEvent.Created.from(this));
     }
 
     public void updateStatus(Status status) {
         this.statusV2 = status;
+    }
+
+    public void complete(){
+        if(this.statusV2.equals(Status.COMPLETED)) return;
+
+        this.statusV2 = Status.COMPLETED;
+        registerEvent(OrderEvent.Completed.from(this));
+    }
+
+    public void fail(){
+        if(this.statusV2.equals(Status.FAILED)) return;
+
+        this.statusV2 = Status.FAILED;
+        registerEvent(OrderEvent.Canceled.from(this));
     }
 
     public enum Status{

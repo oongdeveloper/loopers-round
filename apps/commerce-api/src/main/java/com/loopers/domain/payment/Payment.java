@@ -73,14 +73,16 @@ public class Payment extends AggregateRoot {
     }
 
     public void completed(){
+        if (this.status.equals(Status.COMPLETED)) return;
+
         this.status = Status.COMPLETED;
-//        domainEvents.add(PaymentEvent.Completed.from(this));
         registerEvent(PaymentEvent.Completed.from(this));
     }
 
     public void failed(){
+        if (this.status.equals(Status.FAILED)) return;
+
         this.status = Status.FAILED;
-//        domainEvents.add(PaymentEvent.Canceled.from(this));
         registerEvent(PaymentEvent.Canceled.from(this));
     }
 

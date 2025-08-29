@@ -1,5 +1,6 @@
 package com.loopers.application.order;
 
+import com.loopers.domain.common.DomainEventPublisher;
 import com.loopers.domain.coupons.issued.UserCouponCommand;
 import com.loopers.domain.coupons.issued.UserCouponService;
 import com.loopers.domain.order.Order;
@@ -9,6 +10,7 @@ import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import com.loopers.domain.stock.StockService;
 import jakarta.transaction.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +26,16 @@ public class OrderFacade {
     private final StockService stockService;
     private final UserCouponService userCouponService;
 
-    public OrderFacade(OrderService orderService, ProductService productService, StockService stockService, UserCouponService userCouponService) {
+    private final DomainEventPublisher domainEventPublisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    public OrderFacade(OrderService orderService, ProductService productService, StockService stockService, UserCouponService userCouponService, DomainEventPublisher domainEventPublisher, ApplicationEventPublisher applicationEventPublisher) {
         this.orderService = orderService;
         this.productService = productService;
         this.stockService = stockService;
         this.userCouponService = userCouponService;
+        this.domainEventPublisher = domainEventPublisher;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Transactional
@@ -48,7 +55,9 @@ public class OrderFacade {
         order.created();
 
         orderService.save(order);
-        stockService.decreaseStock(requestMap);
+//        stockService.reduceStock(requestMap);
+        domainEventPublisher.publish(order.pullDomainEvents());
+        applicationEventPublisher.publishEvent(OrderAppEvent.Created.of(request.userId(), requestMap));
         return OrderInfo.of(order);
     }
 
@@ -61,5 +70,16 @@ public class OrderFacade {
     public OrderResult.DataDetail getOrderDetail(OrderQuery.Detail query) {
         Order order = orderService.getOrderDetail(query.orderId());
         return OrderResult.DataDetail.of(order.getId(), order.getLines().getLines());
+    }
+
+    public void completed(Long orderId){
+        orderService.find(orderId)
+                .complete();
+    }
+
+    public void failed(Long orderId){
+        Order order = orderService.find(orderId);
+        order.fail();
+        domainEventPublisher.publish(order.pullDomainEvents());
     }
 }

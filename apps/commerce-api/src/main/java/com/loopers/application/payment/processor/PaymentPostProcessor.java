@@ -1,15 +1,14 @@
 package com.loopers.application.payment.processor;
 
+import com.loopers.application.payment.PaymentResult;
 import com.loopers.application.payment.action.CompletedPaymentAction;
 import com.loopers.application.payment.action.FailedPaymentAction;
 import com.loopers.application.payment.action.PaymentAction;
-import com.loopers.application.payment.PaymentResult;
-import com.loopers.domain.coupons.issued.UserCouponService;
-import com.loopers.domain.order.OrderService;
+import com.loopers.domain.common.DomainEventPublisher;
 import com.loopers.domain.payment.PaymentService;
-import com.loopers.domain.stock.StockService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -20,9 +19,14 @@ import java.util.Map;
 public class PaymentPostProcessor {
     private final Map<PaymentResult.Status, PaymentAction> actions = new HashMap<>();
 
-    public PaymentPostProcessor(PaymentService paymentService, OrderService orderService, StockService stockService, UserCouponService userCouponService) {
-        actions.put(PaymentResult.Status.COMPLETED, new CompletedPaymentAction(paymentService, orderService));
-        actions.put(PaymentResult.Status.FAILED, new FailedPaymentAction(paymentService, orderService, stockService, userCouponService));
+//    public PaymentPostProcessor(PaymentService paymentService, OrderService orderService, StockService stockService, UserCouponService userCouponService, DomainEventPublisher publisher) {
+//        actions.put(PaymentResult.Status.COMPLETED, new CompletedPaymentAction(paymentService, orderService, publisher));
+//        actions.put(PaymentResult.Status.FAILED, new FailedPaymentAction(paymentService, orderService, stockService, userCouponService, publisher));
+//    }
+
+    public PaymentPostProcessor(PaymentService paymentService, DomainEventPublisher publisher, ApplicationEventPublisher applicationEventPublisher) {
+        actions.put(PaymentResult.Status.COMPLETED, new CompletedPaymentAction(paymentService, publisher, applicationEventPublisher));
+        actions.put(PaymentResult.Status.FAILED, new FailedPaymentAction(paymentService, publisher, applicationEventPublisher));
     }
 
     @Transactional

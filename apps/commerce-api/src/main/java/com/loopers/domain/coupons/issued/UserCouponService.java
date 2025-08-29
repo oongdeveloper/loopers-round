@@ -28,8 +28,17 @@ public class UserCouponService {
     }
 
     @Transactional
-    public void rollbackCoupon(Long userId, Long id) {
-        UserCoupon coupon = userCouponRepository.findUserCoupon(userId, id)
+    public void use(UserCouponCommand.Use command){
+        userCouponRepository.findUserCoupon(command.userId(), command.couponId())
+                .ifPresentOrElse(
+                        UserCoupon::use,
+                        () -> new CoreException(ErrorType.NOT_FOUND,"사용자에게 존재하지 않는 쿠폰입니다. " + command.couponId())
+                );
+    }
+
+    @Transactional
+    public void rollbackCoupon(UserCouponCommand.Rollback command) {
+        UserCoupon coupon = userCouponRepository.findUserCoupon(command.userId(), command.couponId())
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "사용자에게 존재하지 않는 쿠폰입니다."));
         coupon.rollback();
     }
