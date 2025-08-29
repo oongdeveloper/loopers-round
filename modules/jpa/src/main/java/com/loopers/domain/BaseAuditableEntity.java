@@ -1,6 +1,9 @@
 package com.loopers.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 
 import java.time.ZonedDateTime;
@@ -13,13 +16,13 @@ import java.time.ZonedDateTime;
 @Getter
 public abstract class BaseAuditableEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
-    private ZonedDateTime createdAt;
+    protected ZonedDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private ZonedDateTime updatedAt;
+    protected ZonedDateTime updatedAt;
 
     @Column(name = "deleted_at")
-    private ZonedDateTime deletedAt;
+    protected ZonedDateTime deletedAt;
 
     /**
      * 엔티티의 유효성을 검증한다.
