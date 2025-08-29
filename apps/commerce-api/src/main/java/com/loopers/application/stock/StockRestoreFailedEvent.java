@@ -1,6 +1,7 @@
 package com.loopers.application.stock;
 
-import com.loopers.domain.notify.AppErrorEvent;
+
+import com.loopers.support.event.AppErrorEvent;
 
 import java.util.Map;
 

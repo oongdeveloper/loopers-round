@@ -1,6 +1,7 @@
 package com.loopers.application.coupon;
 
-import com.loopers.domain.notify.AppErrorEvent;
+
+import com.loopers.support.event.AppErrorEvent;
 
 public record CouponRollbackFailedEvent(
         Long userId,
