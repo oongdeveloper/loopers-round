@@ -38,6 +38,18 @@ resilience4j:
         retry-exceptions:
           - com.loopers.data.feign.RetryableException
         fail-after-max-attempts: true
+      internalTaskRetry:
+        max-attempts: 2
+        expotentailBackoff:
+          initialInterval: 500ms
+          multiplier: 2
+#        wait-duration: 500ms
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessException # Spring 추상화의 최상위 예외. 일시적인 데이터 처리 예외
+          - jakarta.persistence.QueryTimeoutException # DB 쿼리가 지정된 시간 내에 완료되지 못한 경우
+          - java.sql.SQLTransientConnectionException # JDBC 드라이버 수준에서 DB 연결에 일시적인 문제 발생
+          - org.springframework.jdbc.CannotGetJdbcConnectionException # DB 연결 획득 실패했을 때
+        fail-after-max-attempts: true
   circuitbreaker:
     instances:
       pgCircuit:
