@@ -1,6 +1,6 @@
 package com.loopers.domain.product;
 
-import com.loopers.domain.BaseEntity;
+import com.loopers.domain.common.AggregateRoot;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import io.micrometer.common.util.StringUtils;
@@ -27,7 +27,7 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
-public class Product extends BaseEntity {
+public class Product extends AggregateRoot {
 
     @Column(name = "ref_brand_id", nullable = false)
     private Long brandId;
@@ -69,6 +69,14 @@ public class Product extends BaseEntity {
         return new Product(
                 brandId, productName, basePrice, imageUrl, description
         );
+    }
+
+    public void like(){
+        this.likeCount++;
+    }
+
+    public void unlike(){
+        this.likeCount--;
     }
 
     private void validate(Long brandId, String productName, BigDecimal basePrice, String imageUrl){

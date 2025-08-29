@@ -13,7 +13,6 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ProductLike extends BaseAuditableEntity {
-
     @Id
     @Column(name = "ref_product_id", nullable = false)
     private Long productId;
@@ -26,6 +25,14 @@ public class ProductLike extends BaseAuditableEntity {
 
         this.productId = productId;
         this.likeCount = likeCount;
+    }
+
+    public void like(){
+        this.likeCount++;
+    }
+
+    public void unlike(){
+        this.likeCount--;
     }
 
     public static ProductLike of(Long productId, Long likeCount) {

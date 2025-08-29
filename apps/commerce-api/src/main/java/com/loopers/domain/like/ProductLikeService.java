@@ -22,4 +22,14 @@ public class ProductLikeService {
                 .orElse(ProductLike.of(productId, 0L));
     }
 
+    public void increase(Long productId){
+        productLikeRepository.getProductLike(productId)
+                .ifPresent(ProductLike::like);
+    }
+
+    public void decrease(Long productId){
+        productLikeRepository.getProductLike(productId)
+                .ifPresent(ProductLike::unlike);
+    }
+
 }
