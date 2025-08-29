@@ -12,7 +12,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserServiceIntegrationTest {
@@ -25,7 +27,7 @@ public class UserServiceIntegrationTest {
 
     @Autowired
     public UserServiceIntegrationTest(UserService userService,
-                                      DatabaseCleanUp databaseCleanUp) {
+                                          DatabaseCleanUp databaseCleanUp) {
         this.userService = userService;
         this.databaseCleanUp = databaseCleanUp;
     }
