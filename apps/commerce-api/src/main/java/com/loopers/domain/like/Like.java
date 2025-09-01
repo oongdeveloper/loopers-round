@@ -1,6 +1,6 @@
 package com.loopers.domain.like;
 
-import com.loopers.domain.BaseAuditableEntity;
+import com.loopers.domain.common.AuditableAggregateRoot;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -11,12 +11,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "likes")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Like extends BaseAuditableEntity {
+public class Like extends AuditableAggregateRoot {
     @EmbeddedId
     private LikeId id;
 
     private Like(Long userId, Long productId) {
         this.id = new LikeId(userId, productId);
+        registerEvent(LikeEvent.Liked.from(this));
     }
 
     public static Like of(Long userId, Long productId) {
@@ -41,6 +42,21 @@ public class Like extends BaseAuditableEntity {
 
         public static LikeId of(Long userId, Long productId) {
             return new LikeId(userId, productId);
+        }
+    }
+
+
+    public void delete() {
+        if (this.deletedAt == null) {
+            super.delete();
+            registerEvent(LikeEvent.UnLiked.from(this));
+        }
+    }
+
+    public void restore() {
+        if (this.deletedAt != null) {
+            super.restore();
+            registerEvent(LikeEvent.Liked.from(this));
         }
     }
 }

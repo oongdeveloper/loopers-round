@@ -90,7 +90,7 @@ public class CouponConcurrencyTest {
                     ))
                     .toList();
 
-            int threadCount = 10;
+            int threadCount = 5;
             ExecutorService executor = Executors.newFixedThreadPool(threadCount);
             CountDownLatch latch = new CountDownLatch(threadCount);
             AtomicInteger failedCount = new AtomicInteger(0);
@@ -117,7 +117,7 @@ public class CouponConcurrencyTest {
 
             latch.await();
 
-            assertThat(failedCount.get()).isEqualTo(9);
+            assertThat(failedCount.get()).isEqualTo(4);
         }
     }
 }

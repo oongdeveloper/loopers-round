@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class PointPaymentMethod extends AbstractPaymentMethod {
     private final PointService pointService;
+    private final int NON_PG_PROVIDER = 0;
+
 
     public PointPaymentMethod(PointService pointService) {
         this.pointService = pointService;
@@ -22,7 +24,7 @@ public class PointPaymentMethod extends AbstractPaymentMethod {
 
     @Override
     PaymentResult doPay(PaymentCommand command) {
-        try{
+        try {
             pointService.deduct(PointCommand.Deduct.of(command.getUserId(), command.getAmount()));
 
             return new PaymentResult(
@@ -32,10 +34,10 @@ public class PointPaymentMethod extends AbstractPaymentMethod {
                     command.getMethod(),
                     PaymentResult.Status.COMPLETED,
                     "정상 결제되었습니다.",
-                    null,
+                    NON_PG_PROVIDER,
                     null
             );
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return new PaymentResult(
                     command.getOrderId(),
                     command.getIdempotencyKey(),
@@ -43,7 +45,7 @@ public class PointPaymentMethod extends AbstractPaymentMethod {
                     command.getMethod(),
                     PaymentResult.Status.FAILED,
                     e.getMessage(),
-                    null,
+                    NON_PG_PROVIDER,
                     null
             );
         }

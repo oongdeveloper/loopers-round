@@ -1,11 +1,13 @@
 package com.loopers.domain.payment;
 
 
-import com.loopers.domain.BaseEntity;
+import com.loopers.domain.common.AggregateRoot;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "payment")
@@ -13,7 +15,9 @@ import java.math.BigDecimal;
 @Getter
 @AllArgsConstructor
 @ToString
-public class Payment extends BaseEntity {
+public class Payment extends AggregateRoot {
+    @Transient
+    private final List<PaymentEvent> domainEvents = new ArrayList<>();
 
     @Column(name = "idempotency_key", unique = true, nullable = false)
     String idempotencyKey;
@@ -66,6 +70,20 @@ public class Payment extends BaseEntity {
 
     public void updateStatus(Status status) {
         this.status = status;
+    }
+
+    public void completed(){
+        if (this.status.equals(Status.COMPLETED)) return;
+
+        this.status = Status.COMPLETED;
+        registerEvent(PaymentEvent.Completed.from(this));
+    }
+
+    public void failed(){
+        if (this.status.equals(Status.FAILED)) return;
+
+        this.status = Status.FAILED;
+        registerEvent(PaymentEvent.Canceled.from(this));
     }
 
     public void setPgProvider(int provider){

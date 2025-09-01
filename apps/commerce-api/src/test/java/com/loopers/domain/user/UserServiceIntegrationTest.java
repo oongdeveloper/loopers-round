@@ -8,9 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserServiceIntegrationTest {
@@ -23,7 +27,7 @@ public class UserServiceIntegrationTest {
 
     @Autowired
     public UserServiceIntegrationTest(UserService userService,
-                                      DatabaseCleanUp databaseCleanUp) {
+                                          DatabaseCleanUp databaseCleanUp) {
         this.userService = userService;
         this.databaseCleanUp = databaseCleanUp;
     }
@@ -104,19 +108,17 @@ public class UserServiceIntegrationTest {
         void success_whenFindExistUserId(){
             User userInfo = userService.find(ENROLLED_USER);
 
-//            assertThat(userInfo)
-//                    .isPresent()
-//                    .hasValueSatisfying(user -> {
-//                        assertThat(user.getUserId()).isEqualTo(ENROLLED_USER);
-//                        assertThat(user.getUserName()).isEqualTo("오옹");
-//                    });
+            assertThat(Optional.of(userInfo))
+                    .hasValueSatisfying(user -> {
+                        assertThat(user.getUserId()).isEqualTo(ENROLLED_USER);
+                        assertThat(user.getUserName()).isEqualTo("오옹");
+                    });
         }
 
         @DisplayName("해당 ID 의 회원이 존재하지 않을 경우, NOT_FOUND 에러가 발생한다.")
         @Test
         void throwNullPointException_whenCannotFindUserId(){
             CoreException exception = assertThrows(CoreException.class, () -> {
-//                userService.save(command);
                 User userEntity = userService.find(UNKNOWN_USER);
             });
 

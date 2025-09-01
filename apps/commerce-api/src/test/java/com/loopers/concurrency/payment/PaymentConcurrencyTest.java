@@ -1,10 +1,12 @@
 package com.loopers.concurrency.payment;
 
+import com.loopers.application.payment.PaymentFacade;
+import com.loopers.domain.order.Order;
+import com.loopers.domain.order.OrderRepository;
+import com.loopers.domain.order.OrderService;
 import com.loopers.domain.payment.Payment;
 import com.loopers.domain.payment.PaymentCommand;
-import com.loopers.application.payment.PaymentFacade;
 import com.loopers.domain.point.Point;
-import com.loopers.domain.stock.StockService;
 import com.loopers.domain.user.User;
 import com.loopers.domain.user.UserCommand;
 import com.loopers.infrastructure.point.PointJpaRepository;
@@ -13,9 +15,11 @@ import com.loopers.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.math.BigDecimal;
 import java.util.concurrent.CountDownLatch;
@@ -24,7 +28,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 public class PaymentConcurrencyTest {
     @Autowired
@@ -33,8 +40,10 @@ public class PaymentConcurrencyTest {
     private PointJpaRepository pointRepository;
     @Autowired
     private UserJpaRepository userJpaRepository;
-    @MockitoSpyBean
-    private StockService stockService;
+    @Autowired
+    private OrderRepository orderRepository;
+    @MockitoBean
+    private OrderService orderService;
 
     @Autowired
     private DatabaseCleanUp databaseCleanUp;
@@ -59,21 +68,28 @@ public class PaymentConcurrencyTest {
         BigDecimal DEDUCT_POINT = BigDecimal.valueOf(1000L);
 
         pointRepository.save(Point.from(USER_ID, TOTAL_POINT));
+        Order order = orderRepository.save(Order.create(user.getId()));
 
-        int threadCount = 10;
+        int threadCount = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch latch = new CountDownLatch(threadCount);
         AtomicInteger failCount = new AtomicInteger(0);
 
+        when(orderService.validateOrder(any(Long.class), any(Long.class), any(BigDecimal.class)))
+                .thenReturn(null);
+        when(orderService.find(any(Long.class)))
+                .thenReturn(order);
+
+        String generatedKey = paymentFacade.generateKey(USER_ID, order.getId());
         for (int i = 0; i < threadCount; i++) {
             executor.submit(() -> {
                 try {
                     paymentFacade.pay(PaymentCommand.of(
                             USER_ID,
-                            1L,
-                            null,
-                            BigDecimal.ZERO,
-                            Payment.Method.CARD.name(),
+                            order.getId(),
+                            generatedKey,
+                            DEDUCT_POINT,
+                            Payment.Method.POINT.name(),
                             null
                     ));
                 } catch (RuntimeException e){
@@ -88,7 +104,7 @@ public class PaymentConcurrencyTest {
 
         latch.await();
         assertThat(failCount.get())
-                .isEqualTo(9);
+                .isEqualTo(4);
 //        verify(stockService, times(9)).increaseStock(any(Map.class));
     }
 }

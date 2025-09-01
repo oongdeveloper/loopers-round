@@ -11,6 +11,7 @@ import com.loopers.domain.pg.PgGatewayService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import static com.loopers.domain.pg.PgPaymentInfo.TransactionResponse;
@@ -24,12 +25,15 @@ public class PaymentFacade {
     private final PaymentProcessor paymentProcessor;
     private final PaymentPostProcessor postProcessor;
 
-    public PaymentFacade(PaymentService paymentService, OrderService orderService, PgGatewayService pgGatewayService, PaymentProcessor paymentProcessor, PaymentPostProcessor postProcessor) {
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    public PaymentFacade(PaymentService paymentService, OrderService orderService, PgGatewayService pgGatewayService, PaymentProcessor paymentProcessor, PaymentPostProcessor postProcessor, ApplicationEventPublisher applicationEventPublisher) {
         this.paymentService = paymentService;
         this.orderService = orderService;
         this.pgGatewayService = pgGatewayService;
         this.paymentProcessor = paymentProcessor;
         this.postProcessor = postProcessor;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public PaymentResult pay(PaymentCommand command){
@@ -37,12 +41,6 @@ public class PaymentFacade {
             if(!command.getIdempotencyKey().equals(paymentService.findIdempotencyKey(command)))
                 throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 키 요청입니다.");
 
-            // TODO. Service 에서 Optional 을 안주면 내가 Controller 할 수가 없음.
-//            Order order = orderService.findByIdAndUserId(command.getOrderId(), command.getUserId())
-//                    .orElseThrow(() -> new CoreException(ErrorType.BAD_REQUEST, "존재하지 않는 주문에 대한 결제 요청입니다."));
-//
-//            if (command.getAmount().compareTo(order.getFinalTotalPrice()) != 0)
-//                throw new CoreException(ErrorType.BAD_REQUEST, "잘못된 결제 요청입니다.");
             orderService.validateOrder(command.getOrderId(), command.getUserId(), command.getAmount());
             paymentService.findByKey(command.getIdempotencyKey()).
                     ifPresentOrElse(
@@ -50,6 +48,7 @@ public class PaymentFacade {
                             () -> paymentService.save(Payment.of(command))
                     );
 
+            applicationEventPublisher.publishEvent(PaymentAppEvent.Reqeust.from(command));
             // 결제 요청
             return paymentProcessor.process(command);
         } catch (Exception e) {
@@ -62,7 +61,6 @@ public class PaymentFacade {
         try{
             validatePgResponse(res);
             Payment payment = validateInternalPayment(res);
-
             PaymentResult paymentResult = PaymentResult.from(payment, res.status().name());
             postProcessor.postprocess(paymentResult);
         } catch (RuntimeException e){

@@ -8,8 +8,10 @@ import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import com.loopers.domain.product.ProductSku;
 import com.loopers.domain.product.projections.ProductListProjectionV2;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,11 +21,13 @@ public class ProductFacade {
     private final BrandService brandService;
     private final ProductService productService;
     private final ProductLikeService productLikeService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ProductFacade(BrandService brandService, ProductService productService, ProductLikeService productLikeService) {
+    public ProductFacade(BrandService brandService, ProductService productService, ProductLikeService productLikeService, ApplicationEventPublisher eventPublisher) {
         this.brandService = brandService;
         this.productService = productService;
         this.productLikeService = productLikeService;
+        this.eventPublisher = eventPublisher;
     }
 
     public Page<ProductInfo.DataList> getProductList(ProductQuery.Summary query) {
@@ -43,15 +47,12 @@ public class ProductFacade {
         );
     }
 
-    public ProductInfo.DataDetail getProductDetail(ProductQuery.Detail query) {
-        long startTime = System.currentTimeMillis();
+    public ProductInfo.DataDetail getProductDetail(@RequestHeader("X-USER-ID") Long userId, ProductQuery.Detail query) {
         Product product = productService.getProductDetail(query.productId());
         Brand brand = brandService.get(product.getBrandId());
         ProductLike productLike = productLikeService.get(query.productId());
 
-        long endTime = System.currentTimeMillis();
-        long executionTime = endTime - startTime;
-        System.out.println("상품 목록 조회 실행 시간: 222 " + executionTime + "ms");
+        eventPublisher.publishEvent(ProductAppEvent.Clicked.of(userId, query.productId()));
         return toDataDetail(product, brand, productLike.getLikeCount());
     }
 

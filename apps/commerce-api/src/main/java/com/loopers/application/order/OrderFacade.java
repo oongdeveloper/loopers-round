@@ -1,5 +1,6 @@
 package com.loopers.application.order;
 
+import com.loopers.domain.common.DomainEventPublisher;
 import com.loopers.domain.coupons.issued.UserCouponCommand;
 import com.loopers.domain.coupons.issued.UserCouponService;
 import com.loopers.domain.order.Order;
@@ -9,13 +10,13 @@ import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import com.loopers.domain.stock.StockService;
 import jakarta.transaction.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OrderFacade {
@@ -25,46 +26,39 @@ public class OrderFacade {
     private final StockService stockService;
     private final UserCouponService userCouponService;
 
-    public OrderFacade(OrderService orderService, ProductService productService, StockService stockService, UserCouponService userCouponService) {
+    private final DomainEventPublisher domainEventPublisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    public OrderFacade(OrderService orderService, ProductService productService, StockService stockService, UserCouponService userCouponService, DomainEventPublisher domainEventPublisher, ApplicationEventPublisher applicationEventPublisher) {
         this.orderService = orderService;
         this.productService = productService;
         this.stockService = stockService;
         this.userCouponService = userCouponService;
+        this.domainEventPublisher = domainEventPublisher;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Transactional
     public OrderInfo createOrder(OrderCommand.Create request){
         Map<Long, Long> requestMap = request.toMap();
 
-        try{
-            stockService.decreaseStock(requestMap);
-            List<Product> foundProducts = productService.getProuctListByIds(requestMap.keySet());
+        List<Product> foundProducts = productService.getProuctListByIds(requestMap.keySet());
+        Order order = OrderFactory.createOrder(request.userId(), requestMap, foundProducts);
+        BigDecimal finalPrice = userCouponService.applyCoupon(
+                UserCouponCommand.Apply.of(
+                        request.userId(),
+                        request.couponId(),
+                        order.getOriginalTotalPrice()
+                )
+        );
+        order.updateFinalTotalPrice(finalPrice);
+        order.created();
 
-//            List<ProductSku> foundSkus =  productSkuService.findByIds(requestMap.keySet());
-//            Set<Long> catalogIds = foundSkus.stream()
-//                    .map(ProductSku::getProductCatalogId)
-//                    .collect(Collectors.toSet());
-//            List<Product> foundCatalogs = productCatalogService.findByIds(catalogIds);
-//            Order order = OrderFactory.createOrder(request.userId(), requestMap, foundSkus, foundCatalogs);
-            Order order = OrderFactory.createOrder(request.userId(), requestMap, foundProducts);
-
-            orderService.save(order);
-            BigDecimal finalPrice = userCouponService.applyCoupon(
-                    UserCouponCommand.Apply.of(
-                            request.userId(),
-                            request.couponId(),
-                            order.getOriginalTotalPrice()
-                    )
-            );
-            order.updateFinalTotalPrice(finalPrice);
-            order.created();
-            return OrderInfo.of(order);
-        } catch (RuntimeException e) {
-            CompletableFuture.runAsync(
-                    () -> stockService.restoreStock(requestMap)
-            );
-            throw new RuntimeException(e);
-        }
+        orderService.save(order);
+//        stockService.reduceStock(requestMap);
+        domainEventPublisher.publish(order.pullDomainEvents());
+        applicationEventPublisher.publishEvent(OrderAppEvent.Created.of(request.userId(), requestMap));
+        return OrderInfo.of(order);
     }
 
     public Page<OrderResult.DataList> getOrderList(OrderQuery.Summary query) {
@@ -76,5 +70,16 @@ public class OrderFacade {
     public OrderResult.DataDetail getOrderDetail(OrderQuery.Detail query) {
         Order order = orderService.getOrderDetail(query.orderId());
         return OrderResult.DataDetail.of(order.getId(), order.getLines().getLines());
+    }
+
+    public void completed(Long orderId){
+        orderService.find(orderId)
+                .complete();
+    }
+
+    public void failed(Long orderId){
+        Order order = orderService.find(orderId);
+        order.fail();
+        domainEventPublisher.publish(order.pullDomainEvents());
     }
 }
