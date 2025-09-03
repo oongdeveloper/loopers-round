@@ -5,6 +5,7 @@ include(
     ":apps:pg-simulator",
     ":modules:jpa",
     ":modules:rediss",
+    ":modules:kafka",
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",
@@ -30,3 +31,6 @@ pluginManagement {
         }
     }
 }
+
+include("apps:commerce-streamer")
+include("modules:kafka")
