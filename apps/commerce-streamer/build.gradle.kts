@@ -9,7 +9,7 @@ repositories {
 dependencies {
     // add-ons
     implementation(project(":modules:jpa"))
-    implementation(project(":modules:rediss"))
+//    implementation(project(":modules:rediss"))
     implementation(project(":modules:kafka"))
     implementation(project(":modules:event:core"))
     implementation(project(":supports:jackson"))
@@ -22,7 +22,7 @@ dependencies {
 
     // test-fixtures
     testImplementation(testFixtures(project(":modules:jpa")))
-    testImplementation(testFixtures(project(":modules:rediss")))
+//    testImplementation(testFixtures(project(":modules:rediss")))
 
 //    testImplementation(platform("org.junit:junit-bom:5.10.0"))
 //    testImplementation("org.junit.jupiter:junit-jupiter")
