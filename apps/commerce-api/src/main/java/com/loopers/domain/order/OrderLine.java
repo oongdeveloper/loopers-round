@@ -21,6 +21,9 @@ public class OrderLine extends BaseEntity {
     @JoinColumn(name = "ref_order_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     Order order;
 
+    @Column(name = "ref_product_id", nullable = false)
+    Long productId;
+
     @Column(name = "ref_product_sku_id", nullable = false)
     Long productSkuId;
 
@@ -34,11 +37,11 @@ public class OrderLine extends BaseEntity {
     @Column(name = "order_line_price", nullable = false)
     BigDecimal orderLinePrice;
 
-    private OrderLine(Long productSkuId, Long quantity,
+    private OrderLine(Long productId, Long productSkuId, Long quantity,
                      String orderLineProductName, BigDecimal orderLinePrice) {
 
         validate(quantity, orderLinePrice);
-
+        this.productId = productId;
         this.productSkuId = productSkuId;
         this.quantity = quantity;
         this.orderLineProductName = orderLineProductName;
@@ -46,9 +49,9 @@ public class OrderLine extends BaseEntity {
         this.totalLinePrice = calculateTotalLinePrice();
     }
 
-    public static OrderLine create(Long productSkuId, Long quantity,
+    public static OrderLine create(Long productId, Long productSkuId, Long quantity,
                      String orderLineProductName, BigDecimal orderLinePrice) {
-        return new OrderLine(productSkuId, quantity, orderLineProductName, orderLinePrice);
+        return new OrderLine(productId, productSkuId, quantity, orderLineProductName, orderLinePrice);
     }
 
     public boolean hasSameProduct(OrderLine other){

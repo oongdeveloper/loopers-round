@@ -1,6 +1,6 @@
 package com.loopers.domain.stock;
 
-import com.loopers.domain.BaseEntity;
+import com.loopers.domain.shared.AggregateRoot;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import jakarta.persistence.Column;
@@ -17,7 +17,10 @@ import lombok.NoArgsConstructor;
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Stock extends BaseEntity {
+public class Stock extends AggregateRoot {
+
+    @Column(name = "ref_product_id", nullable = false)
+    Long productId;
 
     @Column(name = "ref_product_sku_id", nullable = false)
     Long productSkuId;
@@ -25,7 +28,8 @@ public class Stock extends BaseEntity {
     @Column(name = "quantity", nullable = false)
     Long quantity;
 
-    private Stock(Long productSkuId, Long quantity) {
+    private Stock(Long productId, Long productSkuId, Long quantity) {
+        this.productId = productId;
         this.productSkuId = productSkuId;
         this.quantity = quantity;
     }
@@ -40,13 +44,17 @@ public class Stock extends BaseEntity {
         }
     }
 
-    public static Stock from(Long productSkuId, Long quantity) {
-        return new Stock(productSkuId, quantity);
+    public static Stock from(Long productId, Long productSkuId, Long quantity) {
+        return new Stock(productId, productSkuId, quantity);
     }
 
     public void restoreStock(long quantity){
         if (quantity <= 0) {
             throw new CoreException(ErrorType.BAD_REQUEST,"증가시킬 재고 수량은 0보다 커야 합니다.");
+        }
+
+        if(this.quantity == 0){
+            registerEvent(StockEvent.OnSale.from(this));
         }
         this.quantity += quantity;
     }
@@ -59,5 +67,9 @@ public class Stock extends BaseEntity {
             throw  new IllegalArgumentException("재고가 부족하여 감소시킬 수 없습니다.");
         }
         this.quantity -= quantity;
+
+        if(this.quantity == 0){
+            registerEvent(StockEvent.OutOfStock.from(this));
+        }
     }
 }

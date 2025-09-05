@@ -47,8 +47,13 @@ public class OrderLines {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public Map<Long, Long> getOrderLineQuantity(){
+    public Map<Long, Long> getOrderLineQuantity() {
         return lines.stream()
-                .collect(Collectors.toMap(OrderLine::getId, OrderLine::getQuantity));
+                .collect(Collectors.toMap(OrderLine::getProductSkuId, OrderLine::getQuantity));
+    }
+
+    public Map<Long, Long> getOrderLineProductId() {
+        return lines.stream()
+                .collect(Collectors.toMap(OrderLine::getProductSkuId, OrderLine::getProductId));
     }
 }

@@ -12,6 +12,6 @@ public record OrderInfo(
 ) {
 
     public static OrderInfo of(Order order) {
-        return new OrderInfo(order.getId(), order.getFinalTotalPrice(), order.getOriginalTotalPrice(), order.getStatus());
+        return new OrderInfo(order.getId(), order.getFinalTotalPrice(), order.getOriginalTotalPrice(), order.getStatusV2().name());
     }
 }
