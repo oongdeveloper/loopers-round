@@ -1,7 +1,7 @@
 package com.loopers.domain.payment;
 
 
-import com.loopers.domain.common.AggregateRoot;
+import com.loopers.domain.shared.AggregateRoot;
 import jakarta.persistence.*;
 import lombok.*;
 

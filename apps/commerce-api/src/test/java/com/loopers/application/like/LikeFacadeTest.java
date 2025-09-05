@@ -1,7 +1,7 @@
 package com.loopers.application.like;
 
-import com.loopers.domain.common.DomainEvent;
-import com.loopers.domain.common.DomainEventPublisher;
+import com.loopers.domain.shared.DomainEvent;
+import com.loopers.domain.shared.DomainEventPublisher;
 import com.loopers.domain.like.Like;
 import com.loopers.domain.like.LikeEvent;
 import com.loopers.domain.like.LikeService;

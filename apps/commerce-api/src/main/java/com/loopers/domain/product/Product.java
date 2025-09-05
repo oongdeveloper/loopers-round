@@ -1,6 +1,6 @@
 package com.loopers.domain.product;
 
-import com.loopers.domain.common.AggregateRoot;
+import com.loopers.domain.shared.AggregateRoot;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import io.micrometer.common.util.StringUtils;

@@ -1,4 +1,4 @@
-package com.loopers.domain.common;
+package com.loopers.domain.shared;
 
 import com.loopers.domain.BaseEntity;
 import jakarta.persistence.MappedSuperclass;

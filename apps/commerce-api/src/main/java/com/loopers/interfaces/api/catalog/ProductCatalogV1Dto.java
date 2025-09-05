@@ -20,4 +20,13 @@ public class ProductCatalogV1Dto {
         LOW_PRICE,
         LIKE
     }
+
+    public record Summary(
+
+    ){}
+
+    public record Detail(
+
+    ){}
+
 }

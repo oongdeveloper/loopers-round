@@ -1,6 +1,6 @@
 package com.loopers.domain.like;
 
-import com.loopers.domain.common.AuditableAggregateRoot;
+import com.loopers.domain.shared.AuditableAggregateRoot;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

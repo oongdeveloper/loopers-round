@@ -2,6 +2,7 @@ package com.loopers.application.product;
 
 
 import com.loopers.config.redis.RedisCacheWrapper;
+import com.loopers.domain.brand.BrandService;
 import com.loopers.domain.product.ProductRepository;
 import com.loopers.domain.product.ProductService;
 import com.loopers.domain.product.projections.ProductListProjectionV2;
@@ -31,8 +32,14 @@ public class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
 
-    @InjectMocks
+    @Mock
+    private BrandService brandService;
+
+    @Mock
     private ProductService productService;
+
+    @InjectMocks
+    private ProductFacade productFacade;
 
     // 테스트에 필요한 상수와 객체
     private Long brandId;
@@ -54,13 +61,17 @@ public class ProductServiceTest {
     @Test
     @DisplayName("Redis 캐시가 없는 경우, DB에서 count를 가져와야 한다.")
     void findByBrandIdBySortType_withoutCache() {
+        when(brandService.get(eq(brandId)))
+                .thenReturn(null);
+        when(productService.count())
+                .thenReturn(1000L);
         when(redisCacheWrapper.get(eq(PRODUCT_COUNT_REDIS_PREFIX), eq(Long.class)))
                 .thenReturn(null);
         when(productRepository.count()).thenReturn(mockCount);
         when(productRepository.findByBrandIdBySortType(eq(brandId), eq(sort), eq(pageable)))
                 .thenReturn(mockPage.getContent());
 
-        productService.findByBrandIdBySortType(brandId, sort, pageable);
+        productFacade.getProductList(ProductQuery.Summary.of(brandId, sort, pageable));
 
         // Redis에서 count를 가져오는 메서드가 1번 호출되었는지 확인
         verify(redisCacheWrapper, times(1)).get(eq(PRODUCT_COUNT_REDIS_PREFIX), eq(Long.class));
