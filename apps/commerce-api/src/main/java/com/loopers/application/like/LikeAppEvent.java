@@ -1,5 +1,6 @@
 package com.loopers.application.like;
 
+import com.loopers.event.core.EventType;
 import com.loopers.support.event.AppEvent;
 
 public class LikeAppEvent {
@@ -10,6 +11,11 @@ public class LikeAppEvent {
         public static Liked of(Long userId, Long productId){
             return new Liked(userId, productId);
         }
+
+        @Override
+        public EventType getType() {
+            return EventType.PRODUCT_LIKED;
+        }
     }
 
     public record UnLiked(
@@ -18,6 +24,11 @@ public class LikeAppEvent {
     ) implements AppEvent {
         public static UnLiked of(Long userId, Long productId){
             return new UnLiked(userId, productId);
+        }
+
+        @Override
+        public EventType getType() {
+            return EventType.PRODUCT_UNLIKED;
         }
     }
 }
