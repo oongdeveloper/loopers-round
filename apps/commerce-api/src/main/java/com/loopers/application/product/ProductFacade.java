@@ -65,17 +65,19 @@ public class ProductFacade {
     public ProductInfo.DataDetail getProductDetail(@RequestHeader("X-USER-ID") Long userId, ProductQuery.Detail query) {
         ProductInfo.DataDetail cachedDetail = redisCacheWrapper.get(PREFIX_PRODUCT_DETAIL+query.productId(), ProductInfo.DataDetail.class);
 
-        if (cachedDetail != null) return cachedDetail;
+        if (cachedDetail != null){
+            globalEventPublisher.publish(ProductAppEvent.Clicked.of(userId, query.productId()));
+            return cachedDetail;
+        } else {
+            Product product = productService.getProductDetail(query.productId());
+            Brand brand = brandService.get(product.getBrandId());
+            ProductLike productLike = productLikeService.get(query.productId());
 
-        Product product = productService.getProductDetail(query.productId());
-        Brand brand = brandService.get(product.getBrandId());
-        ProductLike productLike = productLikeService.get(query.productId());
-
-        ProductInfo.DataDetail productDetail = toDataDetail(product, brand, productLike.getLikeCount());
-        redisCacheWrapper.set(PREFIX_PRODUCT_DETAIL+query.productId(), productDetail, 10L, TimeUnit.MINUTES);
-        globalEventPublisher.publish(ProductAppEvent.Clicked.of(userId, query.productId()));
-
-        return productDetail;
+            ProductInfo.DataDetail productDetail = toDataDetail(product, brand, productLike.getLikeCount());
+            redisCacheWrapper.set(PREFIX_PRODUCT_DETAIL+query.productId(), productDetail, 10L, TimeUnit.MINUTES);
+            globalEventPublisher.publish(ProductAppEvent.Clicked.of(userId, query.productId()));
+            return productDetail;
+        }
     }
 
     public void cacheEvict(ProductQuery.Detail query){

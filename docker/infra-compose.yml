@@ -80,7 +80,7 @@ services:
       - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1 # consumer offset 복제 갯수 (현재는 1 - 로컬용이라서)
       - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1 # transaction log 토픽 복제 갯수 (현재는 1 - 로컬용이라서)
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1 # In-Sync-Replica 최소 수 (현재는 1 - 로컬용이라서)
-      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false # 외부에서 토픽 생성 막음
+#      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false # 외부에서 토픽 생성 막음
     volumes:
       - kafka-data:/bitnami/kafka
     healthcheck:
@@ -89,18 +89,18 @@ services:
       timeout: 5s
       retries: 10
 
-  kafka-init:
-    image: bitnami/kafka:3.5.1
-    depends_on:
-      kafka:
-        condition: service_healthy
-    entrypoint: [ "/bin/bash","-lc" ]
-    command: >
-      "
-      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic order-events --partitions 1 --replication-factor 1 &&
-      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic catalog-events --partitions 1 --replication-factor 1 ||
-      true
-      "
+#  kafka-init:
+#    image: bitnami/kafka:3.5.1
+#    depends_on:
+#      kafka:
+#        condition: service_healthy
+#    entrypoint: [ "/bin/bash","-lc" ]
+#    command: >
+#      "
+#      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic order-events --partitions 1 --replication-factor 1 &&
+#      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic catalog-events --partitions 1 --replication-factor 1 ||
+#      true
+#      "
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
