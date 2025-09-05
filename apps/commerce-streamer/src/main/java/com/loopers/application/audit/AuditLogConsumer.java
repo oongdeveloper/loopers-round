@@ -25,7 +25,7 @@ public class AuditLogConsumer {
             groupId = "audit-log",
             containerFactory = KafkaConfig.BATCH_LISTENER
     )
-    public void demoListener(
+    public void consume(
             List<ConsumerRecord<String, String>> messages,
             Acknowledgment acknowledgment
     ) {
