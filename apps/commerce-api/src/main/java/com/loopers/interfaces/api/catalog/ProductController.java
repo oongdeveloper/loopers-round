@@ -6,12 +6,12 @@ import com.loopers.application.product.ProductInfo;
 import com.loopers.application.product.ProductQuery;
 import com.loopers.interfaces.api.ApiResponse;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class ProductController implements ProductV1ApiSpec{
     private final ProductFacade productFacade;
 

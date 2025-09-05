@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "product_metrics")
@@ -17,9 +16,6 @@ import java.time.ZonedDateTime;
 public class ProductMetric extends BaseAuditableEntity {
     @EmbeddedId
     private MetricId id;
-
-    @Column(name = "target_date", nullable = false, updatable = false)
-    private ZonedDateTime targetDate;
 
     @Column(name = "view_count")
     private Long viewCount;
@@ -31,6 +27,38 @@ public class ProductMetric extends BaseAuditableEntity {
     // 상품 판매량
     @Column(name = "sales_volume")
     private Long salesVolume;
+
+    public ProductMetric(Long id, LocalDate date) {
+        this.id = MetricId.of(id, date);
+        this.viewCount = 0L;
+        this.likeCount = 0L;
+        this.salesVolume = 0L;
+    }
+
+    public static ProductMetric of(Long id, LocalDate date){
+        return new ProductMetric(id, date);
+    }
+
+    public void increaseViewCount(){
+        this.viewCount++;
+    }
+
+    public void increaseLikeCount(){
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount(){
+        this.likeCount--;
+    }
+
+    public void increaseSaleCount(){
+        this.salesVolume++;
+    }
+
+    public void decreaseSaleCount(){
+        this.salesVolume--;
+    }
+
 
     @Embeddable
     @NoArgsConstructor(access = AccessLevel.PROTECTED)

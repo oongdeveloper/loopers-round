@@ -4,11 +4,11 @@ import com.loopers.application.brand.BrandFacade;
 import com.loopers.application.brand.BrandInfo;
 import com.loopers.application.brand.BrandQuery;
 import com.loopers.interfaces.api.ApiResponse;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class BrandController implements BrandV1ApiSpec{
     private final BrandFacade brandFacade;
 

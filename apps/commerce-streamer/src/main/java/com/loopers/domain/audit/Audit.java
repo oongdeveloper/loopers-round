@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "audit_log")
@@ -26,4 +27,19 @@ public class Audit extends BaseEntity {
 
     @Column(name = "payload", nullable = false)
     private String payload;
+
+    private Audit(String eventId, ZonedDateTime createdAt, EventType type, String payload) {
+        Objects.requireNonNull(eventId);
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(payload);
+
+        this.eventId = eventId;
+        this.createdAt = createdAt;
+        this.type = type;
+        this.payload = payload;
+    }
+
+    public static Audit of(String eventId, ZonedDateTime createdAt, EventType type, String payload){
+        return new Audit(eventId, createdAt, type, payload);
+    }
 }

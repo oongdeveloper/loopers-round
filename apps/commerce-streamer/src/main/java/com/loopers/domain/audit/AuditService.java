@@ -10,4 +10,8 @@ public class AuditService {
     public AuditService(AuditRepository auditRepository) {
         this.auditRepository = auditRepository;
     }
+
+    public void save(Audit audit){
+        auditRepository.save(audit);
+    }
 }

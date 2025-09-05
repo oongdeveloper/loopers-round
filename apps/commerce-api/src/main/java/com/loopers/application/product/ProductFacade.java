@@ -9,7 +9,7 @@ import com.loopers.domain.product.Product;
 import com.loopers.domain.product.ProductService;
 import com.loopers.domain.product.ProductSku;
 import com.loopers.domain.product.projections.ProductListProjectionV2;
-import com.loopers.event.producer.EventStore;
+import com.loopers.event.producer.GlobalEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
@@ -25,17 +25,17 @@ public class ProductFacade {
     private final ProductService productService;
     private final ProductLikeService productLikeService;
     private final RedisCacheWrapper redisCacheWrapper;
-    private final EventStore eventStore;
+    private final GlobalEventPublisher globalEventPublisher;
 
     private final String PRODUCT_COUNT_PREFIX = "product:count";
     private final String PREFIX_PRODUCT_DETAIL = "product:detail:";
 
-    public ProductFacade(BrandService brandService, ProductService productService, ProductLikeService productLikeService, RedisCacheWrapper redisCacheWrapper, EventStore eventStore) {
+    public ProductFacade(BrandService brandService, ProductService productService, ProductLikeService productLikeService, RedisCacheWrapper redisCacheWrapper, GlobalEventPublisher globalEventPublisher) {
         this.brandService = brandService;
         this.productService = productService;
         this.productLikeService = productLikeService;
         this.redisCacheWrapper = redisCacheWrapper;
-        this.eventStore = eventStore;
+        this.globalEventPublisher = globalEventPublisher;
     }
 
     public Page<ProductInfo.DataList> getProductList(ProductQuery.Summary query) {
@@ -73,7 +73,7 @@ public class ProductFacade {
 
         ProductInfo.DataDetail productDetail = toDataDetail(product, brand, productLike.getLikeCount());
         redisCacheWrapper.set(PREFIX_PRODUCT_DETAIL+query.productId(), productDetail, 10L, TimeUnit.MINUTES);
-        eventStore.store(ProductAppEvent.Clicked.of(userId, query.productId()));
+        globalEventPublisher.publish(ProductAppEvent.Clicked.of(userId, query.productId()));
 
         return productDetail;
     }

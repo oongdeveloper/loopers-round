@@ -23,6 +23,7 @@ class EventProducer {
 
     public void send(EventEnvelop<?> event){
         try {
+            log.info("여기까진 온게 맞나? {}", event);
             kafkaTemplate.send(event.getTopic(), event.getEventId(), event.toJson())
                     .get(1L, TimeUnit.MINUTES);
         } catch (InterruptedException | ExecutionException e) {
