@@ -63,18 +63,19 @@ services:
     image: bitnami/kafka:3.5.1
     container_name: kafka
     ports:
-      - "9092:9092" # 카프카 브로커 PORT
+#      - "9092:9092" # 카프카 브로커 PORT
       - "19092:19092" # 호스트 리스너
     environment:
       - KAFKA_CFG_NODE_ID=1 # 브로커 고유 ID
       - KAFKA_CFG_PROCESS_ROLES=broker,controller # KRaft 모드여서, broker / controller 역할 모두 부여
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,PLAINTEXT_HOST://:19092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,PLAINTEXT_HOST://:19092,CONTROLLER://:9093
       # 브로커 클라이언트 (PLAINTEXT), 브로커 호스트 (PLAINTEXT) 내부 컨트롤러 (CONTROLLER)
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_HOST://localhost:19092
+#      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:19092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka:9092,PLAINTEXT_HOST://localhost:19092
       # 외부 클라이언트 접속 호스트 (localhost:9092), 브로커 접속 호스트 (localhost:19092)
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       # 각 리스너별 보안 프로토콜 설정
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER # 컨트롤러 담당 리스너 지정
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093 # 컨트롤러 후보 노드 정의 (단일 브로커라 자기 자신만 있음)
       - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1 # consumer offset 복제 갯수 (현재는 1 - 로컬용이라서)
@@ -89,18 +90,18 @@ services:
       timeout: 5s
       retries: 10
 
-#  kafka-init:
-#    image: bitnami/kafka:3.5.1
-#    depends_on:
-#      kafka:
-#        condition: service_healthy
-#    entrypoint: [ "/bin/bash","-lc" ]
-#    command: >
-#      "
-#      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic order-events --partitions 1 --replication-factor 1 &&
-#      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic catalog-events --partitions 1 --replication-factor 1 ||
-#      true
-#      "
+  kafka-init:
+    image: bitnami/kafka:3.5.1
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: [ "/bin/bash","-lc" ]
+    command: >
+      "
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic order-events --partitions 1 --replication-factor 1 &&
+      /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic catalog-events --partitions 1 --replication-factor 1 ||
+      true
+      "
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
