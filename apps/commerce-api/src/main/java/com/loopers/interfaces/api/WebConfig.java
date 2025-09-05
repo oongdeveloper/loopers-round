@@ -13,7 +13,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/v1/**")
                 .excludePathPatterns(
                         "/api/v1/users",
-                        "/api/v1/payment/**"
+                        "/api/v1/payment/**",
+                        "/api/v1/products/**"
                 );
         WebMvcConfigurer.super.addInterceptors(registry);
     }

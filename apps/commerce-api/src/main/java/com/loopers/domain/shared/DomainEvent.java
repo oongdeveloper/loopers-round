@@ -1,9 +1,8 @@
-package com.loopers.domain.common;
+package com.loopers.domain.shared;
 
 import java.time.ZonedDateTime;
 
 public interface DomainEvent {
-
     default ZonedDateTime createdAt() {
         return ZonedDateTime.now();
     }

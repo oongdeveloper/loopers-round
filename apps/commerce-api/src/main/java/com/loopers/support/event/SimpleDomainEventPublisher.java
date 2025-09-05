@@ -1,7 +1,7 @@
 package com.loopers.support.event;
 
-import com.loopers.domain.common.DomainEvent;
-import com.loopers.domain.common.DomainEventPublisher;
+import com.loopers.domain.shared.DomainEvent;
+import com.loopers.domain.shared.DomainEventPublisher;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 

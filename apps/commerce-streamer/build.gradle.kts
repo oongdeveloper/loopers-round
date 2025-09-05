@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":modules:jpa"))
     implementation(project(":modules:rediss"))
     implementation(project(":modules:kafka"))
+    implementation(project(":modules:event:core"))
     implementation(project(":supports:jackson"))
     implementation(project(":supports:logging"))
     implementation(project(":supports:monitoring"))
@@ -25,8 +26,4 @@ dependencies {
 
 //    testImplementation(platform("org.junit:junit-bom:5.10.0"))
 //    testImplementation("org.junit.jupiter:junit-jupiter")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

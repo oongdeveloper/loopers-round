@@ -5,10 +5,13 @@ include(
     ":apps:pg-simulator",
     ":modules:jpa",
     ":modules:rediss",
-    ":modules:kafka",
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",
+    "apps:commerce-streamer",
+    "modules:kafka",
+    "modules:event:core",
+    "modules:event:producer"
 )
 
 // configurations
@@ -31,6 +34,3 @@ pluginManagement {
         }
     }
 }
-
-include("apps:commerce-streamer")
-include("modules:kafka")

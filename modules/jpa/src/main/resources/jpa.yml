@@ -37,7 +37,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create # validate # create
+      ddl-auto: validate # validate # create
 
 datasource:
   mysql-jpa:
