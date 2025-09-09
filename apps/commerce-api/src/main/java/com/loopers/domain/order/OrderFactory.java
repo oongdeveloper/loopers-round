@@ -19,6 +19,7 @@ public class OrderFactory {
         products.forEach(product -> {
             product.getSkus().forEach(sku -> {
                 order.addOrderLine(OrderLine.create(
+                        product.getId(),
                         sku.getId(),
                         requestMap.get(sku.getId()),
                         product.getProductName(),

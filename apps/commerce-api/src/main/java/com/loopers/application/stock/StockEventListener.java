@@ -21,9 +21,8 @@ public class StockEventListener {
     }
 
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     void handle(OrderEvent.Canceled event){
         stockFacade.restore(StockCommand.Restore.of(event.orderId(), event.orderedItems()));
     }
-
 }

@@ -1,6 +1,6 @@
 package com.loopers.domain.like;
 
-import com.loopers.domain.common.DomainEvent;
+import com.loopers.domain.shared.DomainEvent;
 
 public class LikeEvent {
     public record Liked(

@@ -15,7 +15,7 @@ public class OrderResult {
             String status
     ){
         public static DataList of(Order order){
-            return new DataList(order.getId(), order.getFinalTotalPrice(), order.getOriginalTotalPrice(), order.getStatus());
+            return new DataList(order.getId(), order.getFinalTotalPrice(), order.getOriginalTotalPrice(), order.getStatusV2().name());
         }
     }
 

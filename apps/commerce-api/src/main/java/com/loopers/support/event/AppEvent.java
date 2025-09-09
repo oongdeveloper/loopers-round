@@ -1,4 +1,6 @@
 package com.loopers.support.event;
 
-public interface AppEvent {
+import com.loopers.event.core.EventPayload;
+
+public interface AppEvent extends EventPayload {
 }

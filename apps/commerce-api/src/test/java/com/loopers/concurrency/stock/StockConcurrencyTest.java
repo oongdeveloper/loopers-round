@@ -35,9 +35,9 @@ public class StockConcurrencyTest {
     @Test
     @DisplayName("동시에 여러 번 요청이 오더라도 재고는 정상적으로 차감되어야 한다.")
     void shouldDeductStockCorrectly_whenMultipleRequestsAreMadeConcurrently() throws InterruptedException {
-        stockJpaRepository.save(Stock.from(1L, 10L));
-        stockJpaRepository.save(Stock.from(2L, 10L));
-        stockJpaRepository.save(Stock.from(3L, 10L));
+        stockJpaRepository.save(Stock.from(1L,1L, 10L));
+        stockJpaRepository.save(Stock.from(1L,2L, 10L));
+        stockJpaRepository.save(Stock.from(1L,3L, 10L));
 
         int threadCount = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);

@@ -1,5 +1,6 @@
 package com.loopers.interfaces.api.catalog;
 
+import com.loopers.PaginationRequest;
 import com.loopers.interfaces.api.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +15,23 @@ public interface ProductV1ApiSpec {
     )
     ApiResponse<?> getList(
             @Schema(name = "브랜드 ID")
-            Long brandId
+            Long brandId,
+            @Schema(name = "정렬 조건")
+            String sortType,
+            @Schema(name = "페이징 정보")
+            PaginationRequest paginationRequest
+
     );
+
+    @Operation(
+            summary = "Product 상세 조회",
+            description = "상품 상세를 조회합니다."
+    )
+    ApiResponse<?> getDetail(
+            @Schema(name = "사용자 ID")
+            Long userId,
+            @Schema(name = "상품 ID")
+            Long productId
+    );
+
 }

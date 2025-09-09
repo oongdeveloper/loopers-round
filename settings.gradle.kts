@@ -8,6 +8,10 @@ include(
     ":supports:jackson",
     ":supports:logging",
     ":supports:monitoring",
+    "apps:commerce-streamer",
+    "modules:kafka",
+    "modules:event:core",
+    "modules:event:producer"
 )
 
 // configurations

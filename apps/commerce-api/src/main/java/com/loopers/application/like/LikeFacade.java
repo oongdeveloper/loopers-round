@@ -1,11 +1,11 @@
 package com.loopers.application.like;
 
-import com.loopers.domain.common.DomainEventPublisher;
+import com.loopers.domain.shared.DomainEventPublisher;
 import com.loopers.domain.like.LikeService;
 import com.loopers.domain.like.ProductLikeService;
 import com.loopers.domain.like.projections.LikeProductProjection;
+import com.loopers.event.producer.GlobalEventPublisher;
 import jakarta.transaction.Transactional;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +14,13 @@ public class LikeFacade {
     private final LikeService likeService;
     private final ProductLikeService productLikeService;
     private final DomainEventPublisher eventPublisher;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final GlobalEventPublisher globalEventPublisher;
 
-    public LikeFacade(LikeService likeService, ProductLikeService productLikeService, DomainEventPublisher eventPublisher, ApplicationEventPublisher applicationEventPublisher) {
+    public LikeFacade(LikeService likeService, ProductLikeService productLikeService, DomainEventPublisher eventPublisher, GlobalEventPublisher globalEventPublisher) {
         this.likeService = likeService;
         this.productLikeService = productLikeService;
         this.eventPublisher = eventPublisher;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.globalEventPublisher = globalEventPublisher;
     }
 
     @Transactional
@@ -35,7 +35,7 @@ public class LikeFacade {
                             likeService.save(userId, productCataglogId);
                         }
                 );
-        applicationEventPublisher.publishEvent(LikeAppEvent.Liked.of(userId, productCataglogId));
+        globalEventPublisher.publish(LikeAppEvent.Liked.of(userId, productCataglogId));
     }
 
     @Transactional
@@ -47,7 +47,7 @@ public class LikeFacade {
                             eventPublisher.publish(like.pullDomainEvents());
                         }
                 );
-        applicationEventPublisher.publishEvent(LikeAppEvent.UnLiked.of(userId, productCataglogId));
+        globalEventPublisher.publish(LikeAppEvent.UnLiked.of(userId, productCataglogId));
     }
 
     public Page<LikeResult.DataList> getLikeProductList(LikeQuery.Summary query) {

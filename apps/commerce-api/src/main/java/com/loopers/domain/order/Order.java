@@ -1,6 +1,6 @@
 package com.loopers.domain.order;
 
-import com.loopers.domain.common.AggregateRoot;
+import com.loopers.domain.shared.AggregateRoot;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,11 +32,6 @@ public class Order extends AggregateRoot {
     @Column(name = "ref_user_coupon_id", nullable = true)
     Long couponId;
 
-    // TODO. Enum 처리 해야됨
-//    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    String status;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status_v2")
     Status statusV2;
@@ -46,7 +41,6 @@ public class Order extends AggregateRoot {
 
     private Order(Long userId, String status){
         this.userId = userId;
-        this.status = status;
         this.statusV2 = Status.valueOf(status);
     }
 
@@ -69,7 +63,7 @@ public class Order extends AggregateRoot {
     }
 
     public void created(){
-        this.status = "CREATED";
+        this.statusV2 = Status.NEW;
         registerEvent(OrderEvent.Created.from(this));
     }
 

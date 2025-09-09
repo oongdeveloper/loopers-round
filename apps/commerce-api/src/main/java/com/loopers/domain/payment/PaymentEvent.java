@@ -1,6 +1,6 @@
 package com.loopers.domain.payment;
 
-import com.loopers.domain.common.DomainEvent;
+import com.loopers.domain.shared.DomainEvent;
 
 //public sealed interface PaymentEvent permits PaymentEvent.Completed, PaymentEvent.Canceled {
 public class PaymentEvent {

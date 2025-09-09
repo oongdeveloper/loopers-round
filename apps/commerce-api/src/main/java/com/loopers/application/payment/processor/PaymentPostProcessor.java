@@ -4,11 +4,10 @@ import com.loopers.application.payment.PaymentResult;
 import com.loopers.application.payment.action.CompletedPaymentAction;
 import com.loopers.application.payment.action.FailedPaymentAction;
 import com.loopers.application.payment.action.PaymentAction;
-import com.loopers.domain.common.DomainEventPublisher;
+import com.loopers.domain.shared.DomainEventPublisher;
 import com.loopers.domain.payment.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -24,9 +23,9 @@ public class PaymentPostProcessor {
 //        actions.put(PaymentResult.Status.FAILED, new FailedPaymentAction(paymentService, orderService, stockService, userCouponService, publisher));
 //    }
 
-    public PaymentPostProcessor(PaymentService paymentService, DomainEventPublisher publisher, ApplicationEventPublisher applicationEventPublisher) {
-        actions.put(PaymentResult.Status.COMPLETED, new CompletedPaymentAction(paymentService, publisher, applicationEventPublisher));
-        actions.put(PaymentResult.Status.FAILED, new FailedPaymentAction(paymentService, publisher, applicationEventPublisher));
+    public PaymentPostProcessor(PaymentService paymentService, DomainEventPublisher publisher) {
+        actions.put(PaymentResult.Status.COMPLETED, new CompletedPaymentAction(paymentService, publisher));
+        actions.put(PaymentResult.Status.FAILED, new FailedPaymentAction(paymentService, publisher));
     }
 
     @Transactional

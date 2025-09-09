@@ -11,7 +11,6 @@ import com.loopers.domain.pg.PgGatewayService;
 import com.loopers.support.error.CoreException;
 import com.loopers.support.error.ErrorType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import static com.loopers.domain.pg.PgPaymentInfo.TransactionResponse;
@@ -25,15 +24,12 @@ public class PaymentFacade {
     private final PaymentProcessor paymentProcessor;
     private final PaymentPostProcessor postProcessor;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
-    public PaymentFacade(PaymentService paymentService, OrderService orderService, PgGatewayService pgGatewayService, PaymentProcessor paymentProcessor, PaymentPostProcessor postProcessor, ApplicationEventPublisher applicationEventPublisher) {
+    public PaymentFacade(PaymentService paymentService, OrderService orderService, PgGatewayService pgGatewayService, PaymentProcessor paymentProcessor, PaymentPostProcessor postProcessor) {
         this.paymentService = paymentService;
         this.orderService = orderService;
         this.pgGatewayService = pgGatewayService;
         this.paymentProcessor = paymentProcessor;
         this.postProcessor = postProcessor;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public PaymentResult pay(PaymentCommand command){
@@ -48,8 +44,6 @@ public class PaymentFacade {
                             () -> paymentService.save(Payment.of(command))
                     );
 
-            applicationEventPublisher.publishEvent(PaymentAppEvent.Reqeust.from(command));
-            // 결제 요청
             return paymentProcessor.process(command);
         } catch (Exception e) {
             log.error("결제 처리 오류 ", e);
@@ -58,7 +52,7 @@ public class PaymentFacade {
     }
 
     public void postPg(TransactionResponse.Data res){
-        try{
+        try {
             validatePgResponse(res);
             Payment payment = validateInternalPayment(res);
             PaymentResult paymentResult = PaymentResult.from(payment, res.status().name());

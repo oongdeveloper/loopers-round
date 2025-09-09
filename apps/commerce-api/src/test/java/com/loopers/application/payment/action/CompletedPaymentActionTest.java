@@ -1,8 +1,8 @@
 package com.loopers.application.payment.action;
 
 import com.loopers.application.payment.PaymentResult;
-import com.loopers.domain.common.DomainEvent;
-import com.loopers.domain.common.DomainEventPublisher;
+import com.loopers.domain.shared.DomainEvent;
+import com.loopers.domain.shared.DomainEventPublisher;
 import com.loopers.domain.payment.Payment;
 import com.loopers.domain.payment.PaymentCommand;
 import com.loopers.domain.payment.PaymentEvent;
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -29,14 +28,12 @@ class CompletedPaymentActionTest {
     private PaymentService paymentService;
     @Mock
     private DomainEventPublisher domainEventPublisher;
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
 
     @Test
     @DisplayName("결제가 성공하면 결제성공 Event 가 발행된다.")
     void shouldPublishEvent_whenPaymentFailed(){
         ArgumentCaptor<Collection<DomainEvent>> captor = ArgumentCaptor.forClass(Collection.class);
-        CompletedPaymentAction action = new CompletedPaymentAction(paymentService, domainEventPublisher, applicationEventPublisher);
+        CompletedPaymentAction action = new CompletedPaymentAction(paymentService, domainEventPublisher);
 
         Payment payment = Payment.of(PaymentCommand.of(
                 1L, 1L, "test-payment-key", BigDecimal.valueOf(10000L), "CARD", null
