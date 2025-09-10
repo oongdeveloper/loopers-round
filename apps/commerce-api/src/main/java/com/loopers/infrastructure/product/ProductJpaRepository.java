@@ -100,4 +100,20 @@ public interface ProductJpaRepository extends JpaRepository<Product, Long> {
             "LEFT JOIN FETCH so.optionValue ov " +
             "WHERE s.id IN :skuIds")
     List<Product> findProductsBySkuIds(@Param("skuIds") Collection<Long> skuIds);
+
+    @Query(value = """
+            SELECT
+                p.id AS id,
+                b.brand_name AS brandName,
+                p.product_name AS productName,
+                p.price AS price,
+                p.image_url AS imageUrl,
+                p.description AS description,
+                l.like_count AS likeCount
+            FROM product p
+            INNER JOIN product_like l on p.id = l.ref_product_id
+            INNER JOIN brand b on p.ref_brand_id = b.id
+            WHERE p.id IN :ids
+            """, nativeQuery = true)
+    List<ProductListProjectionV2> findProductListByIds(@Param("ids") Collection<Long> ids);
 }

@@ -33,7 +33,7 @@ public class ProductService {
                 .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "존재하지 않는 상품입니다."));
     }
 
-    public List<Product> getProuctListByIds(Collection<Long> skuIds) {
+    public List<Product> getProuctListBySkuIds(Collection<Long> skuIds) {
         if (skuIds == null || skuIds.isEmpty()) {
             return List.of();
         }
@@ -42,5 +42,9 @@ public class ProductService {
 
     public Long count(){
         return productRepository.count();
+    }
+
+    public List<ProductListProjectionV2> getProductListByIds(Collection<Long> ids){
+        return productRepository.findProductListByIds(ids);
     }
 }

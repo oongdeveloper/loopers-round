@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -120,5 +123,14 @@ public class RedisCacheWrapper {
         }
     }
 
+    public void addZset(String key, Set<ZSetOperations.TypedTuple<String>> tuples){
+        redisTemplate.opsForZSet().add(key, tuples);
+    }
+
+    public Set<Long> getRange(String key, int start, int end){
+        Set<String> range = redisTemplate.opsForZSet().range(key, start, end);
+        assert range != null;
+        return range.stream().map(Long::parseLong).collect(Collectors.toSet());
+    }
 
 }

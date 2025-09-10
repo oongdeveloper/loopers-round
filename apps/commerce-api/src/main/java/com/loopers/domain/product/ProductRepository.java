@@ -27,4 +27,6 @@ public interface ProductRepository {
     Optional<Product> findById(Long productId);
 
     List<Product> findProductsBySkuIds(Collection<Long> skuIds);
+
+    List<ProductListProjectionV2> findProductListByIds(Collection<Long> ids);
 }

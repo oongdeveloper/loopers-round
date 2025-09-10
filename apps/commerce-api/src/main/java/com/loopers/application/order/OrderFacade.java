@@ -42,7 +42,7 @@ public class OrderFacade {
     public OrderInfo createOrder(OrderCommand.Create request){
         Map<Long, Long> requestMap = request.toMap();
 
-        List<Product> foundProducts = productService.getProuctListByIds(requestMap.keySet());
+        List<Product> foundProducts = productService.getProuctListBySkuIds(requestMap.keySet());
         Order order = OrderFactory.createOrder(request.userId(), requestMap, foundProducts);
         BigDecimal finalPrice = userCouponService.applyCoupon(
                 UserCouponCommand.Apply.of(
