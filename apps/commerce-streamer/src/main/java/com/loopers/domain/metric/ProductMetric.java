@@ -59,6 +59,26 @@ public class ProductMetric extends BaseAuditableEntity {
         this.salesVolume--;
     }
 
+    public void increaseViewCount(long count){
+        this.viewCount += count;
+    }
+
+    public void increaseLikeCount(long count){
+        this.likeCount += count;
+    }
+
+    public void decreaseLikeCount(long count){
+        this.likeCount -= count;
+    }
+
+    public void increaseSaleCount(long count){
+        this.salesVolume += count;
+    }
+
+    public void decreaseSaleCount(long count){
+        this.salesVolume -= count;
+    }
+
 
     @Embeddable
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
