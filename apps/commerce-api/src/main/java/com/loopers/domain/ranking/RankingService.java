@@ -18,7 +18,11 @@ public class RankingService {
         return repository.getRange(key, start, end);
     }
 
-    public void add(String key, Map<String, Double> map){
+    public Map<Long, Float> getRangeWithScore(String key, int start, int end){
+        return repository.getRangeWithScore(key, start, end);
+    }
+
+    public void add(String key, Map<Long, Float> map){
         repository.add(key, map);
     }
 

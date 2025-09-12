@@ -23,11 +23,16 @@ public class RankingRepositoryImpl implements RankingRepository {
         return redisCacheWrapper.getRange(key, start, end);
     }
     @Override
-    public void add(String key, Map<String, Double> map){
+    public Map<Long, Float> getRangeWithScore(String key, int start, int end){
+        return redisCacheWrapper.getRangeWithScore(key, start, end);
+    }
+
+    @Override
+    public void add(String key, Map<Long, Float> map){
         Set<ZSetOperations.TypedTuple<String>> tuples = new HashSet<>();
-        for (Map.Entry<String, Double> entry : map.entrySet()) {
-            String member = entry.getKey();   // 맵의 키가 ZSET의 멤버(String)
-            Double score = entry.getValue();  // 맵의 값이 ZSET의 스코어(Double)
+        for (Map.Entry<Long, Float> entry : map.entrySet()) {
+            String member = String.valueOf(entry.getKey());   // 맵의 키가 ZSET의 멤버(String)
+            Double score = Double.valueOf(entry.getValue());  // 맵의 값이 ZSET의 스코어(Double)
 
             DefaultTypedTuple<String> tuple = new DefaultTypedTuple<>(member, score);
             tuples.add(tuple);

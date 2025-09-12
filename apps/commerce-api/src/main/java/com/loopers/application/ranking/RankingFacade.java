@@ -7,6 +7,7 @@ import com.loopers.domain.ranking.RankingService;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class RankingFacade {
     public List<ProductInfo.DataList> getProductRanking(LocalDate today, int size, int page){
         int start = size * page;
         int end = start + size;
-        Set<Long> rankIds = rankingService.getRange(RANKING_KEY + today, start, end);
+        Set<Long> rankIds = rankingService.getRange(RANKING_KEY + today.format(DateTimeFormatter.ofPattern("yyyyMMdd")), start, end);
         // 조회가 안되는 경우, 고려 필요
         List<ProductListProjectionV2> productList = productService.getProductListByIds(rankIds);
         return productList.stream().map(pj -> {
