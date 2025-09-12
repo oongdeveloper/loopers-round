@@ -8,4 +8,6 @@ public interface RankingRepository {
 
     Map<Long, Float> getRangeWithScore(String key, int start, int end);
     void add(String key, Map<Long, Float> map);
+
+    Long count(String key);
 }

@@ -39,4 +39,9 @@ public class RankingRepositoryImpl implements RankingRepository {
         }
         redisCacheWrapper.addZset(key, tuples);
     }
+
+    @Override
+    public Long count(String key){
+        return redisCacheWrapper.count(key);
+    }
 }

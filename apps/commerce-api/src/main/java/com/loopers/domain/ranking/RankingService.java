@@ -26,4 +26,8 @@ public class RankingService {
         repository.add(key, map);
     }
 
+    public Long count(String key){
+        return repository.count(key);
+    }
+
 }

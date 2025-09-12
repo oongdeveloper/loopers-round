@@ -128,6 +128,10 @@ public class RedisCacheWrapper {
         redisTemplate.opsForZSet().add(key, tuples);
     }
 
+    public Long count(String key){
+        return redisTemplate.opsForZSet().size(key);
+    }
+
     public Long getRank(String key, Long productId){
         return redisTemplate.opsForZSet().reverseRank(key, productId);
     }

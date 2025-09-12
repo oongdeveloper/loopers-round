@@ -3,13 +3,12 @@ package com.loopers.interfaces.api.ranking;
 import com.loopers.application.product.ProductInfo;
 import com.loopers.application.ranking.RankingFacade;
 import com.loopers.interfaces.api.ApiResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 public class RankingController implements RankingV1ApiSpec{
@@ -21,11 +20,12 @@ public class RankingController implements RankingV1ApiSpec{
 
     @Override
     @GetMapping(value = "/api/v1/rankings", consumes = "applciation/json")
-    public ApiResponse<List<RankV1Dto.Summary>> get(@RequestParam("date") LocalDate today,
+    public ApiResponse<?> get(@RequestParam("date") LocalDate today,
                                                          @RequestParam("size") int size,
                                                          @RequestParam("page") int page) {
-        List<ProductInfo.DataList> result = rankingFacade.getProductRanking(today, size, page);
-        return ApiResponse.success(result.stream().map(RankV1Dto.Summary::from)
-                .collect(Collectors.toList()));
+        Page<ProductInfo.DataList> result = rankingFacade.getProductRanking(today, size, page);
+        return ApiResponse.success(result);
+//        return ApiResponse.success(result.stream().map(RankV1Dto.Summary::from)
+//                .collect(Collectors.toList()));
     }
 }
