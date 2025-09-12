@@ -27,6 +27,10 @@ public class EventEnvelop<T extends EventPayload> {
         return EventSerializer.serialize(this);
     }
 
+    public String payloadToJson() {
+        return EventSerializer.serialize(this.payload);
+    }
+
     public static EventEnvelop<EventPayload> fromJson(String json) {
         EventRaw eventRaw = EventSerializer.deserialize(json, EventRaw.class);
         if (eventRaw == null) {

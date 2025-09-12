@@ -3,12 +3,15 @@ package com.loopers.event.producer;
 import com.loopers.event.core.EventEnvelop;
 import com.loopers.event.producer.domain.DeadEventService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -22,17 +25,25 @@ class EventProducer {
     }
 
     public void send(EventEnvelop<?> event){
-        try {
-            kafkaTemplate.send(event.getTopic(), event.getEventId(), event.toJson())
-                    .get(1L, TimeUnit.MINUTES);
-        } catch (InterruptedException | ExecutionException e) {
-            log.info("Kafka 이벤트 발행 실패 {}", event);
-            deadEventService.save(event, "Kafka 발행 실패 오류");
-            throw new RuntimeException(e);
-        } catch (TimeoutException e){
-            log.info("Kafka 이벤트 발행 Timeout 발생 {}", event);
-            deadEventService.save(event, "Kafka 발행 Timeout");
-            throw new RuntimeException(e);
-        }
+
+            String payload = event.payloadToJson();
+            List<RecordHeader> headers = List.of(
+                    new RecordHeader("eventType", event.getType().name().getBytes(StandardCharsets.UTF_8)),
+                    new RecordHeader("eventId", event.getEventId().getBytes(StandardCharsets.UTF_8)),
+                    new RecordHeader("createdAt", String.valueOf(event.getCreatedAt()).getBytes(StandardCharsets.UTF_8))
+            );
+
+            ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(event.getTopic(), event.getEventId(), payload);
+            headers.forEach(header -> producerRecord.headers().add(header));
+
+            CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(producerRecord);
+            future.whenComplete((result, ex) -> {
+                if (ex == null) {
+                    log.info("Kafka 메세지 전송 성공 {}", event.getEventId());
+                } else {
+                    log.error("Kafka 메세지 전송 실패 {}", event.getEventId());
+                    deadEventService.save(event, "Kafka 발행 실패");
+                }
+            });
     }
 }
