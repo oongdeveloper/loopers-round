@@ -128,8 +128,12 @@ public class RedisCacheWrapper {
         redisTemplate.opsForZSet().add(key, tuples);
     }
 
+    public Long getRank(String key, Long productId){
+        return redisTemplate.opsForZSet().reverseRank(key, productId);
+    }
+
     public Set<Long> getRange(String key, int start, int end){
-        Set<String> range = redisTemplate.opsForZSet().range(key, start, end);
+        Set<String> range = redisTemplate.opsForZSet().reverseRange(key, start, end);
         assert range != null;
         return range.stream().map(Long::parseLong).collect(Collectors.toSet());
     }

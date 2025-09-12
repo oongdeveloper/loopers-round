@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -29,6 +31,7 @@ public class ProductFacade {
 
     private final String PRODUCT_COUNT_PREFIX = "product:count";
     private final String PREFIX_PRODUCT_DETAIL = "product:detail:";
+    private final String RANKING_KEY = "ranking:product:";
 
     public ProductFacade(BrandService brandService, ProductService productService, ProductLikeService productLikeService, RedisCacheWrapper redisCacheWrapper, GlobalEventPublisher globalEventPublisher) {
         this.brandService = brandService;
@@ -64,6 +67,12 @@ public class ProductFacade {
 
     public ProductInfo.DataDetail getProductDetail(@RequestHeader("X-USER-ID") Long userId, ProductQuery.Detail query) {
         ProductInfo.DataDetail cachedDetail = redisCacheWrapper.get(PREFIX_PRODUCT_DETAIL+query.productId(), ProductInfo.DataDetail.class);
+        Long ranking = redisCacheWrapper.getRank(RANKING_KEY+ LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE), query.productId());
+
+        if (cachedDetail.rank() != ranking) {
+            cachedDetail = null;
+            redisCacheWrapper.delete(PREFIX_PRODUCT_DETAIL+query.productId());
+        }
 
         if (cachedDetail != null){
             globalEventPublisher.publish(ProductAppEvent.Clicked.of(userId, query.productId()));
@@ -73,7 +82,7 @@ public class ProductFacade {
             Brand brand = brandService.get(product.getBrandId());
             ProductLike productLike = productLikeService.get(query.productId());
 
-            ProductInfo.DataDetail productDetail = toDataDetail(product, brand, productLike.getLikeCount());
+            ProductInfo.DataDetail productDetail = toDataDetail(product, brand, productLike.getLikeCount(), ranking);
             redisCacheWrapper.set(PREFIX_PRODUCT_DETAIL+query.productId(), productDetail, 10L, TimeUnit.MINUTES);
             globalEventPublisher.publish(ProductAppEvent.Clicked.of(userId, query.productId()));
             return productDetail;
@@ -84,7 +93,7 @@ public class ProductFacade {
         redisCacheWrapper.delete(PREFIX_PRODUCT_DETAIL+query.productId());
     }
 
-    private ProductInfo.DataDetail toDataDetail(Product product, Brand brand, Long likeCount) {
+    private ProductInfo.DataDetail toDataDetail(Product product, Brand brand, Long likeCount, Long ranking) {
         return new ProductInfo.DataDetail(
                 product.getId(),
                 brand.getBrandName(),
@@ -96,7 +105,8 @@ public class ProductFacade {
                 likeCount,
                 product.getSkus().stream()
                         .map(this::toSkuInfo)
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()),
+                ranking
         );
     }
 
