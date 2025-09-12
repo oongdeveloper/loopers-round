@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -131,6 +132,15 @@ public class RedisCacheWrapper {
         Set<String> range = redisTemplate.opsForZSet().range(key, start, end);
         assert range != null;
         return range.stream().map(Long::parseLong).collect(Collectors.toSet());
+    }
+
+    public Map<Long, Float> getRangeWithScore(String key, int start, int end){
+        Set<ZSetOperations.TypedTuple<String>> range = redisTemplate.opsForZSet().rangeWithScores(key, start, end);
+        assert range != null;
+        return range.stream().collect(Collectors.toMap(
+                tuple -> Long.valueOf(tuple.getValue()),
+                tuple -> tuple.getScore().floatValue()
+        ));
     }
 
 }
