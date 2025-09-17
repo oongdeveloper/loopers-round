@@ -73,4 +73,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     public List<Product> findProductsBySkuIds(Collection<Long> skuIds) {
         return jpaRepository.findProductsBySkuIds(skuIds);
     }
+
+    @Override
+    public List<ProductListProjectionV2> findProductListByIds(Collection<Long> ids) {
+        return jpaRepository.findProductListByIds(ids);
+    }
 }

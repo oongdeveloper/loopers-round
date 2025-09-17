@@ -25,7 +25,8 @@ public class ProductInfo {
             String description,
             ZonedDateTime publishedAt,
             Long likeCount,
-            List<SkuInfo> skuInfos
+            List<SkuInfo> skuInfos,
+            Long rank
     ){}
 
     public record SkuInfo(

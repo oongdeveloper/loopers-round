@@ -6,10 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -120,5 +124,31 @@ public class RedisCacheWrapper {
         }
     }
 
+    public void addZset(String key, Set<ZSetOperations.TypedTuple<String>> tuples){
+        redisTemplate.opsForZSet().add(key, tuples);
+    }
+
+    public Long count(String key){
+        return redisTemplate.opsForZSet().size(key);
+    }
+
+    public Long getRank(String key, Long productId){
+        return redisTemplate.opsForZSet().reverseRank(key, productId);
+    }
+
+    public Set<Long> getRange(String key, int start, int end){
+        Set<String> range = redisTemplate.opsForZSet().reverseRange(key, start, end);
+        assert range != null;
+        return range.stream().map(Long::parseLong).collect(Collectors.toSet());
+    }
+
+    public Map<Long, Float> getRangeWithScore(String key, int start, int end){
+        Set<ZSetOperations.TypedTuple<String>> range = redisTemplate.opsForZSet().rangeWithScores(key, start, end);
+        assert range != null;
+        return range.stream().collect(Collectors.toMap(
+                tuple -> Long.valueOf(tuple.getValue()),
+                tuple -> tuple.getScore().floatValue()
+        ));
+    }
 
 }
