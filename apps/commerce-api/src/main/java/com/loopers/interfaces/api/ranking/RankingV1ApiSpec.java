@@ -16,7 +16,9 @@ public interface RankingV1ApiSpec {
     )
     ApiResponse<?> get(
             @Schema(name = "오늘 날짜", description = "조회할 오늘 랭킹 날짜")
-            LocalDate today,
+            LocalDate date,
+            @Schema(name = "날짜 옵션", description = "일간/주간/월간")
+            String period,
             @Schema(name = "Page Size", description = "조회 Page Size")
             int size,
             @Schema(name = "Page Num", description = "Page 번호")

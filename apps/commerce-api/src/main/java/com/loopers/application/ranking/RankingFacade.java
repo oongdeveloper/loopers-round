@@ -11,8 +11,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 @Slf4j
@@ -28,10 +31,10 @@ public class RankingFacade {
         this.productService = productService;
     }
 
-    public Page<ProductInfo.DataList> getProductRanking(LocalDate today, int size, int page){
+    public Page<ProductInfo.DataList> getProductRanking(LocalDate date, String period, int size, int page){
         int start = size * page;
         int end = start + size;
-        String rankKey = RANKING_KEY + today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String rankKey = getRankingKey(date, period);
 
         Set<Long> rankIds = rankingService.getRange(rankKey, start, end);
         Long count = rankingService.count(rankKey);
@@ -55,19 +58,37 @@ public class RankingFacade {
                                 pj.getPublishedAt(),
                                 pj.getLikeCount()
                         ));
-
-//        return productList.stream().map(pj -> {
-//                    return new ProductInfo.DataList(
-//                            pj.getId(),
-//                            pj.getBrandName(),
-//                            pj.getProductName(),
-//                            pj.getPrice(),
-//                            pj.getImageUrl(),
-//                            pj.getDescription(),
-//                            pj.getPublishedAt(),
-//                            pj.getLikeCount()
-//                    );
-//                })
-//                .collect(Collectors.toList());
     }
+
+    private String getRankingKey(LocalDate targetDate, String period){
+        Period period1 = Period.valueOf(period);
+        String rankingKey = "";
+
+        switch (period1){
+            case DAILY:
+                rankingKey = RANKING_KEY + targetDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+                break;
+            case WEEKLY:
+                WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                int weekNumber = targetDate.get(weekFields.weekOfWeekBasedYear());
+                int year = targetDate.get(weekFields.weekBasedYear());
+                rankingKey = RANKING_KEY + String.format("%d-%02d", year, weekNumber);
+                break;
+            case MONTHLY:
+                YearMonth yearMonth = YearMonth.from(targetDate);
+                rankingKey = RANKING_KEY + yearMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+                break;
+            default:
+                rankingKey = DEFAULT_RANKING;
+                break;
+        }
+        return rankingKey;
+    }
+
+    enum Period{
+        DAILY,
+        WEEKLY,
+        MONTHLY
+    }
+
 }
