@@ -1,7 +1,7 @@
 package com.loopers.batch.job;
 
 
-import jakarta.persistence.EntityManagerFactory;
+import com.loopers.batch.listener.JobParameterSetupListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class RankingJobConfig {
     private final JobRepository jobRepository;
-    private final EntityManagerFactory entityManagerFactory;
+    private JobParameterSetupListener jobParameterSetupListener;
     private static final double ALPHA = 0.5; // 지수가중평균 가중치
 
     @Bean
@@ -28,6 +28,7 @@ public class RankingJobConfig {
     ) {
         return new JobBuilder("rankingJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
+                .listener(jobParameterSetupListener)
                 .start(dailyRankingStep)
                 .next(weeklyScoreCalculateStep)
                 .next(weeklyRankingStep)

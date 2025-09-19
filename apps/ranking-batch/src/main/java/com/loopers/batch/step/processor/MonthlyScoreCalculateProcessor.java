@@ -5,6 +5,7 @@ import com.loopers.domain.ranking.MonthlyRanking;
 import com.loopers.domain.ranking.MonthlyRankingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +19,13 @@ import java.util.Optional;
 @Slf4j
 public class MonthlyScoreCalculateProcessor implements ItemProcessor<DailyRanking, MonthlyRanking> {
     private final MonthlyRankingRepository monthlyRankingRepository;
+    private final StepExecution stepExecution;
     private static final double ALPHA = 0.5; // 지수가중평균 가중치
 
     @Override
     public MonthlyRanking process(DailyRanking dailyRanking) {
-        String monthlyPeriod = getMonthlyPeriod(dailyRanking.getId().getPeriod());
+        String monthlyPeriod = stepExecution.getJobExecution().getExecutionContext().getString("targetMonth");
+//        String monthlyPeriod = getMonthlyPeriod(dailyRanking.getId().getPeriod());
 
         Optional<MonthlyRanking> existingMonthlyRanking = monthlyRankingRepository.findByProductIdAndPeriod(
                 dailyRanking.getId().getProductId(), monthlyPeriod);

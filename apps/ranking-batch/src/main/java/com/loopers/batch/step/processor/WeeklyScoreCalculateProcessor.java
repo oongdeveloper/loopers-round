@@ -5,6 +5,7 @@ import com.loopers.domain.ranking.WeeklyRanking;
 import com.loopers.domain.ranking.WeeklyRankingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +20,13 @@ import java.util.Optional;
 @Slf4j
 public class WeeklyScoreCalculateProcessor implements ItemProcessor<DailyRanking, WeeklyRanking> {
     private final WeeklyRankingRepository weeklyRankingRepository;
+    private final StepExecution stepExecution;
     private static final double ALPHA = 0.5; // 지수가중평균 가중치
 
     @Override
     public WeeklyRanking process(DailyRanking dailyRanking) {
-        String weeklyPeriod = getWeeklyPeriod(dailyRanking.getId().getPeriod());
+        String weeklyPeriod = stepExecution.getJobExecution().getExecutionContext().getString("targetWeek");
+//        String weeklyPeriod = getWeeklyPeriod(dailyRanking.getId().getPeriod());
 
         Optional<WeeklyRanking> existingWeeklyRanking = weeklyRankingRepository.findByProductIdAndPeriod(
                 dailyRanking.getId().getProductId(), weeklyPeriod);

@@ -31,11 +31,10 @@ public class RankingFacade {
         this.productService = productService;
     }
 
-    public Page<ProductInfo.DataList> getProductRanking(LocalDate today, String period, int size, int page){
+    public Page<ProductInfo.DataList> getProductRanking(LocalDate date, String period, int size, int page){
         int start = size * page;
         int end = start + size;
-//        String rankKey = RANKING_KEY + today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String rankKey = getRankingKey(period);
+        String rankKey = getRankingKey(date, period);
 
         Set<Long> rankIds = rankingService.getRange(rankKey, start, end);
         Long count = rankingService.count(rankKey);
@@ -61,23 +60,22 @@ public class RankingFacade {
                         ));
     }
 
-    private String getRankingKey(String period){
+    private String getRankingKey(LocalDate targetDate, String period){
         Period period1 = Period.valueOf(period);
         String rankingKey = "";
-        LocalDate today = LocalDate.now();
 
         switch (period1){
             case DAILY:
-                rankingKey = RANKING_KEY + today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+                rankingKey = RANKING_KEY + targetDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
                 break;
             case WEEKLY:
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
-                int weekNumber = today.get(weekFields.weekOfWeekBasedYear());
-                int year = today.get(weekFields.weekBasedYear());
+                int weekNumber = targetDate.get(weekFields.weekOfWeekBasedYear());
+                int year = targetDate.get(weekFields.weekBasedYear());
                 rankingKey = RANKING_KEY + String.format("%d-%02d", year, weekNumber);
                 break;
             case MONTHLY:
-                YearMonth yearMonth = YearMonth.from(today);
+                YearMonth yearMonth = YearMonth.from(targetDate);
                 rankingKey = RANKING_KEY + yearMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
                 break;
             default:

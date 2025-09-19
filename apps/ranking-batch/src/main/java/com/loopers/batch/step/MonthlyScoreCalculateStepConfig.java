@@ -29,7 +29,6 @@ import java.util.Map;
 public class MonthlyScoreCalculateStepConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
-    private final EntityManagerFactory entityManagerFactory;
     private final MonthlyScoreCalculateProcessor processor;
 
     @Bean

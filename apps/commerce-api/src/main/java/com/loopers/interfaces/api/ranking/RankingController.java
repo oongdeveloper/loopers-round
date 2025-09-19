@@ -20,11 +20,11 @@ public class RankingController implements RankingV1ApiSpec{
 
     @Override
     @GetMapping(value = "/api/v1/rankings", consumes = "applciation/json")
-    public ApiResponse<?> get(@RequestParam("date") LocalDate today,
+    public ApiResponse<?> get(@RequestParam("date") LocalDate date,
                               @RequestParam("period") String period,
                              @RequestParam("size") int size,
                              @RequestParam("page") int page) {
-        Page<ProductInfo.DataList> result = rankingFacade.getProductRanking(today, period, size, page);
+        Page<ProductInfo.DataList> result = rankingFacade.getProductRanking(date, period, size, page);
         return ApiResponse.success(result);
 //        return ApiResponse.success(result.stream().map(RankV1Dto.Summary::from)
 //                .collect(Collectors.toList()));
