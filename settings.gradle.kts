@@ -9,6 +9,7 @@ include(
     ":supports:logging",
     ":supports:monitoring",
     "apps:commerce-streamer",
+    "apps:ranking-batch",
     "modules:kafka",
     "modules:event:core",
     "modules:event:producer"
@@ -34,3 +35,5 @@ pluginManagement {
         }
     }
 }
+
+include("apps:ranking-batch")
